@@ -1,14 +1,15 @@
 (ns xyloobservations.handler
   (:require
-    [xyloobservations.middleware :as middleware]
-    [xyloobservations.layout :refer [error-page]]
-    [xyloobservations.routes.home :refer [home-routes]]
-    [xyloobservations.routes.auth :refer [auth-routes]]
-    [reitit.ring :as ring]
-    [ring.middleware.content-type :refer [wrap-content-type]]
-    [ring.middleware.webjars :refer [wrap-webjars]]
-    [xyloobservations.env :refer [defaults]]
-    [mount.core :as mount]))
+   [xyloobservations.middleware :as middleware]
+   [xyloobservations.layout :refer [error-page]]
+   [xyloobservations.routes.home :refer [home-routes]]
+   [xyloobservations.routes.auth :refer [auth-routes]]
+   [xyloobservations.routes.admin :refer [admin-routes]]
+   [reitit.ring :as ring]
+   [ring.middleware.content-type :refer [wrap-content-type]]
+   [ring.middleware.webjars :refer [wrap-webjars]]
+   [xyloobservations.env :refer [defaults]]
+   [mount.core :as mount]))
 
 (mount/defstate init-app
   :start ((or (:init defaults) (fn [])))
@@ -19,7 +20,8 @@
   (ring/ring-handler
     (ring/router
       [(home-routes)
-       (auth-routes)])
+       (auth-routes)
+       (admin-routes)])
     (ring/routes
       (ring/create-resource-handler
         {:path "/"})

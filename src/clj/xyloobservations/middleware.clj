@@ -9,7 +9,8 @@
     [xyloobservations.config :refer [env]]
     [ring.middleware.flash :refer [wrap-flash]]
     [immutant.web.middleware :refer [wrap-session]]
-    [ring.middleware.defaults :refer [site-defaults wrap-defaults]])
+    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+    [ring.util.http-response :as response])
   )
 
 (defn wrap-internal-error [handler]
@@ -37,6 +38,13 @@
       ;; disable wrap-formats for websockets
       ;; since they're not compatible with this middleware
       ((if (:websocket? request) handler wrapped) request))))
+
+(defn wrap-auth [handler]
+  (fn [request]
+    (let [response (handler request)]
+      (if (contains? (request :session) :user)
+        response
+        (response/found (str "/login?redirect=" (request :path-info) "?" (request :query-string)))))))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)

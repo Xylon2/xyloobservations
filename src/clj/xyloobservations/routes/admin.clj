@@ -14,6 +14,7 @@
 (defn admin-routes []
   [""
    {:middleware [middleware/wrap-csrf
-                 middleware/wrap-formats]}
+                 middleware/wrap-formats
+                 middleware/wrap-auth]}
    ["/add_tag" {:get add-tag-page
                 :post add-tag-submit}]])

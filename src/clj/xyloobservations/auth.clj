@@ -2,13 +2,13 @@
   (:require
    [buddy.hashers :as hashers]
    [next.jdbc :as jdbc]
-   [polls.db.core :as db]))
+   [xyloobservations.db.core :as db]))
 
 (defn create-user! [login password]
   (jdbc/with-transaction [t-conn db/*db*]
     (if-not (empty? (db/get-user-for-auth* t-conn {:login login}))
       (throw (ex-info "User already exists!"
-                      {:polls/error-id ::duplicate-user
+                      {:xyloobservations/error-id ::duplicate-user
                        :error "User already exists!"}))
       (db/create-user!* t-conn
                         {:login    login

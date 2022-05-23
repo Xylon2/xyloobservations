@@ -2,14 +2,22 @@
   (:require
    [xyloobservations.layout :as layout]
    [xyloobservations.middleware :as middleware]
+   [xyloobservations.adminfunctions :as admin]
    [ring.util.response]
-   [ring.util.http-response :as response]))
+   [ring.util.http-response :as response]
+   [xyloobservations.db.core :as db]))
 
 (defn add-tag-page [request]
   (layout/render request "add_tag.html" {}))
 
 (defn add-tag-submit [request]
-  (layout/render request "add_tag.html" {}))
+  (let [{:keys [tagname description]} (request :params)]
+    ;; we add it and show the form again so they
+    ;; may add another
+    (try (do (admin/add-tag! tagname description)
+             (layout/render request "add_tag.html" {:msgtype "success" :msgtxt "successfully added tag"}))
+         (catch Exception e (layout/render request "add_tag.html" {:msgtype "error" :msgtxt (str "caught exception: " (.getMessage e))})))
+    ))
 
 (defn admin-routes []
   [""

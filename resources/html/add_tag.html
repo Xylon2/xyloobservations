@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="content">
-    <p style="color: red;">
-      {{error}}
+    <p style="color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
+      {{msgtxt}}
     </p>
-    <p>debug {{debuginfo}}</p>
     <form method="POST" action="/add_tag">
       {% csrf-field %}
       <fieldset>

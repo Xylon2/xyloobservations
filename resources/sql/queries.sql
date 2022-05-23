@@ -8,3 +8,9 @@ values (:login, :password)
 -- :doc selects a user for authentication
 select * from users
 where login = :login
+
+-- :name add-tag! :! :n
+-- :doc add a tag
+insert into tag
+(tag_name, description)
+values (:tagname, :description)

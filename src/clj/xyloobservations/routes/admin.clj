@@ -16,7 +16,7 @@
     ;; may add another
     (try (do (admin/add-tag! tagname description)
              (layout/render request "add_tag.html" {:msgtype "success" :msgtxt "successfully added tag"}))
-         (catch Exception e (layout/render request "add_tag.html" {:msgtype "error" :msgtxt (str "caught exception: " (.getMessage e))})))
+         (catch AssertionError e (layout/render request "add_tag.html" {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))})))
     ))
 
 (defn admin-routes []

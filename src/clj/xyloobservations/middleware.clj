@@ -1,16 +1,16 @@
 (ns xyloobservations.middleware
   (:require
-    [xyloobservations.env :refer [defaults]]
-    [clojure.tools.logging :as log]
-    [xyloobservations.layout :refer [error-page]]
-    [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
-    [xyloobservations.middleware.formats :as formats]
-    [muuntaja.middleware :refer [wrap-format wrap-params]]
-    [xyloobservations.config :refer [env]]
-    [ring.middleware.flash :refer [wrap-flash]]
-    [immutant.web.middleware :refer [wrap-session]]
-    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-    [ring.util.http-response :as response])
+   [xyloobservations.env :refer [defaults]]
+   [clojure.tools.logging :as log]
+   [xyloobservations.layout :refer [error-page]]
+   [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
+   [xyloobservations.middleware.formats :as formats]
+   [muuntaja.middleware :refer [wrap-format wrap-params]]
+   [xyloobservations.config :refer [env]]
+   [ring.middleware.flash :refer [wrap-flash]]
+   [immutant.web.middleware :refer [wrap-session]]
+   [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+   [ring.util.http-response :as response])
   )
 
 (defn wrap-internal-error [handler]

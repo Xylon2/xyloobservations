@@ -19,10 +19,18 @@
          (catch AssertionError e (layout/render request "add_tag.html" {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))})))
     ))
 
+(defn upload-image-page [request]
+  (layout/render request "upload_image.html"))
+
+(defn upload-image-submit [request]
+  (layout/render request "upload_image.html"))
+
 (defn admin-routes []
   [""
    {:middleware [middleware/wrap-csrf
                  middleware/wrap-formats
                  middleware/wrap-auth]}
    ["/add_tag" {:get add-tag-page
-                :post add-tag-submit}]])
+                :post add-tag-submit}]
+   ["/upload_image" {:get upload-image-page
+                     :post upload-image-submit}]])

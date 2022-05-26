@@ -10,3 +10,8 @@
     (db/add-tag! t-conn
                  {:tagname tagname
                   :description description})))
+
+(defn upload-image! [imagedata]
+  (jdbc/with-transaction [t-conn db/*db*]
+    (db/upload-image! t-conn
+                 {:imagedata imagedata})))

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="content">
+    <p style="color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
+      {{msgtxt}}
+    </p>
+    <form method="POST" action="/upload_image">
+      {% csrf-field %}
+      <fieldset>
+        <legend><h1>Upload an image</h1></legend>
+        <input type="file" name="filename" id="newimage"><br>
+      </fieldset>
+      <input type="submit" value="Upload">
+    </form>
+  </div>
+{% endblock %}

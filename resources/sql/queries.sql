@@ -14,3 +14,9 @@ where login = :login
 insert into tag
 (tag_name, description)
 values (:tagname, :description)
+
+-- :name upload-image! :! :n
+-- :doc upload the image
+insert into image
+(imagedata)
+values (:imagedata)

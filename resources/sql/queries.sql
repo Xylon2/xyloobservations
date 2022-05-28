@@ -20,3 +20,21 @@ values (:tagname, :description)
 insert into image
 (imagedata)
 values (:imagedata)
+
+-- :name orphan-images :? :*
+-- :doc get images which do not have a tag associated
+select
+    imagetag_id,
+    tag_ref,
+    image_ref,
+    image_id
+from
+    imagetag
+right join image
+    on image_ref = image_id
+where imagetag_id is null;
+
+-- :name fetch-image :? :1
+-- :doc fetch image data
+select imagedata from image
+where image_id = :image_id;

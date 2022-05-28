@@ -1,7 +1,15 @@
 (ns xyloobservations.adminfunctions
   (:require
    [next.jdbc :as jdbc]
-   [xyloobservations.db.core :as db]))
+   [xyloobservations.db.core :as db]
+   [clojure.java.io :as io]))
+
+(defn slurp-bytes
+  "Slurp the bytes from a slurpable thing"
+  [x]
+  (with-open [out (java.io.ByteArrayOutputStream.)]
+    (io/copy (io/input-stream x) out)
+    (.toByteArray out)))
 
 (defn add-tag! [tagname description]
   (if (some empty? [tagname description])
@@ -11,7 +19,10 @@
                  {:tagname tagname
                   :description description})))
 
-(defn upload-image! [imagedata]
+(defn upload-image! [{{:keys [tempfile size filename]} "filename"}]
+  ;; size is the filesize in bytes
+  (if (> size 1000000)
+    (throw (AssertionError. "this picture is too big")))
   (jdbc/with-transaction [t-conn db/*db*]
     (db/upload-image! t-conn
-                 {:imagedata imagedata})))
+                 {:imagedata (slurp-bytes tempfile)})))

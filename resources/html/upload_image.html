@@ -4,7 +4,7 @@
     <p style="color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
       {{msgtxt}}
     </p>
-    <form method="POST" action="/upload_image">
+    <form method="POST" enctype="multipart/form-data" action="/upload_image">
       {% csrf-field %}
       <fieldset>
         <legend><h1>Upload an image</h1></legend>

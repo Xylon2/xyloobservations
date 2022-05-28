@@ -23,7 +23,10 @@
   (layout/render request "upload_image.html"))
 
 (defn upload-image-submit [request]
-  (layout/render request "upload_image.html"))
+  (let [file (request :multipart-params)]
+    (try (do (admin/upload-image! file)
+             (layout/render request "upload_image.html" {:msgtype "success" :msgtxt "successfully uploaded image"}))
+         (catch AssertionError e (layout/render request "upload_image.html" {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))})))))
 
 (defn admin-routes []
   [""

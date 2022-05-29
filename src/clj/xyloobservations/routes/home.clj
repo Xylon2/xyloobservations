@@ -9,7 +9,8 @@
    [ring.util.http-response :as response]))
 
 (defn home-page [request]
-  (layout/render request "home.html" {:imagelisting (homefunc/get-orphaned-images)}))
+  (layout/render request "home.html" {:orphans (homefunc/get-orphan-images)
+                                      :tags (homefunc/tags-with-images)}))
 
 (defn image [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))]

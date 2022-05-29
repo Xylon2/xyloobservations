@@ -24,15 +24,28 @@ values (:imagedata)
 -- :name orphan-images :? :*
 -- :doc get images which do not have a tag associated
 select
-    imagetag_id,
-    tag_ref,
-    image_ref,
     image_id
 from
     imagetag
 right join image
-    on image_ref = image_id
-where imagetag_id is null;
+    on imagetag.image_ref = image.image_id
+where imagetag.imagetag_id is null;
+
+-- :name tags-with-images :? :*
+-- :doc get tags that have images. will contain duplicates
+select
+    tag_id,
+    tag_name,
+    description
+from
+    imagetag
+inner join tag
+    on imagetag.tag_ref = tag.tag_id
+
+-- :name images-by-tag :? :*
+-- :doc get ids of all the images which have a certain tag
+select image_ref from imagetag
+where tag_ref = :tag_ref
 
 -- :name fetch-image :? :1
 -- :doc fetch image data

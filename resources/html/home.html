@@ -1,9 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="content">
-  {% if imagelisting|length > 0 %}
+  {% for tag in tags %}
+    <h1>{{tag.tag_name}}</h1>
+    <p>{{tag.description}}</p>
+    {% for image_id in tag.images %}
+    <img src="/image?id={{image_id}}">
+    {% endfor %}
+  {% endfor %}
+  {% if orphans|length > 0 %}
   <h1>Un-tagged images</h1>
-    {% for image in imagelisting %}
+    {% for image in orphans %}
       <img src="/image?id={{image.image_id}}">
     {% endfor %}
   {% endif %}

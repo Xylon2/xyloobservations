@@ -6,12 +6,18 @@
     <p>{{tag.description}}</p>
     {% for image_id in tag.images %}
     <img src="/image?id={{image_id}}">
-    {% endfor %}
+    {% if loggedin %}
+    <a href="/image_admin?id={{image_id}}">settings</a>
+    {% endif %}
+  {% endfor %}
   {% endfor %}
   {% if orphans|length > 0 %}
   <h1>Un-tagged images</h1>
     {% for image in orphans %}
       <img src="/image?id={{image.image_id}}">
+      {% if loggedin %}
+      <a href="/image_admin?id={{image.image_id}}">settings</a>
+      {% endif %}
     {% endfor %}
   {% endif %}
   </div>

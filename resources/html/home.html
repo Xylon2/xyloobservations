@@ -7,7 +7,7 @@
     {% for image_id in tag.images %}
     <img src="/image?id={{image_id}}">
     {% if loggedin %}
-    <a href="/image_admin?id={{image_id}}">settings</a>
+    <a href="/image_settings?id={{image_id}}">settings</a>
     {% endif %}
   {% endfor %}
   {% endfor %}
@@ -16,7 +16,7 @@
     {% for image in orphans %}
       <img src="/image?id={{image.image_id}}">
       {% if loggedin %}
-      <a href="/image_admin?id={{image.image_id}}">settings</a>
+      <a href="/image_settings?id={{image.image_id}}">settings</a>
       {% endif %}
     {% endfor %}
   {% endif %}

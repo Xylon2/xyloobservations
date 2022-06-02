@@ -51,3 +51,19 @@ where tag_ref = :tag_ref
 -- :doc fetch image data
 select imagedata from image
 where image_id = :image_id;
+
+-- :name tag_names_of_image :? :*
+-- :doc get names and ids of all tags attached to a given image
+select 
+    tag_id,
+    tag_name
+from 
+    imagetag
+inner join tag
+    on tag_ref = tag_id
+where image_ref = :image_id;
+
+-- :name all_tags :? :*
+-- :doc get names and ids of all tags
+select tag_id, tag_name 
+from tag;

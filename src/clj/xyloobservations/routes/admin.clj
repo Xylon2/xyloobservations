@@ -28,6 +28,15 @@
              (layout/render request "upload_image.html" {:msgtype "success" :msgtxt "successfully uploaded image"}))
          (catch AssertionError e (layout/render request "upload_image.html" {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))})))))
 
+(defn image-settings-page [request]
+  (let [image_id (Integer/parseInt ((request :query-params) "id"))
+        attached_tags (db/tag_names_of_image {:image_id image_id})
+        all_tags (db/all_tags)]
+    (layout/render request "image_settings.html" {:image_id image_id
+                                                  :attached_tags attached_tags
+                                                  :all_tags all_tags})))
+
+
 (defn admin-routes []
   [""
    {:middleware [middleware/wrap-csrf
@@ -36,4 +45,5 @@
    ["/add_tag" {:get add-tag-page
                 :post add-tag-submit}]
    ["/upload_image" {:get upload-image-page
-                     :post upload-image-submit}]])
+                     :post upload-image-submit}]
+   ["/image_settings" {:get image-settings-page}]])

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="content">
+    <img src="/image?id={{image_id}}">
+    <h2>Attached tags</h2>
+    <ul>
+    {% for tag in attached_tags %}
+      <li>
+        {{ tag.tag_name }}
+      </li>
+    {% endfor %}
+    </ul>
+    <form>
+      <label for="tag">Add a tag:</label>
+      <select name="tag" id="tag">
+      {% for tag in all_tags %}
+        <option value="{{ tag.tag_id }}">{{ tag.tag_name }}</option>
+      {% endfor %}
+      </select> 
+    </form>
+  </div>
+{% endblock %}

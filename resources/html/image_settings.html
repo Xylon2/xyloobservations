@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="content">
+    <p style="color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
+      {{msgtxt}}
+    </p>
     <img src="/image?id={{image_id}}">
     <h2>Attached tags</h2>
     <ul>
@@ -10,13 +13,14 @@
       </li>
     {% endfor %}
     </ul>
-    <form>
+    <form method="POST">
+      {% csrf-field %}
       <label for="tag">Add a tag:</label>
-      <select name="tag" id="tag">
+      <select name="tag" id="tag" onchange='if(this.value != 0) { this.form.submit(); }'>
       {% for tag in all_tags %}
         <option value="{{ tag.tag_id }}">{{ tag.tag_name }}</option>
       {% endfor %}
-      </select> 
+      </select>
     </form>
   </div>
 {% endblock %}

@@ -36,6 +36,15 @@
                                                   :attached_tags attached_tags
                                                   :all_tags all_tags})))
 
+(defn image-settings-submit [request]
+  (let [image_id (Integer/parseInt ((request :query-params) "id"))
+        newtag (-> request :params :tag Integer/parseInt)]
+    (admin/tag-image! newtag, image_id)
+    (let [attached_tags (db/tag_names_of_image {:image_id image_id})
+          all_tags (db/all_tags)]
+      (layout/render request "image_settings.html" {:image_id image_id
+                                                    :attached_tags attached_tags
+                                                    :all_tags all_tags}))))
 
 (defn admin-routes []
   [""
@@ -46,4 +55,5 @@
                 :post add-tag-submit}]
    ["/upload_image" {:get upload-image-page
                      :post upload-image-submit}]
-   ["/image_settings" {:get image-settings-page}]])
+   ["/image_settings" {:get image-settings-page
+                       :post image-settings-submit}]])

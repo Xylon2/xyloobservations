@@ -26,3 +26,8 @@
   (jdbc/with-transaction [t-conn db/*db*]
     (db/upload-image! t-conn
                  {:imagedata (slurp-bytes tempfile)})))
+
+(defn tag-image! [tag_id, image_id]
+  "simply assigning a tag to an image"
+  (db/tag-image! {:tag_id tag_id
+                  :image_id image_id}))

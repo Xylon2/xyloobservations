@@ -67,3 +67,8 @@ where image_ref = :image_id;
 -- :doc get names and ids of all tags
 select tag_id, tag_name 
 from tag;
+
+-- :name tag-image! :! :n
+-- :doc add a tag to an image
+insert into imagetag (tag_ref, image_ref)
+values (:tag_id, :image_id);

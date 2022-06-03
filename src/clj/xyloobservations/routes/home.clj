@@ -17,7 +17,8 @@
   (let [image_id (Integer/parseInt ((request :query-params) "id"))]
     (->  (homefunc/fetch-image image_id)
          response/ok
-         (response/content-type "image/jpeg"))
+         (response/content-type "image/jpeg")
+         (response/header "Cache-Control" "public, max-age=31536000, immutable"))
     ))
 
 (defn about-page [request]

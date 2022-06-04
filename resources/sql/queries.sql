@@ -11,15 +11,13 @@ where login = :login
 
 -- :name add-tag! :! :n
 -- :doc add a tag
-insert into tag
-(tag_name, description)
+insert into tag (tag_name, description)
 values (:tagname, :description)
 
 -- :name upload-image! :! :n
 -- :doc upload the image
-insert into image
-(imagedata)
-values (:imagedata)
+insert into image (imagedata, mimetype)
+values (:imagedata, :mimetype)
 
 -- :name orphan-images :? :*
 -- :doc get images which do not have a tag associated
@@ -49,7 +47,7 @@ where tag_ref = :tag_ref
 
 -- :name fetch-image :? :1
 -- :doc fetch image data
-select imagedata from image
+select imagedata, mimetype from image
 where image_id = :image_id;
 
 -- :name tag_names_of_image :? :*

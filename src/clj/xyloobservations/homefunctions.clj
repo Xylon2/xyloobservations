@@ -18,7 +18,6 @@
   )
 
 (defn fetch-image [image_id]
-  (-> {:image_id image_id}
-      db/fetch-image
-      :imagedata
-      io/input-stream))
+  "just run the fetch-image query and convert the imagedata into an io/input-stream"
+  (let [{:keys [imagedata mimetype]} (db/fetch-image {:image_id image_id})]
+    {:mimetype mimetype :imagedata (io/input-stream imagedata)}))

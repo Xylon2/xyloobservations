@@ -13,15 +13,6 @@
                                       :orphans (homefunc/get-orphan-images)
                                       :loggedin (contains? (request :session) :user)}))
 
-;; (defn image [request]
-;;   (let [image_id (Integer/parseInt ((request :query-params) "id"))
-;;         imagedata ((homefunc/fetch-image image_id) :imagedata)]
-;;     (->  imagedata
-;;          response/ok imagedata
-;;          (response/content-type "image/jpeg")
-;;          (response/header "Cache-Control" "public, max-age=31536000, immutable"))
-;;     ))
-
 (defn image [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
         {:keys [imagedata mimetype]} (homefunc/fetch-image image_id)]

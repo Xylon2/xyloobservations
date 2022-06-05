@@ -44,3 +44,9 @@
   "simply assigning a tag to an image"
   (db/tag-image! {:tag_id tag_id
                   :image_id image_id}))
+
+(defn update-caption! [newcaption, image_id]
+  "simply update the caption"
+  (db/update-caption! {:newcaption newcaption
+                       :image_id image_id}))
+

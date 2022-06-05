@@ -32,20 +32,28 @@
 (defn image-settings-page [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
         attached_tags (db/tag_names_of_image {:image_id image_id})
+        caption ((db/get-caption {:image_id image_id}) :caption)
         all_tags (db/all_tags)]
     (layout/render request "image_settings.html" {:image_id image_id
                                                   :attached_tags attached_tags
-                                                  :all_tags all_tags})))
+                                                  :all_tags all_tags
+                                                  :caption caption})))
 
 (defn image-settings-submit [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
-        newtag (-> request :params :tag Integer/parseInt)]
-    (admin/tag-image! newtag, image_id)
+        newtag (-> request :params :tag Integer/parseInt)
+        dropdownsubmit (-> request :params :dropdownsubmit)
+        newcaption (-> request :params :caption)]
+    (if (= dropdownsubmit "true")
+     (admin/tag-image! newtag, image_id)
+      (admin/update-caption! newcaption, image_id))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
+          caption ((db/get-caption {:image_id image_id}) :caption)
           all_tags (db/all_tags)]
       (layout/render request "image_settings.html" {:image_id image_id
                                                     :attached_tags attached_tags
-                                                    :all_tags all_tags}))))
+                                                    :all_tags all_tags
+                                                    :caption caption}))))
 
 (defn admin-routes []
   [""

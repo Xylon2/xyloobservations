@@ -77,3 +77,14 @@ from tag;
 -- :doc add a tag to an image
 insert into imagetag (tag_ref, image_ref)
 values (:tag_id, :image_id);
+
+-- :name get-caption :? :1
+-- :doc get the caption for an image
+select caption from image
+where image_id = :image_id;
+
+-- :name update-caption! :! :n
+-- :doc update the caption for an image
+update image
+set caption = :newcaption
+where image_id = :image_id;

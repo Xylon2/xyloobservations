@@ -16,12 +16,16 @@
     <form method="POST">
       {% csrf-field %}
       <label for="tag">Add a tag:</label>
-      <select name="tag" id="tag" onchange='if(this.value != 0) { this.form.submit(); }'>
-        <option value=0></option>
+      <select name="tag" id="tag" onchange='if(this.value != 0) { document.getElementById("dropdownsubmit").value = "true"; this.form.submit(); }'>
+        <option value=0>_</option>
       {% for tag in all_tags %}
         <option value="{{ tag.tag_id }}">{{ tag.tag_name }}</option>
       {% endfor %}
       </select>
+      <input type="hidden" id="dropdownsubmit" name="dropdownsubmit" value="false">
+      <h2>Caption</h2>
+      <textarea name="caption" id="caption">{{caption}}</textarea><br>
+      <input type="submit" value="Save">
     </form>
   </div>
 {% endblock %}

@@ -16,18 +16,19 @@ values (:tagname, :description)
 
 -- :name upload-image! :! :n
 -- :doc upload the image
-insert into image (imagedata, mimetype)
-values (:imagedata, :mimetype)
+insert into image (imagedata, mimetype, caption)
+values (:imagedata, :mimetype, :caption)
 
 -- :name orphan-images :? :*
 -- :doc get images which do not have a tag associated
 select
-    image_id
+    image_id,
+    caption
 from
     imagetag
 right join image
-    on imagetag.image_ref = image.image_id
-where imagetag.imagetag_id is null;
+    on image_ref = image_id
+where imagetag_id is null;
 
 -- :name tags-with-images :? :*
 -- :doc get tags that have images. will contain duplicates
@@ -42,7 +43,13 @@ inner join tag
 
 -- :name images-by-tag :? :*
 -- :doc get ids of all the images which have a certain tag
-select image_ref from imagetag
+select
+    image_id,
+    caption
+from
+    imagetag
+inner join image
+    on image_ref = image_id
 where tag_ref = :tag_ref
 
 -- :name fetch-image :? :1

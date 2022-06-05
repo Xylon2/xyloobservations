@@ -20,7 +20,8 @@
                  {:tagname tagname
                   :description description})))
 
-(defn upload-image! [{{:keys [tempfile size filename]} "filename"}]
+(defn upload-image! [{{:keys [tempfile size filename]} "filename"}
+                     caption]
   ;; size is the filesize in bytes
   (let [mimetype (-> (str/split filename #"\.")
                      last
@@ -36,7 +37,8 @@
     (jdbc/with-transaction [t-conn db/*db*]
       (db/upload-image! t-conn
                         {:imagedata (slurp-bytes tempfile)
-                         :mimetype mimetype}))))
+                         :mimetype mimetype
+                         :caption caption}))))
 
 (defn tag-image! [tag_id, image_id]
   "simply assigning a tag to an image"

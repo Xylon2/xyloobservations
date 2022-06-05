@@ -8,9 +8,9 @@
   (db/orphan-images))
 
 (defn add-images [tag]
-  "given a map of values for the tag, add a extra key containing a vector of imageids"
+  "given a map of values for the tag, add a extra key containing a vector of maps of imageids and captions"
   (let [tag_id (tag :tag_id)]
-    (assoc tag :images (map :image_ref (db/images-by-tag {:tag_ref tag_id})))))
+    (assoc tag :images (db/images-by-tag {:tag_ref tag_id}))))
 
 (defn tags-with-images []
   ":tag_id :tag_name and :description"

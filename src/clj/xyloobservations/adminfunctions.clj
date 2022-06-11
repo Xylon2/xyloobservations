@@ -5,6 +5,10 @@
    [clojure.java.io :as io]
    [clojure.string :as str]))
 
+(defmacro map-of
+  [& xs]
+  `(hash-map ~@(mapcat (juxt keyword identity) xs)))
+
 (defn slurp-bytes
   "Slurp the bytes from a slurpable thing"
   [x]
@@ -16,9 +20,7 @@
   (if (some empty? [tagname description])
     (throw (AssertionError. "empty values are not allowed")))
   (jdbc/with-transaction [t-conn db/*db*]
-    (db/add-tag! t-conn
-                 {:tagname tagname
-                  :description description})))
+    (db/add-tag! t-conn (map-of tagname description))))
 
 (defn upload-image! [{{:keys [tempfile size filename]} "filename"}
                      caption]
@@ -42,17 +44,14 @@
 
 (defn tag-image! [tag_id, image_id]
   "assign a tag to an image"
-  (if (-> (db/find-imagetag {:tag_id tag_id
-                             :image_id image_id})
+  (if (-> (db/find-imagetag (map-of tag_id image_id))
           :count
           (= 0)
           not)
     (throw (AssertionError. "this tag is already assigned to this image")))
-  (db/tag-image! {:tag_id tag_id
-                  :image_id image_id}))
+  (db/tag-image! (map-of tag_id image_id)))
 
 (defn update-caption! [newcaption, image_id]
   "simply update the caption"
-  (db/update-caption! {:newcaption newcaption
-                       :image_id image_id}))
+  (db/update-caption! (map-of newcaption image_id)))
 

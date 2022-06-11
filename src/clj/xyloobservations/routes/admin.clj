@@ -7,6 +7,10 @@
    [ring.util.http-response :as response]
    [xyloobservations.db.core :as db]))
 
+(defmacro map-of
+  [& xs]
+  `(hash-map ~@(mapcat (juxt keyword identity) xs)))
+
 (defn add-tag-page [request]
   (layout/render request "add_tag.html" {}))
 
@@ -34,10 +38,7 @@
         attached_tags (db/tag_names_of_image {:image_id image_id})
         caption ((db/get-caption {:image_id image_id}) :caption)
         all_tags (db/all_tags)]
-    (layout/render request "image_settings.html" {:image_id image_id
-                                                  :attached_tags attached_tags
-                                                  :all_tags all_tags
-                                                  :caption caption})))
+    (layout/render request "image_settings.html" (map-of image_id attached_tags all_tags caption))))
 
 (defn image-settings-submit [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
@@ -50,10 +51,7 @@
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
           caption ((db/get-caption {:image_id image_id}) :caption)
           all_tags (db/all_tags)]
-      (layout/render request "image_settings.html" {:image_id image_id
-                                                    :attached_tags attached_tags
-                                                    :all_tags all_tags
-                                                    :caption caption}))))
+      (layout/render request "image_settings.html" (map-of image_id attached_tags all_tags caption)))))
 
 (defn admin-routes []
   [""

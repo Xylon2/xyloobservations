@@ -88,3 +88,10 @@ where image_id = :image_id;
 update image
 set caption = :newcaption
 where image_id = :image_id;
+
+-- :name find-imagetag :? :1
+-- :doc is there an imagetag entry linking a specific tag and image
+select count(*)
+from imagetag
+where image_ref = :image_id
+and tag_ref = :tag_id;

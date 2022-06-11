@@ -41,7 +41,13 @@
                          :caption caption}))))
 
 (defn tag-image! [tag_id, image_id]
-  "simply assigning a tag to an image"
+  "assign a tag to an image"
+  (if (-> (db/find-imagetag {:tag_id tag_id
+                             :image_id image_id})
+          :count
+          (= 0)
+          not)
+    (throw (AssertionError. "this tag is already assigned to this image")))
   (db/tag-image! {:tag_id tag_id
                   :image_id image_id}))
 

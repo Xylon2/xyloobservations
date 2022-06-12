@@ -95,3 +95,27 @@ select count(*)
 from imagetag
 where image_ref = :image_id
 and tag_ref = :tag_id;
+
+-- :name images-with-tags :? :*
+-- :doc gets all image ids and captions that have any tag
+select
+    image_id,
+    caption
+from
+    imagetag
+inner join image
+    on image_ref = image_id
+
+-- :name filter-images :? :*
+-- :doc filter down a list of images to only those with a specific tag
+select
+    image_id,
+    caption
+from
+    imagetag
+inner join image
+    on image_ref = image_id
+where
+    tag_ref = :tag
+and
+    image_ref in (:v*:images)

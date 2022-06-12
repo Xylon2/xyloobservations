@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="content">
+  <h1>Matching images</h1>
+    {% for image in images %}
+      <figure>
+        <img src="/image?id={{image.image_id}}">
+        <figcaption>{{image.caption}}</figcaption>
+      </figure>
+    {% endfor %}
+  </div>
+{% endblock %}

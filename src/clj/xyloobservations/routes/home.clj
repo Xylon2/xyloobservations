@@ -13,6 +13,12 @@
                                       :orphans (homefunc/get-orphan-images)
                                       :loggedin (contains? (request :session) :user)}))
 
+(defn gallery [request]
+  (let [tags (map #(Integer/parseInt %) (homefunc/always-vector ((request :query-params) "tags")))]
+    (if (> (count tags) 0)
+      (layout/render request "gallery.html" {:images (homefunc/matching-images tags)})
+      (layout/render request "gallery.html" {:images (homefunc/images-with-tags)}))))
+
 (defn image [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
         {:keys [imagedata mimetype]} (homefunc/fetch-image image_id)]
@@ -28,6 +34,7 @@
    {:middleware [middleware/wrap-csrf
                  middleware/wrap-formats]}
    ["/" {:get home-page}]
+   ["/gallery" {:get gallery}]
    ["/image" {:get image}]
    ["/about" {:get about-page}]])
 

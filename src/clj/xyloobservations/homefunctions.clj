@@ -39,8 +39,7 @@
 
 (defn always-vector [item]
   "this function takes something which may or may not be a vector and makes it always a vector"
-  (if (= (type item) clojure.lang.PersistentVector)
-    item
-    (if (= (type item) nil)
-      []
-      [item])))
+  (cond
+    (= (type item) clojure.lang.PersistentVector) item
+    (= (type item) nil) []
+    :else [item]))

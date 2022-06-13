@@ -33,7 +33,7 @@
       (filter-images tags (db/filter-images {:tag firsttag :images image_ids})))))
 
 (defn matching-images [[firsttag & tags]]
-  "get a list of images that have the first tag"
+  "get a list of images that have all of a list of tags"
   (let [images (db/images-by-tag {:tag_ref firsttag})]
     (filter-images tags images)))
 

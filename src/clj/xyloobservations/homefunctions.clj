@@ -25,17 +25,9 @@
 (defn images-with-tags []
   (distinct (db/images-with-tags)))
 
-(defn filter-images [[firsttag & tags] images]
-  "repeatedly filter down till we run out of tags"
-  (let [image_ids (map :image_id images)]
-    (if (= firsttag nil)
-      images
-      (filter-images tags (db/filter-images {:tag firsttag :images image_ids})))))
-
-(defn matching-images [[firsttag & tags]]
+(defn matching-images [tags]
   "get a list of images that have all of a list of tags"
-  (let [images (db/images-by-tag {:tag_ref firsttag})]
-    (filter-images tags images)))
+  (db/images-multi-tags {:tags (vec tags)}))
 
 (defn always-vector [item]
   "this function takes something which may or may not be a vector and makes it always a vector"

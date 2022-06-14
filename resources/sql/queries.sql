@@ -106,16 +106,19 @@ from
 inner join image
     on image_ref = image_id
 
--- :name filter-images :? :*
--- :doc filter down a list of images to only those with a specific tag
+-- :name images-multi-tags :? :*
+-- :doc find images that have all of the provided tags. accepts vector of tags
 select
     image_id,
     caption
 from
-    imagetag
-inner join image
-    on image_ref = image_id
-where
-    tag_ref = :tag
-and
-    image_ref in (:v*:images)
+    image
+where image_id in
+(
+/*~
+(let [taglist (:tags params)]
+  (cons
+    (str "select image_ref from imagetag where tag_ref = " (last taglist))
+    (map #(str "intersect select image_ref from imagetag where tag_ref = " %) (pop taglist))))
+~*/
+)

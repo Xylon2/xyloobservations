@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="content">
-  <h1>Matching images</h1>
+  <h1>{% if filters|length < 1 %}All images
+      {% else %}Images tagged
+        {% for tag in filters %}
+          {% if forloop.counter > 1 %}and{% endif %}
+          "{{ tag.tag_name }}"
+        {% endfor %}
+      {% endif %}
+  </h1>
     {% for image in images %}
       <figure>
         <img src="/image?id={{image.image_id}}">

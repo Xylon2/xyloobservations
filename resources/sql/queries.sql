@@ -122,3 +122,9 @@ where image_id in
     (map #(str "intersect select image_ref from imagetag where tag_ref = " %) (pop taglist))))
 ~*/
 )
+
+-- :name names-for-tags :? :*
+-- :doc given a list of tag ids, return ids and names
+select tag_id, tag_name
+from tag
+where tag_id in (:v*:tags)

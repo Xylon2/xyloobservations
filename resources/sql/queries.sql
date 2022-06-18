@@ -125,7 +125,7 @@ where image_id in
 
 -- :name names-for-tags :? :*
 -- :doc given a list of tag ids, return ids and names
-select tag_id, tag_name
+select tag_id, tag_name, description
 from tag
 where tag_id in (:v*:tags)
 

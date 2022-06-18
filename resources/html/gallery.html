@@ -16,9 +16,14 @@
     {% endfor %}
     ">{{tag.tag_name}}</a>
   {% endfor %}
+  {% if filters|length > 0 %}
+    {% for ftag in filters %}
+      <p>{{ ftag.description }}</p>
+    {% endfor %}
+  {% endif %}
     {% for image in images %}
       <figure>
-        <img src="/image?id={{image.image_id}}">
+        <img src="/image?id={{image.image_id}}" loading="lazy">
         <figcaption>{{image.caption}}</figcaption>
       </figure>
     {% endfor %}

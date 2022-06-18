@@ -33,3 +33,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+a.button:link a.button:visited {
+  appearance: button;
+
+  text-decoration: none;
+  color: initial;
+}
+
+a.green {
+  background-color: #4CAF50;
+}

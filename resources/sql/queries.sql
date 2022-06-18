@@ -128,3 +128,12 @@ where image_id in
 select tag_id, tag_name
 from tag
 where tag_id in (:v*:tags)
+
+-- :name all-tags-with-images :? :*
+-- :doc return all tags which have an image
+select distinct
+    tag_id, tag_name
+from
+    imagetag
+inner join tag
+    on tag_id = tag_ref

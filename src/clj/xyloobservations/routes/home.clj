@@ -17,8 +17,10 @@
   (let [tags (map #(Integer/parseInt %) (homefunc/always-vector ((request :query-params) "tags")))]
     (if (> (count tags) 0)
       (layout/render request "gallery.html" {:images (homefunc/matching-images tags)
-                                             :filters (db/names-for-tags {:tags tags})})
-      (layout/render request "gallery.html" {:images (homefunc/images-with-tags)}))))
+                                             :filters (db/names-for-tags {:tags tags})
+                                             :alltags (db/all-tags-with-images)})
+      (layout/render request "gallery.html" {:images (homefunc/images-with-tags)
+                                             :alltags (db/all-tags-with-images)}))))
 
 (defn image [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))

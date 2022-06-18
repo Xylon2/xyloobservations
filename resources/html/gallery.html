@@ -26,6 +26,9 @@
         <img src="/image?id={{image.image_id}}" loading="lazy">
         <figcaption>{{image.caption}}</figcaption>
       </figure>
+      {% if loggedin %}
+      <a href="/image_settings?id={{image.image_id}}">settings</a>
+      {% endif %}
     {% endfor %}
   </div>
 {% endblock %}

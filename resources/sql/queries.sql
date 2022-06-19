@@ -11,8 +11,8 @@ where login = :login
 
 -- :name add-tag! :! :n
 -- :doc add a tag
-insert into tag (tag_name, description)
-values (:tagname, :description)
+insert into tag (tag_name, description, advanced)
+values (:tagname, :description, :advanced)
 
 -- :name upload-image! :! :n
 -- :doc upload the image
@@ -121,7 +121,7 @@ where tag_id in (:v*:tags)
 -- :name all-tags-with-images :? :*
 -- :doc return all tags which have an image
 select distinct
-    tag_id, tag_name
+    tag_id, tag_name, advanced
 from
     imagetag
 inner join tag

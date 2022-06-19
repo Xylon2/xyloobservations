@@ -25,11 +25,11 @@
   "this function takes something which may or may not be a vector and makes it always a vector"
   (cond
     (= (type item) clojure.lang.PersistentVector) item
-    (= (type item) nil) []
+    (nil? item) []
     :else [item]))
 
 (defn default-number [item]
   "if it's null, returns string 10"
   (cond
     (= (type item) java.lang.String) item
-    (nil? (type item)) "10"))
+    (nil? item) "10"))

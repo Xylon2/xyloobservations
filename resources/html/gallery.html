@@ -2,7 +2,7 @@
 {% block content %}
   <div class="content">
   <h1>Select a tag to filter your results</h1>
-  {% for tag in alltags %}
+  {% for tag in alltags %}{% ifequal tag.advanced "false" %}
   <a href="?tags={{tag.tag_id}}" class="button
     {% for ftag in filters %}
       {% if ftag.tag_id = tag.tag_id %}
@@ -10,7 +10,7 @@
       {% endif %}
     {% endfor %}
     ">{{tag.tag_name}}</a>
-  {% endfor %}
+  {% endifequal %}{% endfor %}
   {% if filters|length > 0 %}
     {% for ftag in filters %}
       <p>{{ ftag.description }}</p>

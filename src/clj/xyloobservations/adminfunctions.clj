@@ -16,11 +16,19 @@
     (io/copy (io/input-stream x) out)
     (.toByteArray out)))
 
-(defn add-tag! [tagname description]
+(defn sanitize_advanced [thing]
+  "our checkbox gives us either a null or a string \"true\".
+   we need to convert that into true/false"
+  (if (= "true" thing)
+    true
+    false)
+  )
+
+(defn add-tag! [tagname description radvanced]
   (if (some empty? [tagname description])
     (throw (AssertionError. "empty values are not allowed")))
-  (jdbc/with-transaction [t-conn db/*db*]
-    (db/add-tag! t-conn (map-of tagname description))))
+  (let [advanced (sanitize_advanced radvanced)]
+   (db/add-tag! (map-of tagname description advanced))))
 
 (defn upload-image! [{{:keys [tempfile size filename]} "filename"}
                      caption]

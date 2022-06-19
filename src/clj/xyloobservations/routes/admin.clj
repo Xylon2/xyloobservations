@@ -19,10 +19,10 @@
   (myrender request "add_tag.html" {}))
 
 (defn add-tag-submit [request]
-  (let [{:keys [tagname description]} (request :params)]
+  (let [{:keys [tagname description advanced]} (request :params)]
     ;; we add it and show the form again so they
     ;; may add another
-    (try (do (admin/add-tag! tagname description)
+    (try (do (admin/add-tag! tagname description advanced)
              (myrender request "add_tag.html" {:msgtype "success"
                                                :msgtxt "successfully added tag"}))
          (catch AssertionError e

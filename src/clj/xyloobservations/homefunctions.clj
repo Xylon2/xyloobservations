@@ -27,3 +27,9 @@
     (= (type item) clojure.lang.PersistentVector) item
     (= (type item) nil) []
     :else [item]))
+
+(defn default-number [item]
+  "if it's null, returns string 10"
+  (cond
+    (= (type item) java.lang.String) item
+    (nil? (type item)) "10"))

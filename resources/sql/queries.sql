@@ -126,3 +126,19 @@ from
     imagetag
 inner join tag
     on tag_id = tag_ref
+
+-- :name random-images :? :*
+-- :doc return the specified number of random images that have tags
+with distinctimages as (
+    select distinct
+        image_id, caption
+    from
+        imagetag
+    inner join image
+        on image_id = image_ref
+)
+select
+    image_id, caption
+from
+    distinctimages
+order by random() limit :numimages

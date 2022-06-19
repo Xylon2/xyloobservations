@@ -26,8 +26,11 @@
          (response/content-type mimetype)
          (response/header "Cache-Control" "public, max-age=31536000, immutable"))))
 
-(defn about-page [request]
-  (layout/render request "about.html"))
+(defn random [request]
+  (let [numimages (Integer/parseInt (homefunc/default-number ((request :query-params) "num")))]
+    (layout/render request "random.html" {:images (db/random-images {:numimages numimages})
+                                          :numimages numimages
+                                          :loggedin (contains? (request :session) :user)})))
 
 (defn home-routes []
   [ "" 
@@ -35,5 +38,5 @@
                  middleware/wrap-formats]}
    ["/" {:get gallery}]
    ["/image" {:get image}]
-   ["/about" {:get about-page}]])
+   ["/random" {:get random}]])
 

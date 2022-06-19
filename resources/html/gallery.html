@@ -21,14 +21,14 @@
       <p>{{ ftag.description }}</p>
     {% endfor %}
   {% endif %}
-    {% for image in images %}
-      <figure>
-        <img src="/image?id={{image.image_id}}" loading="lazy">
-        <figcaption>{{image.caption}}</figcaption>
-      </figure>
-      {% if loggedin %}
-      <a href="/image_settings?id={{image.image_id}}">settings</a>
-      {% endif %}
-    {% endfor %}
+  {% for image in images %}
+    <figure>
+      <img src="/image?id={{image.image_id}}" loading="lazy">
+      <figcaption>{{image.caption}}</figcaption>
+    </figure>
+    {% if loggedin %}
+    <a href="/image_settings?id={{image.image_id}}">settings</a>
+    {% endif %}
+  {% endfor %}
   </div>
 {% endblock %}

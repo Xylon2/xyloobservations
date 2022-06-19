@@ -8,16 +8,18 @@
    [ring.util.response]
    [ring.util.http-response :as response]))
 
+(defn myrender [request template argmap]
+  "simply a wrapper for layout/render to add commonly used arguments"
+  (layout/render request template (conj argmap {:loggedin (contains? (request :session) :user)})))
+
 (defn gallery [template request]
   (let [tags (map #(Integer/parseInt %) (homefunc/always-vector ((request :query-params) "tags")))]
     (if (> (count tags) 0)
-      (layout/render request template {:images (homefunc/matching-images tags)
-                                             :filters (db/names-for-tags {:tags tags})
-                                             :alltags (db/all-tags-with-images)
-                                             :loggedin (contains? (request :session) :user)})
-      (layout/render request template {:images (homefunc/images-with-tags)
-                                             :alltags (db/all-tags-with-images)
-                                             :loggedin (contains? (request :session) :user)}))))
+      (myrender request template {:images (homefunc/matching-images tags)
+                                  :filters (db/names-for-tags {:tags tags})
+                                  :alltags (db/all-tags-with-images)})
+      (myrender request template {:images (homefunc/images-with-tags)
+                                  :alltags (db/all-tags-with-images)}))))
 
 (defn image [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
@@ -28,9 +30,8 @@
 
 (defn random [request]
   (let [numimages (Integer/parseInt (homefunc/default-number ((request :query-params) "num")))]
-    (layout/render request "random.html" {:images (db/random-images {:numimages numimages})
-                                          :numimages numimages
-                                          :loggedin (contains? (request :session) :user)})))
+    (myrender request "random.html" {:images (db/random-images {:numimages numimages})
+                                     :numimages numimages})))
 
 (defn home-routes []
   [ "" 

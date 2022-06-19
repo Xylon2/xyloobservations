@@ -7,66 +7,63 @@
    [ring.util.http-response :as response]
    [xyloobservations.db.core :as db]))
 
+(defn myrender [request template argmap]
+  "simply a wrapper for layout/render to add commonly used arguments"
+  (layout/render request template (conj argmap {:loggedin (contains? (request :session) :user)})))
+
 (defmacro map-of
   [& xs]
   `(hash-map ~@(mapcat (juxt keyword identity) xs)))
 
 (defn add-tag-page [request]
-  (layout/render request "add_tag.html" {:loggedin (contains? (request :session) :user)}))
+  (myrender request "add_tag.html" {}))
 
 (defn add-tag-submit [request]
   (let [{:keys [tagname description]} (request :params)]
     ;; we add it and show the form again so they
     ;; may add another
     (try (do (admin/add-tag! tagname description)
-             (layout/render request "add_tag.html" {:msgtype "success"
-                                                    :msgtxt "successfully added tag"
-                                                    :loggedin (contains? (request :session) :user)}))
+             (myrender request "add_tag.html" {:msgtype "success"
+                                               :msgtxt "successfully added tag"}))
          (catch AssertionError e
-           (layout/render request "add_tag.html" {:msgtype "error"
-                                                  :msgtxt (str "validation error: " (.getMessage e))
-                                                  :loggedin (contains? (request :session) :user)})))))
+           (myrender request "add_tag.html" {:msgtype "error"
+                                             :msgtxt (str "validation error: " (.getMessage e))})))))
 
 (defn upload-image-page [request]
-  (layout/render request "upload_image.html" {:loggedin (contains? (request :session) :user)}))
+  (myrender request "upload_image.html" {}))
 
 (defn upload-image-submit [request]
   (let [file (request :multipart-params)
         caption (-> request :params :caption)]
     (try (do (admin/upload-image! file caption)
-             (layout/render request "upload_image.html" {:msgtype "success"
-                                                         :msgtxt "successfully uploaded image"
-                                                         :loggedin (contains? (request :session) :user)}))
+             (myrender request "upload_image.html" {:msgtype "success"
+                                                    :msgtxt "successfully uploaded image"}))
          (catch AssertionError e
-           (layout/render request "upload_image.html" {:msgtype "error"
-                                                       :msgtxt (str "validation error: " (.getMessage e))
-                                                       :loggedin (contains? (request :session) :user)})))))
+           (myrender request "upload_image.html" {:msgtype "error"
+                                                  :msgtxt (str "validation error: " (.getMessage e))})))))
 
 (defn image-settings-page [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
         attached_tags (db/tag_names_of_image {:image_id image_id})
         caption ((db/get-caption {:image_id image_id}) :caption)
-        all_tags (db/all_tags)
-        loggedin (contains? (request :session) :user)]
-    (layout/render request "image_settings.html" (map-of image_id attached_tags all_tags caption loggedin))))
+        all_tags (db/all_tags)]
+    (myrender request "image_settings.html" (map-of image_id attached_tags all_tags caption))))
 
 (defn image-settings-submit [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
         newtag (-> request :params :tag Integer/parseInt)
         dropdownsubmit (-> request :params :dropdownsubmit)
-        newcaption (-> request :params :caption)
-        loggedin (contains? (request :session) :user)]
+        newcaption (-> request :params :caption)]
     (if (= dropdownsubmit "true")
      (admin/tag-image! newtag, image_id)
       (admin/update-caption! newcaption, image_id))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
           caption ((db/get-caption {:image_id image_id}) :caption)
           all_tags (db/all_tags)]
-      (layout/render request "image_settings.html" (map-of image_id attached_tags all_tags caption loggedin)))))
+      (myrender request "image_settings.html" (map-of image_id attached_tags all_tags caption)))))
 
 (defn orphan_images [request]
-  (layout/render request "orphan_images.html" {:orphans (db/orphan-images)
-                                               :loggedin (contains? (request :session) :user)}))
+  (myrender request "orphan_images.html" {:orphans (db/orphan-images)}))
 
 (defn admin-routes []
   [""

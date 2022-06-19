@@ -1,16 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="content">
-  <h1>Select a tag to filter your results</h1>
-  {% for tag in alltags %}
-  <a href="?tags={{tag.tag_id}}" class="button
-    {% for ftag in filters %}
-      {% if ftag.tag_id = tag.tag_id %}
-        green
-      {% endif %}
+  <h1>Select multiple tags to filter your results</h1>
+
+  <form method="GET">
+    {% for tag in alltags %}
+    <div id="ck-button"><label>
+      <input type="checkbox" id="tchkbox_{{tag.tag_id}}" name="tags"
+      value="{{tag.tag_id}}"
+        {% for ftag in filters %}
+          {% if ftag.tag_id = tag.tag_id %}
+            checked
+          {% endif %}
+        {% endfor %}>
+      <span>{{tag.tag_name}}</span>
+    </label></div>
     {% endfor %}
-    ">{{tag.tag_name}}</a>
-  {% endfor %}
+    <br/>
+    <input type="submit" value="Submit">
+  </form>
+  
   {% if filters|length > 0 %}
     {% for ftag in filters %}
       <p>{{ ftag.description }}</p>

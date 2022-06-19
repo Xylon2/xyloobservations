@@ -26,6 +26,7 @@
               <div id="nav-menu" class="navbar-menu">
                   <div class="navbar-start">
                       <a href="/" class="navbar-item{% ifequal page "gallery" %} is-active{%endifequal%}">Gallery</a>
+                      <a href="/advanced" class="navbar-item{% ifequal page "advanced" %} is-active{%endifequal%}">Advanced</a>
                       <a href="/random?num=10" class="navbar-item{% ifequal page "random" %} is-active{%endifequal%}">Random</a>
                       {% if loggedin %}
                       <a href="/add_tag" class="navbar-item{% ifequal page "add_tag.html" %} is-active{%endifequal%}">Add Tag</a>

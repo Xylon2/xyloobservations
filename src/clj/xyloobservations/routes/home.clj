@@ -8,14 +8,14 @@
    [ring.util.response]
    [ring.util.http-response :as response]))
 
-(defn gallery [request]
+(defn gallery [template request]
   (let [tags (map #(Integer/parseInt %) (homefunc/always-vector ((request :query-params) "tags")))]
     (if (> (count tags) 0)
-      (layout/render request "gallery.html" {:images (homefunc/matching-images tags)
+      (layout/render request template {:images (homefunc/matching-images tags)
                                              :filters (db/names-for-tags {:tags tags})
                                              :alltags (db/all-tags-with-images)
                                              :loggedin (contains? (request :session) :user)})
-      (layout/render request "gallery.html" {:images (homefunc/images-with-tags)
+      (layout/render request template {:images (homefunc/images-with-tags)
                                              :alltags (db/all-tags-with-images)
                                              :loggedin (contains? (request :session) :user)}))))
 
@@ -36,7 +36,8 @@
   [ "" 
    {:middleware [middleware/wrap-csrf
                  middleware/wrap-formats]}
-   ["/" {:get gallery}]
+   ["/" {:get #(gallery "gallery.html" %)}]
+   ["/advanced" {:get #(gallery "advanced.html" %)}]
    ["/image" {:get image}]
    ["/random" {:get random}]])
 

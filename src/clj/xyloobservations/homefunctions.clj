@@ -4,9 +4,6 @@
    [xyloobservations.db.core :as db]
    [clojure.java.io :as io]))
 
-(defn get-orphan-images []
-  (db/orphan-images))
-
 (defn add-images [tag]
   "given a map of values for the tag, add a extra key containing a vector of maps of imageids and captions"
   (let [tag_id (tag :tag_id)]

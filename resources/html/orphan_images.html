@@ -1,21 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="content">
-  {% for tag in tags %}
-    <h1>{{tag.tag_name}}</h1>
-    <p>{{tag.description}}</p>
-    {% for image in tag.images %}
-      <figure>
-        <img src="/image?id={{image.image_id}}">
-        <figcaption>{{image.caption}}</figcaption>
-      </figure>
-      {% if loggedin %}
-      <a href="/image_settings?id={{image.image_id}}">settings</a>
-      {% endif %}
-    {% endfor %}
-  {% endfor %}
   {% if orphans|length > 0 %}
-  <h1>Un-tagged images</h1>
+  <h1>These images have no tags</h1>
     {% for image in orphans %}
       <figure>
         <img src="/image?id={{image.image_id}}">

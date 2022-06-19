@@ -64,6 +64,10 @@
           all_tags (db/all_tags)]
       (layout/render request "image_settings.html" (map-of image_id attached_tags all_tags caption loggedin)))))
 
+(defn orphan_images [request]
+  (layout/render request "orphan_images.html" {:orphans (db/orphan-images)
+                                               :loggedin (contains? (request :session) :user)}))
+
 (defn admin-routes []
   [""
    {:middleware [middleware/wrap-csrf
@@ -74,4 +78,5 @@
    ["/upload_image" {:get upload-image-page
                      :post upload-image-submit}]
    ["/image_settings" {:get image-settings-page
-                       :post image-settings-submit}]])
+                       :post image-settings-submit}]
+   ["/orphan_images" {:get orphan_images}]])

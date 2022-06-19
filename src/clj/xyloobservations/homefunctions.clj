@@ -12,11 +12,6 @@
   (let [tag_id (tag :tag_id)]
     (assoc tag :images (db/images-by-tag {:tag_ref tag_id}))))
 
-(defn tags-with-images []
-  ":tag_id :tag_name and :description"
-  (map add-images (set (db/tags-with-images)))
-  )
-
 (defn fetch-image [image_id]
   "just run the fetch-image query and convert the imagedata into an io/input-stream"
   (let [{:keys [imagedata mimetype]} (db/fetch-image {:image_id image_id})]

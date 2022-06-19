@@ -8,11 +8,6 @@
    [ring.util.response]
    [ring.util.http-response :as response]))
 
-(defn home-page [request]
-  (layout/render request "home.html" {:tags    (homefunc/tags-with-images)
-                                      :orphans (homefunc/get-orphan-images)
-                                      :loggedin (contains? (request :session) :user)}))
-
 (defn gallery [request]
   (let [tags (map #(Integer/parseInt %) (homefunc/always-vector ((request :query-params) "tags")))]
     (if (> (count tags) 0)
@@ -38,8 +33,7 @@
   [ "" 
    {:middleware [middleware/wrap-csrf
                  middleware/wrap-formats]}
-   ["/" {:get home-page}]
-   ["/gallery" {:get gallery}]
+   ["/" {:get gallery}]
    ["/image" {:get image}]
    ["/about" {:get about-page}]])
 

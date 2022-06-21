@@ -10,7 +10,10 @@
 
 (defn myrender [request template argmap]
   "simply a wrapper for layout/render to add commonly used arguments"
-  (layout/render request template (conj argmap {:loggedin (contains? (request :session) :user)})))
+  (layout/render request
+                 template
+                 (conj argmap {:loggedin (contains? (request :session) :user)
+                               :fullpath (str (request :path-info) "?" (request :query-string))})))
 
 (defn gallery [template request]
   (let [tags (map #(Integer/parseInt %) (homefunc/always-vector ((request :query-params) "tags")))]

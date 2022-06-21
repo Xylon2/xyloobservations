@@ -20,9 +20,17 @@
           (assoc :session (assoc session :user (authresult :login))))
       (layout/render request "login.html" {:error (str "Authentication Failure") :redirect redirect}))))
 
+(defn logout-now [request]
+  (let [redirect ((request :query-params) "redirect")
+        session (request :session)]
+    (-> (response/found (if (empty? redirect) "/" redirect))
+        (assoc :session (dissoc session :user)))
+    ))
+
 (defn auth-routes []
   [""
    {:middleware [middleware/wrap-csrf
                  middleware/wrap-formats]}
    ["/login" {:get login-page
-              :post login-attempt}]])
+              :post login-attempt}]
+   ["/logout" {:get logout-now}]])

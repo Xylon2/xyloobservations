@@ -142,3 +142,8 @@ select
 from
     distinctimages
 order by random() limit :numimages
+
+-- :name delete-image! :! :n
+-- :doc delete an image
+delete from image
+where image_id = :image_id;

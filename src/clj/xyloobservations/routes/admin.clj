@@ -49,24 +49,37 @@
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
         attached_tags (db/tag_names_of_image {:image_id image_id})
         caption ((db/get-caption {:image_id image_id}) :caption)
-        all_tags (db/all_tags)]
-    (myrender request "image_settings.html" (map-of image_id attached_tags all_tags caption))))
+        all_tags (db/all_tags)
+        redirect ((request :query-params) "redirect")]
+    (myrender request "image_settings.html" (map-of image_id attached_tags all_tags caption redirect))))
 
 (defn image-settings-submit [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
         newtag (-> request :params :tag Integer/parseInt)
         dropdownsubmit (-> request :params :dropdownsubmit)
-        newcaption (-> request :params :caption)]
+        newcaption (-> request :params :caption)
+        redirect ((request :query-params) "redirect")]
     (if (= dropdownsubmit "true")
      (admin/tag-image! newtag, image_id)
       (admin/update-caption! newcaption, image_id))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
           caption ((db/get-caption {:image_id image_id}) :caption)
           all_tags (db/all_tags)]
-      (myrender request "image_settings.html" (map-of image_id attached_tags all_tags caption)))))
+      (myrender request "image_settings.html" (map-of image_id attached_tags all_tags caption redirect)))))
 
 (defn orphan_images [request]
   (myrender request "orphan_images.html" {:orphans (db/orphan-images)}))
+
+(defn confirm_delete [request]
+  (let [image_id (Integer/parseInt ((request :query-params) "id"))
+        redirect ((request :query-params) "redirect")]
+    (myrender request "delete_image.html" (map-of image_id redirect))))
+
+(defn delete_image [request]
+  (let [image_id (Integer/parseInt ((request :query-params) "id"))
+        redirect ((request :query-params) "redirect")]
+    (db/delete-image! {:image_id image_id})
+    (response/found (if (empty? redirect) "/" redirect))))
 
 (defn admin-routes []
   [""
@@ -79,4 +92,6 @@
                      :post upload-image-submit}]
    ["/image_settings" {:get image-settings-page
                        :post image-settings-submit}]
-   ["/orphan_images" {:get orphan_images}]])
+   ["/orphan_images" {:get orphan_images}]
+   ["/deleteimg" {:get confirm_delete
+                  :post delete_image}]])

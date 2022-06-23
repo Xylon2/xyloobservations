@@ -31,7 +31,7 @@
       <figcaption>{{image.caption}}</figcaption>
     </figure>
     {% if loggedin %}
-    <a href="/image_settings?id={{image.image_id}}">settings</a>
+    <a href="/image_settings?id={{image.image_id}}&redirect={{fullpath}}">settings</a>
     {% endif %}
   {% endfor %}
   </div>

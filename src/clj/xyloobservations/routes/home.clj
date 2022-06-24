@@ -36,12 +36,16 @@
     (myrender request "random.html" {:images (db/random-images {:numimages numimages})
                                      :numimages numimages})))
 
+(defn about [request]
+  (myrender request "about.html" {}))
+
 (defn home-routes []
-  [ "" 
+  [""
    {:middleware [middleware/wrap-csrf
                  middleware/wrap-formats]}
    ["/" {:get #(gallery "gallery.html" %)}]
    ["/advanced" {:get #(gallery "advanced.html" %)}]
    ["/image" {:get image}]
-   ["/random" {:get random}]])
+   ["/random" {:get random}]
+   ["/about" {:get about}]])
 

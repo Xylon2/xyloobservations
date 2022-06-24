@@ -4,7 +4,7 @@
   {% if orphans|length > 0 %}
   <h1>These images have no tags</h1>
     {% for image in orphans %}
-      <figure>
+      <figure class="nomargin">
         <img src="/image?id={{image.image_id}}">
         <figcaption>{{image.caption}}</figcaption>
       </figure>

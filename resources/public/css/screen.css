@@ -68,3 +68,8 @@ a.green {
   background-color:#377cb4;
   color:#000;
 }
+
+figure.nomargin {
+  margin-left: 0;
+  margin-right: 0;
+}

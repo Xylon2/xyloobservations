@@ -16,7 +16,6 @@
       <nav class="navbar is-info">
           <div class="container">
               <div class="navbar-brand">
-                  <a class="navbar-item" href="/" style="font-weight:bold;">xyloobservations</a>
                   <span class="navbar-burger burger" data-target="nav-menu">
                       <span></span>
                       <span></span>
@@ -34,6 +33,9 @@
                       <a href="/orphan_images" class="navbar-item{% ifequal page "orphan_images.html" %} is-active  is-italic{%endifequal%}">Orphan Images</a>
                       <a href="/logout?redirect={{fullpath}}" class="navbar-item">Logout</a>
                       {% endif %}
+                  </div>
+                  <div class="navbar-end">
+                      <a href="/about" class="navbar-item{% ifequal page "about.html" %} is-active  is-italic{%endifequal%}">About</a>
                   </div>
               </div>
           </div>

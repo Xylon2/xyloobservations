@@ -3,7 +3,7 @@
   <div class="content">
   <h1>{{ numimages }} random images</h1>
   {% for image in images %}
-    <figure>
+    <figure class="nomargin">
       <img src="/image?id={{image.image_id}}" loading="lazy">
       <figcaption>{{image.caption}}</figcaption>
     </figure>

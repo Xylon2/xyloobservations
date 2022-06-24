@@ -27,7 +27,9 @@
   {% endif %}
   {% for image in images %}
     <figure class="nomargin">
-      <img src="/image?id={{image.image_id}}" loading="lazy">
+      <a href="/image?id={{image.image_id}}">
+        <img src="/image?id={{image.image_id}}" loading="lazy">
+      </a>
       <figcaption>{{image.caption}}</figcaption>
     </figure>
     {% if loggedin %}

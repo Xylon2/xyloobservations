@@ -1,7 +1,7 @@
 (ns xyloobservations.routes.auth
   (:require
    [xyloobservations.layout :as layout]
-   [xyloobservations.auth :as auth]
+   [xyloobservations.authfunctions :as authfunc]
    [xyloobservations.middleware :as middleware]
    [ring.util.response]
    [ring.util.http-response :as response]))
@@ -14,7 +14,7 @@
   (let [{:keys [username password]} (request :params)
         redirect ((request :query-params) "redirect")
         session (request :session)]
-    (def authresult (auth/authenticate-user username password))
+    (def authresult (authfunc/authenticate-user username password))
     (if authresult
       (-> (response/found (if (empty? redirect) "/" redirect))
           (assoc :session (assoc session :user (authresult :login))))

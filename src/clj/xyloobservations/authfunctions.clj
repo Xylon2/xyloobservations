@@ -1,4 +1,4 @@
-(ns xyloobservations.auth
+(ns xyloobservations.authfunctions
   (:require
    [buddy.hashers :as hashers]
    [next.jdbc :as jdbc]

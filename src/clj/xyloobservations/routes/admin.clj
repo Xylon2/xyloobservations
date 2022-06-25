@@ -18,18 +18,18 @@
   [& xs]
   `(hash-map ~@(mapcat (juxt keyword identity) xs)))
 
-(defn add-tag-page [request]
-  (myrender request "add_tag.html" {}))
+(defn tag-manager-page [request]
+  (myrender request "tag_manager.html" {}))
 
-(defn add-tag-submit [request]
+(defn tag-manager-submit [request]
   (let [{:keys [tagname description advanced]} (request :params)]
     ;; we add it and show the form again so they
     ;; may add another
     (try (do (admin/add-tag! tagname description advanced)
-             (myrender request "add_tag.html" {:msgtype "success"
+             (myrender request "tag_manager.html" {:msgtype "success"
                                                :msgtxt "successfully added tag"}))
          (catch AssertionError e
-           (myrender request "add_tag.html" {:msgtype "error"
+           (myrender request "tag_manager.html" {:msgtype "error"
                                              :msgtxt (str "validation error: " (.getMessage e))})))))
 
 (defn upload-image-page [request]
@@ -86,8 +86,8 @@
    {:middleware [middleware/wrap-csrf
                  middleware/wrap-formats
                  middleware/wrap-auth]}
-   ["/add_tag" {:get add-tag-page
-                :post add-tag-submit}]
+   ["/tag_manager" {:get tag-manager-page
+                :post tag-manager-submit}]
    ["/upload_image" {:get upload-image-page
                      :post upload-image-submit}]
    ["/image_settings" {:get image-settings-page

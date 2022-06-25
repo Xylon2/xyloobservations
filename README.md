@@ -27,7 +27,7 @@ To start a web server for the application, run:
 There is an admin interface which you can access at `/login`. To create credentials for this use the repl:
 ```
 lein repl
-(in-ns 'polls.auth)
+(in-ns 'xyloobservations.auth)
  (create-user! "youruser" "yourpass")
 ```
 

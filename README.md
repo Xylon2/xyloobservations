@@ -6,7 +6,7 @@ It's based on [Luminus](https://luminusweb.com/) and I designed it to work with 
 
 ## Running this code
 
-Here I explain how you might run this code on your Linux or Mac workstation for testing
+Here I explain how you may run this code on your Linux or Mac workstation for testing.
 
 Install:
 - [Leiningen](https://github.com/technomancy/leiningen)

@@ -6,9 +6,13 @@ It's based on [Luminus](https://luminusweb.com/) and I designed it to work with 
 
 ## Running this code
 
-To run this you will need [Leiningen](https://github.com/technomancy/leiningen) installed.
+Here I explain how you might run this code on your Linux or Mac workstation for testing
 
-You're gonna need a PostgreSQL database, and to create a file `dev-config.edn` with credentials. An example of how that might look:
+Install:
+- [Leiningen](https://github.com/technomancy/leiningen)
+- [PostgreSQL](https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e)
+
+Create a PostgreSQL database and user, and create a file `dev-config.edn` with credentials. An example of how that might look:
 ```
 {:dev true
  :port 3000
@@ -21,13 +25,16 @@ You're gonna need a PostgreSQL database, and to create a file `dev-config.edn` w
 ```
 
 To start a web server for the application, run:
-
-    lein run 
-
-There is an admin interface which you can access at `/login`. To create credentials for this use the repl:
 ```
 lein repl
-(in-ns 'xyloobservations.auth)
+(start)
+```
+
+Now you should be able to access the app at http://localhost:3000/.
+
+For uploading images there is an admin interface which you can access at `/login`. To create credentials for this type these in the repl:
+```
+(in-ns 'xyloobservations.authfunctions)
  (create-user! "youruser" "yourpass")
 ```
 

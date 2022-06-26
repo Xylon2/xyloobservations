@@ -12,9 +12,7 @@
     ">{{tag.tag_name}}</a>
   {% endifequal %}{% endfor %}
   {% if filters|length > 0 %}
-    {% for ftag in filters %}
-      <p>{{ ftag.description }}</p>
-    {% endfor %}
+  <h2>{{filters.0.description}}</h2>
   {% endif %}
   {% for image in images %}
     <figure class="nomargin">

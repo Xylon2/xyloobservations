@@ -19,12 +19,7 @@
     <br/>
     <input type="submit" value="Submit">
   </form>
-  
-  {% if filters|length > 0 %}
-    {% for ftag in filters %}
-      <p>{{ ftag.description }}</p>
-    {% endfor %}
-  {% endif %}
+
   {% for image in images %}
     <figure class="nomargin">
       <a href="/image?id={{image.image_id}}">

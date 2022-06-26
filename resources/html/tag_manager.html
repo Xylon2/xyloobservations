@@ -13,7 +13,11 @@
         <label for="description">Tag description</label>
         <textarea name="description" id="description"></textarea><br>
         <label for="advanced">Advanced?</label>
-        <input type="checkbox" id="advanced" name="advanced" value="true">
+        <select name="advanced" id="advanced">
+          <option value="false">no</option>
+          <option value="date">date</option>
+          <option value="place">place</option>
+        </select>
       </fieldset>
       <input type="submit" value="Add tag">
     </form>

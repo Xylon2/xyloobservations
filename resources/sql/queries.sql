@@ -12,7 +12,7 @@ where login = :login
 -- :name add-tag! :! :n
 -- :doc add a tag
 insert into tag (tag_name, description, advanced)
-values (:tagname, :description, :advanced)
+values (:tagname, :description, :advanced::adstates)
 
 -- :name upload-image! :! :1
 -- :doc upload the image
@@ -133,6 +133,7 @@ from
     imagetag
 inner join tag
     on tag_id = tag_ref
+order by advanced;
 
 -- :name random-images :? :*
 -- :doc return the specified number of random images that have tags

@@ -24,11 +24,10 @@
     false)
   )
 
-(defn add-tag! [tagname description radvanced]
+(defn add-tag! [tagname description advanced]
   (if (some empty? [tagname description])
     (throw (AssertionError. "empty values are not allowed")))
-  (let [advanced (sanitize_advanced radvanced)]
-   (db/add-tag! (map-of tagname description advanced))))
+  (db/add-tag! (map-of tagname description advanced)))
 
 (defn upload-image! [{{:keys [tempfile size filename]} "filename"}
                      caption

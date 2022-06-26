@@ -14,10 +14,11 @@ where login = :login
 insert into tag (tag_name, description, advanced)
 values (:tagname, :description, :advanced)
 
--- :name upload-image! :! :n
+-- :name upload-image! :! :1
 -- :doc upload the image
 insert into image (imagedata, mimetype, caption)
 values (:imagedata, :mimetype, :caption)
+returning image_id
 
 -- :name orphan-images :? :*
 -- :doc get images which do not have a tag associated
@@ -60,12 +61,18 @@ where image_ref = :image_id;
 -- :name all_tags :? :*
 -- :doc get names and ids of all tags
 select tag_id, tag_name 
-from tag;
+from tag
+order by advanced;
 
 -- :name tag-image! :! :n
--- :doc add a tag to an image
+-- :doc add tags to an image
 insert into imagetag (tag_ref, image_ref)
-values (:tag_id, :image_id);
+values 
+/*~
+(let [taglist (:taglist params)
+      image_id (:image_id params)]
+  (clojure.string/join ", " (map #(str "(" % ", " image_id ")") taglist)))
+~*/
 
 -- :name get-caption :? :1
 -- :doc get the caption for an image

@@ -2,7 +2,7 @@
   (:require
    [xyloobservations.layout :as layout]
    [xyloobservations.middleware :as middleware]
-   [xyloobservations.adminfunctions :as admin]
+   [xyloobservations.adminfunctions :as adminfunc]
    [ring.util.response]
    [ring.util.http-response :as response]
    [xyloobservations.db.core :as db]))
@@ -25,7 +25,7 @@
   (let [{:keys [tagname description advanced]} (request :params)]
     ;; we add it and show the form again so they
     ;; may add another
-    (try (do (admin/add-tag! tagname description advanced)
+    (try (do (adminfunc/add-tag! tagname description advanced)
              (myrender request "tag_manager.html" {:msgtype "success"
                                                :msgtxt "successfully added tag"}))
          (catch AssertionError e
@@ -33,16 +33,21 @@
                                              :msgtxt (str "validation error: " (.getMessage e))})))))
 
 (defn upload-image-page [request]
-  (myrender request "upload_image.html" {}))
+  (let [all_tags (db/all_tags)]
+    (myrender request "upload_image.html" {:all_tags all_tags})))
 
 (defn upload-image-submit [request]
   (let [file (request :multipart-params)
-        caption (-> request :params :caption)]
-    (try (do (admin/upload-image! file caption)
-             (myrender request "upload_image.html" {:msgtype "success"
+        caption (-> request :params :caption)
+        chozen_tags (-> request :params :tags)
+        all_tags (db/all_tags)]
+    (try (do (adminfunc/upload-image! file caption chozen_tags)
+             (myrender request "upload_image.html" {:all_tags all_tags
+                                                    :msgtype "success"
                                                     :msgtxt "successfully uploaded image"}))
          (catch AssertionError e
-           (myrender request "upload_image.html" {:msgtype "error"
+           (myrender request "upload_image.html" {:all_tags all_tags
+                                                  :msgtype "error"
                                                   :msgtxt (str "validation error: " (.getMessage e))})))))
 
 (defn image-settings-page [request]
@@ -60,8 +65,8 @@
         newcaption (-> request :params :caption)
         redirect ((request :query-params) "redirect")]
     (if (= dropdownsubmit "true")
-     (admin/tag-image! newtag, image_id)
-      (admin/update-caption! newcaption, image_id))
+     (adminfunc/tag-image! newtag, image_id)
+      (adminfunc/update-caption! newcaption, image_id))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
           caption ((db/get-caption {:image_id image_id}) :caption)
           all_tags (db/all_tags)]

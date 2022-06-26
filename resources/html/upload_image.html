@@ -11,6 +11,10 @@
         <input type="file" name="filename" id="newimage"><br>
         <textarea name="caption" id="caption"></textarea>
       </fieldset>
+      {% for tag in all_tags %}
+      <input type="checkbox" id="tag_{{ tag.tag_id }}" name="tags" value="{{ tag.tag_id }}">
+      <label for="tag_{{tag.tag_id}}">{{tag.tag_name}}</label><br/>
+      {% endfor %}
       <input type="submit" value="Upload">
     </form>
   </div>

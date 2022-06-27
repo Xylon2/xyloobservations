@@ -67,6 +67,8 @@
     (case whichform
       "add_tag"
         (adminfunc/tag-image! (Integer/parseInt newtag), image_id)
+      "remove_tag"
+        (adminfunc/untag-image! (Integer/parseInt newtag), image_id)
       "edit_caption"
         (adminfunc/update-caption! newcaption, image_id))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})

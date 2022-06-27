@@ -63,6 +63,10 @@
     (throw (AssertionError. "this tag is already assigned to this image")))
   (db/tag-image! {:taglist [tag_id] :image_id image_id}))
 
+(defn untag-image! [tag_id, image_id]
+  "un-assign a tag from an image"
+  (db/untag-image! {:tag tag_id :image_id image_id}))
+
 (defn update-caption! [newcaption, image_id]
   "simply update the caption"
   (db/update-caption! (map-of newcaption image_id)))

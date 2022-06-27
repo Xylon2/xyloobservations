@@ -74,6 +74,11 @@ values
   (clojure.string/join ", " (map #(str "(" % ", " image_id ")") taglist)))
 ~*/
 
+-- :name untag-image! :! :n
+delete from imagetag
+where image_ref = :image_id
+and tag_ref = :tag;
+
 -- :name get-caption :? :1
 -- :doc get the caption for an image
 select caption from image

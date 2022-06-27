@@ -6,29 +6,34 @@
     </p>
     <img src="/image?id={{image_id}}">
     <h2>Attached tags</h2>
-    <ul>
-    {% for tag in attached_tags %}
-      <li>
-        {{ tag.tag_name }}
-      </li>
-    {% endfor %}
-    </ul>
     <form method="POST">
       {% csrf-field %}
-      <label for="tag">Add a tag:</label>
-      <select name="tag" id="tag" onchange='this.form.submit();'>
+      <ul>
+      {% for tag in attached_tags %}
+      <li>
+        {{tag.tag_name}} <input type="button" value="-" onclick='document.getElementById("remtag").value = "{{tag.tag_id}}"; this.form.submit();'/>
+      </li>
+      {% endfor %}
+      </ul>
+      <input type="hidden" name="whichform" value="remove_tag">
+      <input type="hidden" id="remtag" name="tag" value="">
+    </form>
+    <form method="POST">
+      {% csrf-field %}
+      <label for="addtag">Add a tag:</label>
+      <select name="tag" id="addtag" onchange='this.form.submit();'>
         <option value=0>_</option>
       {% for tag in all_tags %}
-        <option value="{{ tag.tag_id }}">{{ tag.tag_name }}</option>
+        <option value="{{tag.tag_id}}">{{tag.tag_name}}</option>
       {% endfor %}
       </select>
-      <input type="hidden" id="whichform" name="whichform" value="add_tag">
+      <input type="hidden" name="whichform" value="add_tag">
     </form>
     <h2>Caption</h2>
     <form method="POST">
       {% csrf-field %}
       <textarea name="caption" id="caption">{{caption}}</textarea><br>
-      <input type="hidden" id="whichform" name="whichform" value="edit_caption">
+      <input type="hidden" name="whichform" value="edit_caption">
       <input type="submit" value="Save">
     </form>
     <br/>

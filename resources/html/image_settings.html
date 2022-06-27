@@ -16,19 +16,23 @@
     <form method="POST">
       {% csrf-field %}
       <label for="tag">Add a tag:</label>
-      <select name="tag" id="tag" onchange='if(this.value != 0) { document.getElementById("dropdownsubmit").value = "true"; this.form.submit(); }'>
+      <select name="tag" id="tag" onchange='this.form.submit();'>
         <option value=0>_</option>
       {% for tag in all_tags %}
         <option value="{{ tag.tag_id }}">{{ tag.tag_name }}</option>
       {% endfor %}
       </select>
-      <input type="hidden" id="dropdownsubmit" name="dropdownsubmit" value="false">
-      <h2>Caption</h2>
+      <input type="hidden" id="whichform" name="whichform" value="add_tag">
+    </form>
+    <h2>Caption</h2>
+    <form method="POST">
+      {% csrf-field %}
       <textarea name="caption" id="caption">{{caption}}</textarea><br>
+      <input type="hidden" id="whichform" name="whichform" value="edit_caption">
       <input type="submit" value="Save">
     </form>
     <br/>
-    <p>Delete?</p>
+    <h2>Delete</h2>
     <a href="/deleteimg?id={{image_id}}&redirect={{redirect}}" class="button">Delete</a>
   </div>
 {% endblock %}

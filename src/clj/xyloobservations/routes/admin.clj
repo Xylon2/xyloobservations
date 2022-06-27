@@ -60,13 +60,15 @@
 
 (defn image-settings-submit [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
-        newtag (-> request :params :tag Integer/parseInt)
-        dropdownsubmit (-> request :params :dropdownsubmit)
+        newtag (-> request :params :tag)
+        whichform (-> request :params :whichform)
         newcaption (-> request :params :caption)
         redirect ((request :query-params) "redirect")]
-    (if (= dropdownsubmit "true")
-     (adminfunc/tag-image! newtag, image_id)
-      (adminfunc/update-caption! newcaption, image_id))
+    (case whichform
+      "add_tag"
+        (adminfunc/tag-image! (Integer/parseInt newtag), image_id)
+      "edit_caption"
+        (adminfunc/update-caption! newcaption, image_id))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
           caption ((db/get-caption {:image_id image_id}) :caption)
           all_tags (db/all_tags)]

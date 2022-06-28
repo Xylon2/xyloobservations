@@ -7,7 +7,7 @@
     <form method="POST">
       {% csrf-field %}
       <fieldset>
-        <legend><h1>Adding a new tag</h1></legend>
+        <legend><h2>Adding a new tag</h2></legend>
         <label for="tagname">Tag name</label>
         <input type="text" name="tagname" id="tagname"><br>
         <label for="description">Tag description</label>
@@ -21,5 +21,19 @@
       </fieldset>
       <input type="submit" value="Add tag">
     </form>
-  </div>
+    <h1>Existing tags</h1>
+    <table>
+      <form method="GET">
+      {% for tag in all_tags %}
+      <tr>
+        <td>{{tag.tag_name}}</td>
+        <td><input type="submit" value="modify" formaction="/modify_tag" onclick='document.getElementById("tagid").value = "{{tag.tag_id}}";'/></td>
+        <td><input type="submit" value="delete" formaction="/delete_tag" onclick='document.getElementById("tagid").value = "{{tag.tag_id}}";'/></td>
+      </tr>
+      {% endfor %}
+      <input type="hidden" id="tagid" name="tag" value=""/>
+      <input type="hidden" name="redirect" value="/tag_manager"/>
+      </form>
+    </table>
+</div>
 {% endblock %}

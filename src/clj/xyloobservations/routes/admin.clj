@@ -19,18 +19,21 @@
   `(hash-map ~@(mapcat (juxt keyword identity) xs)))
 
 (defn tag-manager-page [request]
-  (myrender request "tag_manager.html" {}))
+  (let [all_tags (db/all_tags)]
+    (myrender request "tag_manager.html" {:all_tags all_tags})))
 
 (defn tag-manager-submit [request]
   (let [{:keys [tagname description advanced]} (request :params)]
-    ;; we add it and show the form again so they
-    ;; may add another
-    (try (do (adminfunc/add-tag! tagname description advanced)
-             (myrender request "tag_manager.html" {:msgtype "success"
-                                               :msgtxt "successfully added tag"}))
-         (catch AssertionError e
-           (myrender request "tag_manager.html" {:msgtype "error"
-                                             :msgtxt (str "validation error: " (.getMessage e))})))))
+    ;; we add it and show the form again so they may add another
+    (try
+      (do (adminfunc/add-tag! tagname description advanced)
+          (def message {:msgtype "success"
+                        :msgtxt "successfully added tag"}))
+      (catch AssertionError e
+        (def message {:msgtype "error"
+                      :msgtxt (str "validation error: " (.getMessage e))})))
+    (let [all_tags (db/all_tags)]
+      (myrender request "tag_manager.html" (conj {:all_tags all_tags} message)))))
 
 (defn upload-image-page [request]
   (let [all_tags (db/all_tags)]

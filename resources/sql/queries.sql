@@ -60,7 +60,7 @@ where image_ref = :image_id;
 
 -- :name all_tags :? :*
 -- :doc get names and ids of all tags
-select tag_id, tag_name 
+select tag_id, tag_name
 from tag
 order by advanced;
 
@@ -130,6 +130,12 @@ select tag_id, tag_name, description
 from tag
 where tag_id in (:v*:tags)
 
+-- :name name-tag :? :1
+-- :doc get the name of one tag
+select tag_name
+from tag
+where tag_id = :tag_id;
+
 -- :name all-tags-with-images :? :*
 -- :doc return all tags which have an image
 select distinct
@@ -160,3 +166,8 @@ order by random() limit :numimages
 -- :doc delete an image
 delete from image
 where image_id = :image_id;
+
+-- :name delete-tag! :! :n
+-- :doc delete a tag
+delete from tag
+where tag_id = :tag_id;

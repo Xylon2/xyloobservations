@@ -82,7 +82,7 @@
 (defn orphan_images [request]
   (myrender request "orphan_images.html" {:orphans (db/orphan-images)}))
 
-(defn confirm_delete [request]
+(defn confirm_delete_image [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
         redirect ((request :query-params) "redirect")]
     (myrender request "delete_image.html" (map-of image_id redirect))))
@@ -91,6 +91,19 @@
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
         redirect ((request :query-params) "redirect")]
     (db/delete-image! {:image_id image_id})
+    (response/found (if (empty? redirect) "/" redirect))))
+
+(defn confirm_delete_tag [request]
+  (let [tag_id (Integer/parseInt ((request :query-params) "tag"))
+        redirect ((request :query-params) "redirect")
+        images (db/images-by-tag {:tag_ref tag_id})
+        tag_name (:tag_name (db/name-tag (map-of tag_id)))]
+    (myrender request "delete_tag.html" (map-of tag_id redirect images tag_name))))
+
+(defn delete_tag [request]
+  (let [tag_id (Integer/parseInt ((request :query-params) "tag"))
+        redirect ((request :query-params) "redirect")]
+    (db/delete-tag! (map-of tag_id))
     (response/found (if (empty? redirect) "/" redirect))))
 
 (defn admin-routes []
@@ -105,5 +118,7 @@
    ["/image_settings" {:get image-settings-page
                        :post image-settings-submit}]
    ["/orphan_images" {:get orphan_images}]
-   ["/deleteimg" {:get confirm_delete
-                  :post delete_image}]])
+   ["/deleteimg" {:get confirm_delete_image
+                  :post delete_image}]
+   ["/delete_tag" {:get confirm_delete_tag
+                   :post delete_tag}]])

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="content">
+    <h1>Confirm deletion</h1>
+    <p>Do you want to delete tag "{{tag_name}}" which is attached to {{images|count}} images?</p>
+    <form method="POST" action="?tag={{tag_id}}&redirect={{redirect}}">
+      {% csrf-field %}
+      <input type="submit" value="Delete"/>
+    </form>
+  </div>
+{% endblock %}

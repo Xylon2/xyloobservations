@@ -27,7 +27,7 @@
       {% for tag in all_tags %}
       <tr>
         <td>{{tag.tag_name}}</td>
-        <td><input type="submit" value="modify" formaction="/modify_tag" onclick='document.getElementById("tagid").value = "{{tag.tag_id}}";'/></td>
+        <td><input type="submit" value="modify" formaction="/tag_settings" onclick='document.getElementById("tagid").value = "{{tag.tag_id}}";'/></td>
         <td><input type="submit" value="delete" formaction="/delete_tag" onclick='document.getElementById("tagid").value = "{{tag.tag_id}}";'/></td>
       </tr>
       {% endfor %}

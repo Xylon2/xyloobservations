@@ -29,6 +29,11 @@
     (throw (AssertionError. "empty values are not allowed")))
   (db/add-tag! (map-of tagname description advanced)))
 
+(defn modify_tag [tag_id, tag_name, description, advanced]
+  (if (some empty? [tag_name description])
+    (throw (AssertionError. "empty values are not allowed")))
+  (db/modify-tag! (map-of tag_id tag_name description advanced)))
+
 (defn upload-image! [{{:keys [tempfile size filename]} "filename"}
                      caption
                      chozen_tags]
@@ -70,4 +75,3 @@
 (defn update-caption! [newcaption, image_id]
   "simply update the caption"
   (db/update-caption! (map-of newcaption image_id)))
-

@@ -14,6 +14,14 @@ where login = :login
 insert into tag (tag_name, description, advanced)
 values (:tagname, :description, :advanced::adstates)
 
+-- :name modify-tag! :! :n
+-- :doc modify a tag
+update tag set
+  tag_name = :tag_name,
+  description = :description,
+  advanced = :advanced::adstates
+where tag_id = :tag_id
+
 -- :name upload-image! :! :1
 -- :doc upload the image
 insert into image (imagedata, mimetype, caption)
@@ -130,9 +138,9 @@ select tag_id, tag_name, description
 from tag
 where tag_id in (:v*:tags)
 
--- :name name-tag :? :1
--- :doc get the name of one tag
-select tag_name
+-- :name tag-info :? :1
+-- :doc info about one tag
+select :i*:cols
 from tag
 where tag_id = :tag_id;
 

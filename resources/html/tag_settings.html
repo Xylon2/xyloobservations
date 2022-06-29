@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="content">
+    <p style="color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
+      {{msgtxt}}
+    </p>
+    <h1>Settings for tag "{{tag_name}}"</h1>
+    <form method="POST">
+      {% csrf-field %}
+      <label for="tag_name">Name</label>
+      <input type="text" name="tag_name" id="tag_name" value="{{tag_name}}"><br/>
+      <label for="description">Description</label>
+      <textarea name="description" id="description">{{description}}</textarea><br>
+      <label for="advanced">Advanced?</label>
+      <select name="advanced" id="advanced">
+        {% for item in ad_opts %}
+        <option {% ifequal item advanced %}selected="selected"{% endifequal %}>
+          {{item}}
+        </option>
+        {% endfor %}
+      </select><br/>
+      <input type="submit" value="Save">
+    </form>
+    <br/>
+    <h2>Delete</h2>
+    <a href="/delete_tag?tag={{tag_id}}&redirect={{redirect}}" class="button">Delete</a>
+  </div>
+{% endblock %}

@@ -55,18 +55,16 @@
 
 (defn image-settings-page [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
+        redirect ((request :query-params) "redirect")
         attached_tags (db/tag_names_of_image {:image_id image_id})
         caption ((db/get-caption {:image_id image_id}) :caption)
-        all_tags (db/all_tags)
-        redirect ((request :query-params) "redirect")]
+        all_tags (db/all_tags)]
     (myrender request "image_settings.html" (map-of image_id attached_tags all_tags caption redirect))))
 
 (defn image-settings-submit [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
-        newtag (-> request :params :tag)
-        whichform (-> request :params :whichform)
-        newcaption (-> request :params :caption)
-        redirect ((request :query-params) "redirect")]
+        redirect ((request :query-params) "redirect")
+        {newtag :tag whichform :whichform newcaption :caption} (request :params)]
     (case whichform
       "add_tag"
         (adminfunc/tag-image! (Integer/parseInt newtag), image_id)
@@ -97,7 +95,7 @@
   (let [tag_id (Integer/parseInt ((request :query-params) "tag"))
         redirect ((request :query-params) "redirect")
         images (db/images-by-tag {:tag_ref tag_id})
-        tag_name (:tag_name (db/name-tag (map-of tag_id)))]
+        tag_name (:tag_name (db/tag-info {:tag_id tag_id :cols ["tag_name"]}))]
     (myrender request "delete_tag.html" (map-of tag_id redirect images tag_name))))
 
 (defn delete_tag [request]
@@ -105,6 +103,22 @@
         redirect ((request :query-params) "redirect")]
     (db/delete-tag! (map-of tag_id))
     (response/found (if (empty? redirect) "/" redirect))))
+
+(defn tag_settings_page [request]
+  (let [tag_id (Integer/parseInt ((request :query-params) "tag"))
+        redirect ((request :query-params) "redirect")
+        {:keys [tag_name description advanced]} (db/tag-info {:tag_id tag_id :cols ["tag_name", "description", "advanced"]})
+        ad_opts ["false" "date" "place"]]
+    (myrender request "tag_settings.html" (map-of tag_id redirect tag_name description advanced ad_opts))))
+
+(defn tag_settings_submit [request]
+  (let [tag_id (Integer/parseInt ((request :query-params) "tag"))
+        redirect ((request :query-params) "redirect")
+        {:keys [tag_name description advanced]} (request :params)]
+    (adminfunc/modify_tag tag_id tag_name description advanced)
+    (let [{:keys [tag_name description advanced]} (db/tag-info {:tag_id tag_id :cols ["tag_name", "description", "advanced"]})
+          ad_opts ["false" "date" "place"]]
+      (myrender request "tag_settings.html" (map-of tag_id redirect tag_name description advanced ad_opts)))))
 
 (defn admin-routes []
   [""
@@ -121,4 +135,6 @@
    ["/deleteimg" {:get confirm_delete_image
                   :post delete_image}]
    ["/delete_tag" {:get confirm_delete_tag
-                   :post delete_tag}]])
+                   :post delete_tag}]
+   ["/tag_settings" {:get tag_settings_page
+                     :post tag_settings_submit}]])

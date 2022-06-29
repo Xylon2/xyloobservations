@@ -32,7 +32,7 @@ lein repl
 
 Now you should be able to access the app at http://localhost:3000/.
 
-For uploading images there is an admin interface which you can access at `/login`. To create credentials for this type these in the repl:
+For uploading images there is an admin interface which you can access at `/login`. To create credentials for this type these in the repl (after running `(start)`):
 ```
 (in-ns 'xyloobservations.authfunctions)
  (create-user! "youruser" "yourpass")

@@ -44,7 +44,11 @@
     (let [response (handler request)]
       (if (contains? (request :session) :user)
         response
-        (response/found (str "/login?redirect=" (request :path-info) "?" (request :query-string)))))))
+        (response/found
+         (str "/login?redirect="
+              (java.net.URLEncoder/encode (request :path-info) "UTF-8")
+              "?"
+              (request :query-string)))))))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)

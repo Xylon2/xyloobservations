@@ -46,9 +46,9 @@
         response
         (response/found
          (str "/login?redirect="
-              (java.net.URLEncoder/encode (request :path-info) "UTF-8")
-              "?"
-              (request :query-string)))))))
+              (java.net.URLEncoder/encode (str
+                                           (request :path-info) "?"
+                                           (request :query-string)) "UTF-8")))))))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)

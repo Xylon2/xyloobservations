@@ -8,7 +8,9 @@
 
 (defn login-page [request]
   (let [redirect ((request :query-params) "redirect")]
-    (layout/render request "login.html" {:redirect redirect})))
+    (layout/render request "login.html" {:redirect
+                                         (java.net.URLEncoder/encode
+                                          (if (empty? redirect) "" redirect) "UTF-8")})))
 
 (defn login-attempt [request]
   (let [{:keys [username password]} (request :params)

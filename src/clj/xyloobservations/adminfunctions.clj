@@ -1,9 +1,12 @@
 (ns xyloobservations.adminfunctions
+  (:use
+   [amazonica.aws.s3])
   (:require
    [next.jdbc :as jdbc]
    [xyloobservations.db.core :as db]
    [clojure.java.io :as io]
-   [clojure.string :as str]))
+   [clojure.string :as str]
+   [xyloobservations.config :refer [env]]))
 
 (defmacro map-of
   [& xs]
@@ -25,12 +28,12 @@
   )
 
 (defn add-tag! [tagname description advanced]
-  (if (some empty? [tagname description])
+  (when (some empty? [tagname description])
     (throw (AssertionError. "empty values are not allowed")))
   (db/add-tag! (map-of tagname description advanced)))
 
 (defn modify_tag [tag_id, tag_name, description, advanced]
-  (if (some empty? [tag_name description])
+  (when (some empty? [tag_name description])
     (throw (AssertionError. "empty values are not allowed")))
   (db/modify-tag! (map-of tag_id tag_name description advanced)))
 
@@ -38,23 +41,32 @@
                      caption
                      chozen_tags]
   ;; size is the filesize in bytes
-  (let [mimetype (-> (str/split filename #"\.")
-                     last
-                     {"jpeg" "image/jpeg"
-                      "jpg"  "image/jpeg"
-                      "avif" "image/avif"
-                      "webp" "image/webp"
-                      "png"  "image/png"})
+  (let [extension (last (str/split filename #"\."))
+        mimetype ({"jpeg" "image/jpeg"
+                   "jpg"  "image/jpeg"
+                   "avif" "image/avif"
+                   "webp" "image/webp"
+                   "png"  "image/png"} extension)
         tag_integers (map #(Integer/parseInt %) chozen_tags)]
     (when (not mimetype)
       (throw (AssertionError. "cannot detect file-type based on extension")))
     (when (> size 1000000)
       (throw (AssertionError. "this picture is too big")))
     (jdbc/with-transaction [t-conn db/*db*]
-      (def image_id (:image_id (db/upload-image! t-conn
-                                                 {:imagedata (slurp-bytes tempfile)
-                                                  :mimetype mimetype
-                                                  :caption caption})))
+      (case (env :image-store)
+        "s3"
+        (let [object_ref (str (.toString (java.util.UUID/randomUUID)) "." extension)]
+          (put-object (env :aws-creds)
+                      :bucket-name (env :bucket-name)
+                      :key object_ref
+                      :metadata {:content-type mimetype}
+                      :file tempfile)
+          (def image_id (:image_id (db/reference-image! t-conn
+                                                        (map-of object_ref mimetype caption)))))
+        "postgres"
+        (let [imagedata (slurp-bytes tempfile)]
+          (def image_id (:image_id (db/upload-image! t-conn
+                                                     (map-of imagedata mimetype caption))))))
       (when-not (empty? tag_integers)
         (db/tag-image! t-conn {:taglist tag_integers
                                :image_id image_id})))))

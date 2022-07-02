@@ -27,17 +27,17 @@
       (myrender request template {:images (homefunc/images-with-tags)
                                   :alltags (db/all-tags-with-images)}))))
 
+(defn random [request]
+  (let [numimages (Integer/parseInt (homefunc/default-number ((request :query-params) "num")))]
+    (myrender request "random.html" {:images (db/random-images {:numimages numimages})
+                                     :numimages numimages})))
+
 (defn image [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
         {:keys [imagedata mimetype]} (homefunc/fetch-image image_id)]
     (->  (response/ok imagedata)
          (response/content-type mimetype)
          (response/header "Cache-Control" "public, max-age=31536000, immutable"))))
-
-(defn random [request]
-  (let [numimages (Integer/parseInt (homefunc/default-number ((request :query-params) "num")))]
-    (myrender request "random.html" {:images (db/random-images {:numimages numimages})
-                                     :numimages numimages})))
 
 (defn about [request]
   (myrender request "about.html" {}))

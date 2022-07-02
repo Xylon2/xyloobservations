@@ -28,6 +28,12 @@ insert into image (imagedata, mimetype, caption)
 values (:imagedata, :mimetype, :caption)
 returning image_id
 
+-- :name reference-image! :! :1
+-- :doc add an image which is in s3
+insert into image (object_ref, mimetype, caption)
+values (:object_ref, :mimetype, :caption)
+returning image_id
+
 -- :name orphan-images :? :*
 -- :doc get images which do not have a tag associated
 select

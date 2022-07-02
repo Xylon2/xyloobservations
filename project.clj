@@ -31,7 +31,12 @@
                  [ring/ring-defaults "0.3.3"]
                  [selmer "1.12.50"]
                  [cheshire "5.10.2"]
-                 [buddy/buddy-hashers "1.8.158"]]
+                 [buddy/buddy-hashers "1.8.158"]
+                 [amazonica "0.3.161" :exclusions [com.amazonaws/aws-java-sdk
+                                                   com.amazonaws/amazon-kinesis-client
+                                                   com.amazonaws/dynamodb-streams-kinesis-adapter]]
+                 [com.amazonaws/aws-java-sdk-core "1.11.968"]
+                 [com.amazonaws/aws-java-sdk-s3 "1.11.968"]]
 
   :min-lein-version "2.0.0"
   

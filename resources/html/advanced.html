@@ -31,5 +31,8 @@
     <a href="/image_settings?id={{image.image_id}}&redirect={{fullpath}}">settings</a>
     {% endif %}
   {% endfor %}
+  {% ifequal images|length 0 %}
+    <br/><p>No images match all the selected tags.</p>
+  {% endifequal %}
   </div>
 {% endblock %}

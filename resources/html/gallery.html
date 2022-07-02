@@ -3,13 +3,13 @@
   <div class="content">
   <h1>Select a tag to filter your results</h1>
   {% for tag in alltags %}{% ifequal tag.advanced "false" %}
-  <a href="?tags={{tag.tag_id}}" class="button
+  <a href="?tags={{tag.tag_id}}" class="ck-button"><span
     {% for ftag in filters %}
       {% if ftag.tag_id = tag.tag_id %}
-        green
+        class="green"
       {% endif %}
     {% endfor %}
-    ">{{tag.tag_name}}</a>
+    >{{tag.tag_name}}</span></a>
   {% endifequal %}{% endfor %}
   {% if filters|length > 0 %}
   <h2>{{filters.0.description}}</h2>

@@ -5,7 +5,7 @@
 
   <form method="GET">
     {% for tag in alltags %}
-    <div id="ck-button"><label>
+    <div class="ck-button"><label>
       <input type="checkbox" id="tchkbox_{{tag.tag_id}}" name="tags"
       value="{{tag.tag_id}}"
         {% for ftag in filters %}

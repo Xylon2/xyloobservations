@@ -41,33 +41,33 @@ a.button:link a.button:visited {
   color: initial;
 }
 
-a.green {
-  background-color: #2aa198;
-}
-
-#ck-button {
+.ck-button {
   margin:0.1em;
-  background-color:#EFEFEF;
   border-radius:0.3em;
   border:0.1em solid #D0D0D0;
   overflow:auto;
   display:inline-block;
 }
 
-#ck-button label span {
+.ck-button span {
   text-align:center;
   padding:0.4em 0.9em;
   display:block;
+  background-color: #839496;
+  color:#EFEFEF;
 }
 
-#ck-button label input {
+.ck-button span.green {
+  background-color: #5f1366;
+}
+
+.ck-button label input {
   position:absolute;
   top:-500px;
 }
 
-#ck-button input:checked + span {
-  background-color:#377cb4;
-  color:#000;
+.ck-button input:checked + span {
+  background-color: #136643;
 }
 
 figure.nomargin {

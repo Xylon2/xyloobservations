@@ -13,6 +13,9 @@
    [ring.util.http-response :as response])
   )
 
+(defn urlencode [foo]
+  (java.net.URLEncoder/encode foo "UTF-8"))
+
 (defn wrap-internal-error [handler]
   (fn [req]
     (try
@@ -46,9 +49,7 @@
         response
         (response/found
          (str "/login?redirect="
-              (java.net.URLEncoder/encode (str
-                                           (request :path-info) "?"
-                                           (request :query-string)) "UTF-8")))))))
+              (urlencode (str (request :path-info) "?" (request :query-string)))))))))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)

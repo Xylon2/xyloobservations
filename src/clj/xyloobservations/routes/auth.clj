@@ -6,11 +6,13 @@
    [ring.util.response]
    [ring.util.http-response :as response]))
 
+(defn urlencode [foo]
+  (java.net.URLEncoder/encode foo "UTF-8"))
+
 (defn login-page [request]
   (let [redirect ((request :query-params) "redirect")]
     (layout/render request "login.html" {:redirect
-                                         (java.net.URLEncoder/encode
-                                          (if (empty? redirect) "" redirect) "UTF-8")})))
+                                         (urlencode (if (empty? redirect) "" redirect))})))
 
 (defn login-attempt [request]
   (let [{:keys [username password]} (request :params)

@@ -8,12 +8,15 @@
    [ring.util.response]
    [ring.util.http-response :as response]))
 
+(defn urlencode [foo]
+  (java.net.URLEncoder/encode foo "UTF-8"))
+
 (defn myrender [request template argmap]
   "simply a wrapper for layout/render to add commonly used arguments"
   (layout/render request
                  template
                  (conj argmap {:loggedin (contains? (request :session) :user)
-                               :fullpath (str (request :path-info) "?" (request :query-string))})))
+                               :fullpath (urlencode (str (request :path-info) "?" (request :query-string)))})))
 
 (defn gallery [template request]
   (let [tags (map #(Integer/parseInt %) (homefunc/always-vector ((request :query-params) "tags")))]

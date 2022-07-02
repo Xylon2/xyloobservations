@@ -7,12 +7,15 @@
    [ring.util.http-response :as response]
    [xyloobservations.db.core :as db]))
 
+(defn urlencode [foo]
+  (java.net.URLEncoder/encode foo "UTF-8"))
+
 (defn myrender [request template argmap]
   "simply a wrapper for layout/render to add commonly used arguments"
   (layout/render request
                  template
                  (conj argmap {:loggedin (contains? (request :session) :user)
-                               :fullpath (str (request :path-info) "?" (request :query-string))})))
+                               :fullpath (urlencode (str (request :path-info) "?" (request :query-string)))})))
 
 (defmacro map-of
   [& xs]
@@ -55,7 +58,7 @@
 
 (defn image-settings-page [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
-        redirect ((request :query-params) "redirect")
+        redirect (urlencode ((request :query-params) "redirect"))
         attached_tags (db/tag_names_of_image {:image_id image_id})
         caption ((db/get-caption {:image_id image_id}) :caption)
         all_tags (db/all_tags)]
@@ -63,7 +66,7 @@
 
 (defn image-settings-submit [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
-        redirect ((request :query-params) "redirect")
+        redirect (urlencode ((request :query-params) "redirect"))
         {newtag :tag whichform :whichform newcaption :caption} (request :params)]
     (case whichform
       "add_tag"
@@ -93,7 +96,7 @@
 
 (defn confirm_delete_tag [request]
   (let [tag_id (Integer/parseInt ((request :query-params) "tag"))
-        redirect ((request :query-params) "redirect")
+        redirect (urlencode ((request :query-params) "redirect"))
         images (db/images-by-tag {:tag_ref tag_id})
         tag_name (:tag_name (db/tag-info {:tag_id tag_id :cols ["tag_name"]}))]
     (myrender request "delete_tag.html" (map-of tag_id redirect images tag_name))))
@@ -106,14 +109,14 @@
 
 (defn tag_settings_page [request]
   (let [tag_id (Integer/parseInt ((request :query-params) "tag"))
-        redirect ((request :query-params) "redirect")
+        redirect (urlencode ((request :query-params) "redirect"))
         {:keys [tag_name description advanced]} (db/tag-info {:tag_id tag_id :cols ["tag_name", "description", "advanced"]})
         ad_opts ["false" "date" "place"]]
     (myrender request "tag_settings.html" (map-of tag_id redirect tag_name description advanced ad_opts))))
 
 (defn tag_settings_submit [request]
   (let [tag_id (Integer/parseInt ((request :query-params) "tag"))
-        redirect ((request :query-params) "redirect")
+        redirect (urlencode ((request :query-params) "redirect"))
         {:keys [tag_name description advanced]} (request :params)]
     (adminfunc/modify_tag tag_id tag_name description advanced)
     (let [{:keys [tag_name description advanced]} (db/tag-info {:tag_id tag_id :cols ["tag_name", "description", "advanced"]})

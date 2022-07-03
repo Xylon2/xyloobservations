@@ -32,7 +32,7 @@
   (case (env :image-store)
     "s3"
     (let [object_ref (str (.toString (java.util.UUID/randomUUID)) "." extension)]
-      (put-object awscreds
+      (put-object (awscreds)
                   :bucket-name (env :bucket-name)
                   :key object_ref
                   :metadata {:content-type mimetype

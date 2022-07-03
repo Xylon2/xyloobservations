@@ -19,8 +19,9 @@
     (io/copy (io/input-stream x) out)
     (.toByteArray out)))
 
-(def awscreds
+(defn awscreds
   "makes a map of aws creds in the format put-object likes"
+  []
   {:access-key (env :aws-access-key)
    :secret-key (env :aws-secret-key)
    :endpoint (env :aws-region)})

@@ -4,7 +4,7 @@
     <p style="color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
       {{msgtxt}}
     </p>
-    <img src="/image?id={{image_id}}">
+    <img src="{{url}}">
     <h2>Attached tags</h2>
     <form method="POST">
       {% csrf-field %}

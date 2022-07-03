@@ -37,17 +37,27 @@
       (:image_id (db/upload-image! t-conn
                                    (map-of imagedata mimetype caption))))))
 
-(defn resolve_image
-  "this function abstracts over the fact we support multiple image-stores. 
-   we output a sequence of maps, each containing a URL and a caption"
+(defn resolve_images
+  "we output a sequence of maps, each containing a URL and a caption"
   [images]
   (case (env :image-store)
     "s3"
     (let [url-prefix (env :url-prefix)]
       (for [x images]
-        {:caption (x :caption)
+        {:image_id (x :image_id)
+         :caption (x :caption)
          :url (str url-prefix (x :object_ref))}))
     "postgres"
     (for [x images]
-      {:caption (x :caption)
+      {:image_id (x :image_id)
+       :caption (x :caption)
        :url (str "/image?id=" (x :image_id))})))
+
+(defn resolve_image
+  "we output the url an image can be accessed at"
+  [image_id object_ref]
+  (case (env :image-store)
+    "s3"
+    (str (env :url-prefix) object_ref)
+    "postgres"
+    (str "/image?id=" image_id)))

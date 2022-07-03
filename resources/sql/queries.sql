@@ -93,9 +93,9 @@ delete from imagetag
 where image_ref = :image_id
 and tag_ref = :tag;
 
--- :name get-caption :? :1
--- :doc get the caption for an image
-select caption from image
+-- :name caption-and-object :? :1
+-- :doc get the caption and object_ref for an image
+select caption, object_ref from image
 where image_id = :image_id;
 
 -- :name update-caption! :! :n

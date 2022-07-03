@@ -5,7 +5,8 @@
    [xyloobservations.adminfunctions :as adminfunc]
    [ring.util.response]
    [ring.util.http-response :as response]
-   [xyloobservations.db.core :as db]))
+   [xyloobservations.db.core :as db]
+   [xyloobservations.imagestorefuncs :as imgstore]))
 
 (defn urlencode [foo]
   (java.net.URLEncoder/encode foo "UTF-8"))
@@ -60,9 +61,10 @@
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
         redirect (urlencode ((request :query-params) "redirect"))
         attached_tags (db/tag_names_of_image {:image_id image_id})
-        caption ((db/get-caption {:image_id image_id}) :caption)
+        {:keys [caption object_ref]} (db/caption-and-object {:image_id image_id})
+        url (imgstore/resolve_image image_id object_ref)
         all_tags (db/all_tags)]
-    (myrender request "image_settings.html" (map-of image_id attached_tags all_tags caption redirect))))
+    (myrender request "image_settings.html" (map-of url image_id attached_tags all_tags caption redirect))))
 
 (defn image-settings-submit [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
@@ -76,9 +78,10 @@
       "edit_caption"
         (adminfunc/update-caption! newcaption, image_id))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
-          caption ((db/get-caption {:image_id image_id}) :caption)
+          {:keys [caption object_ref]} (db/caption-and-object {:image_id image_id})
+          url (imgstore/resolve_image image_id object_ref)
           all_tags (db/all_tags)]
-      (myrender request "image_settings.html" (map-of image_id attached_tags all_tags caption redirect)))))
+      (myrender request "image_settings.html" (map-of url image_id attached_tags all_tags caption redirect)))))
 
 (defn orphan_images [request]
   (myrender request "orphan_images.html" {:orphans (db/orphan-images)}))

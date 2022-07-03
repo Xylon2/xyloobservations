@@ -29,7 +29,6 @@
 (defn store-image
   "stores an image using whichever backend is appropriate"
   [extension mimetype tempfile t-conn caption]
-  (spit "/home/joseph/cljdebug.txt" awscreds)
   (case (env :image-store)
     "s3"
     (let [object_ref (str (.toString (java.util.UUID/randomUUID)) "." extension)]

@@ -6,7 +6,7 @@ It's based on [Luminus](https://luminusweb.com/) and I designed it to work with 
 
 ## Running this code
 
-Here I explain how you may run this code on your Linux or Mac workstation for testing.
+Here I explain how you may run this code on your workstation for development.
 
 Install:
 - [Leiningen](https://github.com/technomancy/leiningen)
@@ -21,6 +21,9 @@ Create a PostgreSQL database and user, and create a file `dev-config.edn` with c
  
  ; set your dev database connection URL here
  :database-url "postgresql://localhost/dbname?user=dbuser&password=dbpass"
+
+ ;; s3 or postgres
+ :image-store "postgres"
 }
 ```
 
@@ -38,7 +41,30 @@ For uploading images there is an admin interface which you can access at `/login
  (create-user! "youruser" "yourpass")
 ```
 
-For ideas on hosting it check out [the luminus docs](https://luminusweb.com/docs/deployment.html).
+## Hosting
+
+For general info on hosting Luminus apps check out [the luminus docs](https://luminusweb.com/docs/deployment.html). However I designed this to be hosted on Heroku.
+
+xyloobservations can store it's images either in postgres or an S3 bucket. Postgres is easier for development but s3 is a better long-term solution. If you want to use s3 you will need to set the right variables.
+
+In `dev-config.edn` it will look something like this:
+```
+ :aws-access-key ""
+ :aws-secret-key ""
+ :aws-region "eu-west-2"
+ :bucket-name ""
+ :url-prefix "https://bucketname.s3.eu-west-2.amazonaws.com/"
+```
+
+If configuring with environment variables the settings are upper-case and use under-scores. Setting the variables for Heroku looks something like:
+```
+heroku config:set IMAGE_STORE=s3
+heroku config:set AWS_ACCESS_KEY=
+heroku config:set AWS_SECRET_KEY=
+heroku config:set AWS_REGION=eu-west-2
+heroku config:set BUCKET_NAME=
+heroku config:set URL_PREFIX=https://bucketname.s3.eu-west-2.amazonaws.com/
+```
 
 ## License
 

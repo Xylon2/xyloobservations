@@ -88,8 +88,10 @@
 
 (defn confirm_delete_image [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
+        object_ref ((db/caption-and-object {:image_id image_id}) :object_ref)
+        url (imgstore/resolve_image image_id object_ref)
         redirect ((request :query-params) "redirect")]
-    (myrender request "delete_image.html" (map-of image_id redirect))))
+    (myrender request "delete_image.html" (map-of image_id url redirect))))
 
 (defn delete_image [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))

@@ -35,7 +35,8 @@
       (put-object awscreds
                   :bucket-name (env :bucket-name)
                   :key object_ref
-                  :metadata {:content-type mimetype}
+                  :metadata {:content-type mimetype
+                             :cache-control "public, max-age=31536000, immutable"}
                   :file tempfile)
       (:image_id (db/reference-image! t-conn
                                       (map-of object_ref mimetype caption))))

@@ -3,10 +3,10 @@
    [xyloobservations.layout :as layout]
    [xyloobservations.db.core :as db]
    [xyloobservations.homefunctions :as homefunc]
-   [clojure.java.io :as io]
    [xyloobservations.middleware :as middleware]
    [ring.util.response]
-   [ring.util.http-response :as response]))
+   [ring.util.http-response :as response]
+   [xyloobservations.imagestorefuncs :as imgstore]))
 
 (defn urlencode [foo]
   (java.net.URLEncoder/encode foo "UTF-8"))
@@ -21,15 +21,15 @@
 (defn gallery [template request]
   (let [tags (map #(Integer/parseInt %) (homefunc/always-vector ((request :query-params) "tags")))]
     (if-not (empty? tags)
-      (myrender request template {:images (homefunc/matching-images tags)
+      (myrender request template {:images (imgstore/resolve_image (homefunc/matching-images tags))
                                   :filters (db/names-for-tags {:tags tags})
                                   :alltags (db/all-tags-with-images)})
-      (myrender request template {:images (homefunc/images-with-tags)
+      (myrender request template {:images (imgstore/resolve_image (homefunc/images-with-tags))
                                   :alltags (db/all-tags-with-images)}))))
 
 (defn random [request]
   (let [numimages (Integer/parseInt (homefunc/default-number ((request :query-params) "num")))]
-    (myrender request "random.html" {:images (db/random-images {:numimages numimages})
+    (myrender request "random.html" {:images (imgstore/resolve_image (db/random-images {:numimages numimages}))
                                      :numimages numimages})))
 
 (defn image [request]

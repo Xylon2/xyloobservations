@@ -22,8 +22,8 @@
 
   {% for image in images %}
     <figure class="nomargin">
-      <a href="/image?id={{image.image_id}}">
-        <img src="/image?id={{image.image_id}}" loading="lazy">
+      <a href="{{image.url}}">
+        <img src="{{image.url}}" loading="lazy">
       </a>
       <figcaption>{{image.caption}}</figcaption>
     </figure>

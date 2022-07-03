@@ -115,6 +115,7 @@ and tag_ref = :tag_id;
 -- :doc gets all image ids and captions that have any tag
 select
     image_id,
+    object_ref,
     caption
 from
     imagetag
@@ -125,6 +126,7 @@ inner join image
 -- :doc find images that have all of the provided tags. accepts vector of tags
 select
     image_id,
+    object_ref,
     caption
 from
     image
@@ -137,6 +139,24 @@ where image_id in
     (map #(str "intersect select image_ref from imagetag where tag_ref = " %) (pop taglist))))
 ~*/
 )
+
+-- :name random-images :? :*
+-- :doc return the specified number of random images that have tags
+with distinctimages as (
+    select distinct
+        image_id, object_ref, caption
+    from
+        imagetag
+    inner join image
+        on image_id = image_ref
+)
+select
+    image_id,
+    object_ref,
+    caption
+from
+    distinctimages
+order by random() limit :numimages
 
 -- :name names-for-tags :? :*
 -- :doc given a list of tag ids, return ids and names
@@ -159,22 +179,6 @@ from
 inner join tag
     on tag_id = tag_ref
 order by advanced;
-
--- :name random-images :? :*
--- :doc return the specified number of random images that have tags
-with distinctimages as (
-    select distinct
-        image_id, caption
-    from
-        imagetag
-    inner join image
-        on image_id = image_ref
-)
-select
-    image_id, caption
-from
-    distinctimages
-order by random() limit :numimages
 
 -- :name delete-image! :! :n
 -- :doc delete an image

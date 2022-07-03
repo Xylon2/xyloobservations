@@ -4,20 +4,12 @@
   (:require
    [next.jdbc :as jdbc]
    [xyloobservations.db.core :as db]
-   [clojure.java.io :as io]
    [clojure.string :as str]
-   [xyloobservations.config :refer [env]]))
+   [xyloobservations.imagestorefuncs :as imgstore]))
 
 (defmacro map-of
   [& xs]
   `(hash-map ~@(mapcat (juxt keyword identity) xs)))
-
-(defn slurp-bytes
-  "Slurp the bytes from a slurpable thing"
-  [x]
-  (with-open [out (java.io.ByteArrayOutputStream.)]
-    (io/copy (io/input-stream x) out)
-    (.toByteArray out)))
 
 (defn sanitize_advanced [thing]
   "our checkbox gives us either a null or a string \"true\".
@@ -53,23 +45,10 @@
     (when (> size 1000000)
       (throw (AssertionError. "this picture is too big")))
     (jdbc/with-transaction [t-conn db/*db*]
-      (case (env :image-store)
-        "s3"
-        (let [object_ref (str (.toString (java.util.UUID/randomUUID)) "." extension)]
-          (put-object (env :aws-creds)
-                      :bucket-name (env :bucket-name)
-                      :key object_ref
-                      :metadata {:content-type mimetype}
-                      :file tempfile)
-          (def image_id (:image_id (db/reference-image! t-conn
-                                                        (map-of object_ref mimetype caption)))))
-        "postgres"
-        (let [imagedata (slurp-bytes tempfile)]
-          (def image_id (:image_id (db/upload-image! t-conn
-                                                     (map-of imagedata mimetype caption))))))
-      (when-not (empty? tag_integers)
-        (db/tag-image! t-conn {:taglist tag_integers
-                               :image_id image_id})))))
+      (let [image_id (imgstore/store-image extension mimetype tempfile t-conn caption)]
+        (when-not (empty? tag_integers)
+          (db/tag-image! t-conn {:taglist tag_integers
+                                 :image_id image_id}))))))
 
 (defn tag-image! [tag_id, image_id]
   "assign a tag to an image"

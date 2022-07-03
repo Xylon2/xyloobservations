@@ -19,13 +19,20 @@
     (io/copy (io/input-stream x) out)
     (.toByteArray out)))
 
+(def awscreds
+  "makes a map of aws creds in the format put-object likes"
+  {:access-key (env :aws-access-key)
+   :secret-key (env :aws-secret-key)
+   :endpoint (env :aws-region)})
+
 (defn store-image
   "stores an image using whichever backend is appropriate"
   [extension mimetype tempfile t-conn caption]
+  (spit "/home/joseph/cljdebug.txt" awscreds)
   (case (env :image-store)
     "s3"
     (let [object_ref (str (.toString (java.util.UUID/randomUUID)) "." extension)]
-      (put-object (env :aws-creds)
+      (put-object awscreds
                   :bucket-name (env :bucket-name)
                   :key object_ref
                   :metadata {:content-type mimetype}

@@ -37,7 +37,8 @@
                                                    com.amazonaws/dynamodb-streams-kinesis-adapter]]
                  [com.amazonaws/aws-java-sdk-core "1.11.968"]
                  [com.amazonaws/aws-java-sdk-s3 "1.11.968"]
-                 [com.novemberain/langohr "5.4.0"]]
+                 [com.novemberain/langohr "5.4.0"]
+                 [com.taoensso/nippy "3.1.3"]]
 
   :min-lein-version "2.0.0"
   

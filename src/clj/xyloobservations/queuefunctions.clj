@@ -1,28 +1,58 @@
 (ns xyloobservations.queuefunctions
   (:gen-class)
+  (:use
+   [amazonica.aws.s3])
   (:require [langohr.core      :as rmq]
             [langohr.channel   :as lch]
             [langohr.queue     :as lq]
             [langohr.consumers :as lc]
-            [langohr.basic     :as lb]))
+            [langohr.basic     :as lb]
+            [xyloobservations.config :refer [env]]
+            [taoensso.nippy :as nippy]
+            [clojure.java.io :as io]))
+
+(defmacro map-of
+  [& xs]
+  `(hash-map ~@(mapcat (juxt keyword identity) xs)))
+
+(defn slurp-bytes
+  "Slurp the bytes from a slurpable thing"
+  [x]
+  (with-open [out (java.io.ByteArrayOutputStream.)]
+    (io/copy (io/input-stream x) out)
+    (.toByteArray out)))
 
 (def ^{:const true}
   default-exchange-name "")
 
+(defn awscreds
+  "makes a map of aws creds in the format put-object likes"
+  []
+  {:access-key (env :aws-access-key)
+   :secret-key (env :aws-secret-key)
+   :endpoint (env :aws-region)})
+
 (defn message-handler
-  [ch {:keys [content-type delivery-tag type] :as meta} ^bytes payload]
-  (spit "/home/joseph/cljdebug.txt" (str "starting delay" (format "[consumer] Received a message: %s, delivery tag: %d, content type: %s, type: %s"
-                                                                  (String. payload "UTF-8") delivery-tag content-type type)))
-  (Thread/sleep 30000)
-  (spit "/home/joseph/cljdebug.txt" (str "ending delay" (format "[consumer] Received a message: %s, delivery tag: %d, content type: %s, type: %s"
-                                                                  (String. payload "UTF-8") delivery-tag content-type type))))
+  [ch {:keys [delivery-tag type] :as meta} ^bytes payload]
+  (let [message (nippy/thaw payload)]
+    (spit "/home/joseph/cljdebug.txt" message)
+    (put-object (awscreds)
+                :bucket-name (env :bucket-name)
+                :key (message :object_ref)
+                :metadata {:content-type (message :mimetype)
+                           :cache-control "public, max-age=31536000, immutable"}
+                :input-stream (-> message :imagebytes java.io.ByteArrayInputStream.))))
 
 (def conn  (rmq/connect))
 (def ch    (lch/open conn))
-(def qname "langohr.examples.hello-world")
+(def qname "xyloobservations.imagequeue")
 
 (lq/declare ch qname {:exclusive false :auto-delete true})
 (lc/subscribe ch qname message-handler {:auto-ack true})
 
-(defn add [thing]
-  (lb/publish ch default-exchange-name qname thing {:content-type "text/plain" :type "greetings.hi"}))
+(defn add [tempfile object_ref image_id mimetype]
+  ;; need to pickle
+  (let [imagebytes (slurp-bytes tempfile)]
+    (lb/publish ch default-exchange-name qname
+                (nippy/freeze (map-of imagebytes object_ref image_id mimetype))
+                {:content-type "application/json" :type "new_image"})))

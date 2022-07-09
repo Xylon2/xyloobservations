@@ -20,32 +20,20 @@
     (io/copy (io/input-stream x) out)
     (.toByteArray out)))
 
-(defn awscreds
-  "makes a map of aws creds in the format put-object likes"
-  []
-  {:access-key (env :aws-access-key)
-   :secret-key (env :aws-secret-key)
-   :endpoint (env :aws-region)})
-
 (defn store-image
   "stores an image using whichever backend is appropriate"
   [extension mimetype tempfile t-conn caption]
-  (queue/add "Hello")
   (case (env :image-store)
     "s3"
-    (let [object_ref (str (.toString (java.util.UUID/randomUUID)) "." extension)]
-      (comment (put-object (awscreds)
-                  :bucket-name (env :bucket-name)
-                  :key object_ref
-                  :metadata {:content-type mimetype
-                             :cache-control "public, max-age=31536000, immutable"}
-                  :file tempfile))
-      (:image_id (db/reference-image! t-conn
-                                      (map-of object_ref mimetype caption))))
+    (let [object_ref (str (.toString (java.util.UUID/randomUUID)) "." extension)
+          image_id (:image_id (db/reference-image! t-conn
+                                                   (map-of object_ref mimetype caption)))]
+      (queue/add tempfile object_ref image_id mimetype)
+      image_id)
     "postgres"
     (comment (let [imagedata (slurp-bytes tempfile)]
-      (:image_id (db/upload-image! t-conn
-                                   (map-of imagedata mimetype caption)))))))
+               (:image_id (db/upload-image! t-conn
+                                            (map-of imagedata mimetype caption)))))))
 
 (defn resolve_images
   "we output a sequence of maps, each containing a URL and a caption"

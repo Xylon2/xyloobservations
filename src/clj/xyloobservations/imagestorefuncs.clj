@@ -6,7 +6,8 @@
    [xyloobservations.db.core :as db]
    [clojure.java.io :as io]
    [clojure.string :as str]
-   [xyloobservations.config :refer [env]]))
+   [xyloobservations.config :refer [env]]
+   [xyloobservations.queuefunctions :as queue]))
 
 (defmacro map-of
   [& xs]
@@ -29,21 +30,22 @@
 (defn store-image
   "stores an image using whichever backend is appropriate"
   [extension mimetype tempfile t-conn caption]
+  (queue/add "Hello")
   (case (env :image-store)
     "s3"
     (let [object_ref (str (.toString (java.util.UUID/randomUUID)) "." extension)]
-      (put-object (awscreds)
+      (comment (put-object (awscreds)
                   :bucket-name (env :bucket-name)
                   :key object_ref
                   :metadata {:content-type mimetype
                              :cache-control "public, max-age=31536000, immutable"}
-                  :file tempfile)
+                  :file tempfile))
       (:image_id (db/reference-image! t-conn
                                       (map-of object_ref mimetype caption))))
     "postgres"
-    (let [imagedata (slurp-bytes tempfile)]
+    (comment (let [imagedata (slurp-bytes tempfile)]
       (:image_id (db/upload-image! t-conn
-                                   (map-of imagedata mimetype caption))))))
+                                   (map-of imagedata mimetype caption)))))))
 
 (defn resolve_images
   "we output a sequence of maps, each containing a URL and a caption"

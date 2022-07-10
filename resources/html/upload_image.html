@@ -51,7 +51,6 @@ $(function() {
                 contentType: false,
                 success: function(data, status) {
                   $("#message").text("queued");
-                  $("#uploadsubmit").prop("disabled", false)
                   $('#uploadform').trigger("reset");
                 },
                 error: function (xhr, status, err)

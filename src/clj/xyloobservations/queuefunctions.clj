@@ -9,7 +9,9 @@
             [langohr.basic     :as lb]
             [xyloobservations.config :refer [env]]
             [taoensso.nippy :as nippy]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [mount.core :as mount]
+            [clojure.tools.logging :as log]))
 
 (defmacro map-of
   [& xs]
@@ -35,24 +37,37 @@
 (defn message-handler
   [ch {:keys [delivery-tag type] :as meta} ^bytes payload]
   (let [message (nippy/thaw payload)]
-    (spit "/home/joseph/cljdebug.txt" message)
+    (log/info (format "received image id %s with ref %s"
+                      (message :image_id)
+                      (message :object_ref)))
     (put-object (awscreds)
                 :bucket-name (env :bucket-name)
                 :key (message :object_ref)
                 :metadata {:content-type (message :mimetype)
                            :cache-control "public, max-age=31536000, immutable"}
-                :input-stream (-> message :imagebytes java.io.ByteArrayInputStream.))))
+                :input-stream (-> message :imagebytes java.io.ByteArrayInputStream.))
+    ;; (Thread/sleep 30000)
+    (log/info (format "uploaded image id %s with ref %s"
+                      (message :image_id)
+                      (message :object_ref)))))
 
-(def conn  (rmq/connect))
-(def ch    (lch/open conn))
-(def qname "xyloobservations.imagequeue")
-
-(lq/declare ch qname {:exclusive false :auto-delete true})
-(lc/subscribe ch qname message-handler {:auto-ack true})
+(mount/defstate thequeue
+  :start (let [conn (rmq/connect)
+               ch (lch/open conn)
+               qname "xyloobservations.imagequeue"]
+           (log/info "starting the queue")
+           (lq/declare ch qname {:exclusive false :auto-delete true})
+           (lc/subscribe ch qname message-handler {:auto-ack true})
+           (map-of conn ch qname))
+  :stop (let [{:keys [conn ch qname]} thequeue]
+          (log/info "stopping the queue")
+          (lch/close ch)
+          (rmq/close conn)
+          ))
 
 (defn add [tempfile object_ref image_id mimetype]
   ;; need to pickle
   (let [imagebytes (slurp-bytes tempfile)]
-    (lb/publish ch default-exchange-name qname
+    (lb/publish (thequeue :ch) default-exchange-name (thequeue :qname)
                 (nippy/freeze (map-of imagebytes object_ref image_id mimetype))
                 {:content-type "application/json" :type "new_image"})))

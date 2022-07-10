@@ -6,7 +6,8 @@
    [ring.util.response]
    [ring.util.http-response :as response]
    [xyloobservations.db.core :as db]
-   [xyloobservations.imagestorefuncs :as imgstore]))
+   [xyloobservations.imagestorefuncs :as imgstore]
+   [cheshire.core :refer [generate-string parse-string]]))
 
 (defn urlencode [foo]
   (java.net.URLEncoder/encode foo "UTF-8"))
@@ -43,19 +44,19 @@
   (let [all_tags (db/all_tags)]
     (myrender request "upload_image.html" {:all_tags all_tags})))
 
-(defn upload-image-submit [request]
+(defn upload-image-ajax [request]
   (let [file (request :multipart-params)
         caption (-> request :params :caption)
-        chozen_tags (-> request :params :tags)
-        all_tags (db/all_tags)]
-    (try (do (adminfunc/upload-image! file caption chozen_tags)
-             (myrender request "upload_image.html" {:all_tags all_tags
-                                                    :msgtype "success"
-                                                    :msgtxt "successfully uploaded image"}))
-         (catch AssertionError e
-           (myrender request "upload_image.html" {:all_tags all_tags
-                                                  :msgtype "error"
-                                                  :msgtxt (str "validation error: " (.getMessage e))})))))
+        chozen_tags (-> request :params :tags)]
+    (try
+      (do (adminfunc/upload-image! file caption chozen_tags)
+          (-> (generate-string {:msgtype "success" :msgtxt "queued"})
+              (response/ok)
+              (response/content-type "application/json")))
+      (catch AssertionError e
+        (-> (generate-string {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))})
+            (response/ok)
+            (response/content-type "application/json"))))))
 
 (defn image-settings-page [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
@@ -128,6 +129,9 @@
           ad_opts ["false" "date" "place"]]
       (myrender request "tag_settings.html" (map-of tag_id redirect tag_name description advanced ad_opts)))))
 
+(defn nogetplz [request] (-> (response/ok "GET not accepted here")
+                             (response/content-type "text/html")))
+
 (defn admin-routes []
   [""
    {:middleware [middleware/wrap-csrf
@@ -135,8 +139,9 @@
                  middleware/wrap-auth]}
    ["/tag_manager" {:get tag-manager-page
                 :post tag-manager-submit}]
-   ["/upload_image" {:get upload-image-page
-                     :post upload-image-submit}]
+   ["/upload_image" {:get upload-image-page}]
+   ["/upload_image_ajax" {:get nogetplz
+                          :post upload-image-ajax}]
    ["/image_settings" {:get image-settings-page
                        :post image-settings-submit}]
    ["/orphan_images" {:get orphan_images}]

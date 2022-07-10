@@ -33,6 +33,7 @@
                      caption
                      chozen_tags]
   ;; size is the filesize in bytes
+  (spit "/home/joseph/cljdebug.txt" (str "size: " size))
   (let [extension (last (str/split filename #"\."))
         mimetype ({"jpeg" "image/jpeg"
                    "jpg"  "image/jpeg"

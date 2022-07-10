@@ -43,7 +43,7 @@
                       image_id
                       object_ref))
     (db/update-progress! {:image_id image_id :progress "resizing"})
-    (Thread/sleep 15000)
+    (Thread/sleep 10000)
     (db/update-progress! {:image_id image_id :progress "saving"})
     (put-object (awscreds)
                 :bucket-name (env :bucket-name)
@@ -51,7 +51,7 @@
                 :metadata {:content-type mimetype
                            :cache-control "public, max-age=31536000, immutable"}
                 :input-stream (java.io.ByteArrayInputStream. imagebytes))
-    (Thread/sleep 15000)
+    (Thread/sleep 10000)
     (log/info (format "uploaded image id %s with ref %s"
                       image_id
                       object_ref))

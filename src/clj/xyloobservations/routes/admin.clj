@@ -49,14 +49,21 @@
         caption (-> request :params :caption)
         chozen_tags (-> request :params :tags)]
     (try
-      (do (adminfunc/upload-image! file caption chozen_tags)
-          (-> (generate-string {:msgtype "success" :msgtxt "queued"})
+      (let [image_id (adminfunc/upload-image! file caption chozen_tags)]
+          (-> (generate-string {:msgtype "success" :msgtxt "queued" :image_id image_id})
               (response/ok)
               (response/content-type "application/json")))
       (catch AssertionError e
         (-> (generate-string {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))})
             (response/ok)
             (response/content-type "application/json"))))))
+
+(defn image-progress [request]
+  (let [image_id (Integer/parseInt ((request :query-params) "image_id"))
+        {progress :progress} (db/get-progress {:image_id image_id})]
+    (-> (generate-string {:msgtype "success" :msgtxt progress :image_id image_id})
+        (response/ok)
+        (response/content-type "application/json"))))
 
 (defn image-settings-page [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
@@ -142,6 +149,7 @@
    ["/upload_image" {:get upload-image-page}]
    ["/upload_image_ajax" {:get nogetplz
                           :post upload-image-ajax}]
+   ["/image_progress" {:get image-progress}]
    ["/image_settings" {:get image-settings-page
                        :post image-settings-submit}]
    ["/orphan_images" {:get orphan_images}]

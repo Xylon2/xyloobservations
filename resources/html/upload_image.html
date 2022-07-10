@@ -24,6 +24,23 @@
 {% block page-scripts %}
 <script type="text/javascript" src="/js/jquery-3.6.0.js"></script>
 <script>
+function doPoll(image_id){
+    $.get('/image_progress?image_id='.concat(image_id), function(data) {
+      switch (data["msgtxt"]) {
+        case "complete":
+          $("#message").css("color", "green");
+          $("#message").text(data["msgtxt"]);
+          break;
+        case null:
+          setTimeout(doPoll, 1000, image_id);
+          break;
+        default:
+          $("#message").text(data["msgtxt"]);
+          setTimeout(doPoll, 1000, image_id);
+      }
+    });
+}
+
 $(function() {
     //hang on event of form with id=myform
     $("#uploadform").submit(function(e) {
@@ -50,8 +67,11 @@ $(function() {
                 processData: false,
                 contentType: false,
                 success: function(data, status) {
-                  $("#message").text("queued");
+                  $("#message").text(data["msgtxt"]);
                   $('#uploadform').trigger("reset");
+
+                  var image_id = data["image_id"];
+                  doPoll(image_id);
                 },
                 error: function (xhr, status, err)
                 {   

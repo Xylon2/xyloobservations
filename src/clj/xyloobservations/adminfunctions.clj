@@ -33,7 +33,6 @@
                      caption
                      chozen_tags]
   ;; size is the filesize in bytes
-  (spit "/home/joseph/cljdebug.txt" (str "size: " size))
   (let [extension (last (str/split filename #"\."))
         mimetype ({"jpeg" "image/jpeg"
                    "jpg"  "image/jpeg"
@@ -49,7 +48,8 @@
       (let [image_id (imgstore/store-image extension mimetype tempfile t-conn caption)]
         (when-not (empty? tag_integers)
           (db/tag-image! t-conn {:taglist tag_integers
-                                 :image_id image_id}))))))
+                                 :image_id image_id}))
+        image_id))))
 
 (defn tag-image! [tag_id, image_id]
   "assign a tag to an image"

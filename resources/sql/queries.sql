@@ -195,3 +195,8 @@ where tag_id = :tag_id;
 update image
 set progress = :progress
 where image_id = :image_id;
+
+-- :name get-progress :? :1
+-- :doc get the processing progress for an image
+select progress from image
+where image_id = :image_id;

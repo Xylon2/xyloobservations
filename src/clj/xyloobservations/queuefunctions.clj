@@ -11,7 +11,8 @@
             [taoensso.nippy :as nippy]
             [clojure.java.io :as io]
             [mount.core :as mount]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [xyloobservations.db.core :as db]))
 
 (defmacro map-of
   [& xs]
@@ -35,21 +36,26 @@
    :endpoint (env :aws-region)})
 
 (defn message-handler
-  [ch {:keys [delivery-tag type] :as meta} ^bytes payload]
-  (let [message (nippy/thaw payload)]
+  [ch meta ^bytes payload]
+  (let [message (nippy/thaw payload)
+        {:keys [image_id object_ref mimetype imagebytes]} message]
     (log/info (format "received image id %s with ref %s"
-                      (message :image_id)
-                      (message :object_ref)))
+                      image_id
+                      object_ref))
+    (db/update-progress! {:image_id image_id :progress "resizing"})
+    (Thread/sleep 15000)
+    (db/update-progress! {:image_id image_id :progress "saving"})
     (put-object (awscreds)
                 :bucket-name (env :bucket-name)
-                :key (message :object_ref)
-                :metadata {:content-type (message :mimetype)
+                :key object_ref
+                :metadata {:content-type mimetype
                            :cache-control "public, max-age=31536000, immutable"}
-                :input-stream (-> message :imagebytes java.io.ByteArrayInputStream.))
-    ;; (Thread/sleep 30000)
+                :input-stream (java.io.ByteArrayInputStream. imagebytes))
+    (Thread/sleep 15000)
     (log/info (format "uploaded image id %s with ref %s"
-                      (message :image_id)
-                      (message :object_ref)))))
+                      image_id
+                      object_ref))
+    (db/update-progress! {:image_id image_id :progress "complete"})))
 
 (mount/defstate thequeue
   :start (let [conn (rmq/connect)

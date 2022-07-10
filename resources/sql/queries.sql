@@ -189,3 +189,9 @@ where image_id = :image_id;
 -- :doc delete a tag
 delete from tag
 where tag_id = :tag_id;
+
+-- :name update-progress! :! :n
+-- :doc updates the progress on an image
+update image
+set progress = :progress
+where image_id = :image_id;

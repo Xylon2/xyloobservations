@@ -30,6 +30,7 @@ function doPoll(image_id){
         case "complete":
           $("#message").css("color", "green");
           $("#message").text(data["msgtxt"]);
+          $("#uploadsubmit").prop("disabled", false);
           break;
         case null:
           setTimeout(doPoll, 1000, image_id);

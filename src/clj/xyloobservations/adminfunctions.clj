@@ -34,7 +34,7 @@
         tag_integers (map #(Integer/parseInt %) chozen_tags)]
     (when (not mimetype)
       (throw (AssertionError. "cannot detect file-type based on extension")))
-    (when (> size 1000000)
+    (when (> size 20000000)
       (throw (AssertionError. "this picture is too big")))
     (jdbc/with-transaction [t-conn db/*db*]
       (let [image_id (imgstore/store-image extension mimetype tempfile t-conn caption)]

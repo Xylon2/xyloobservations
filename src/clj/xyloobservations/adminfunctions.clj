@@ -11,14 +11,6 @@
   [& xs]
   `(hash-map ~@(mapcat (juxt keyword identity) xs)))
 
-(defn sanitize_advanced [thing]
-  "our checkbox gives us either a null or a string \"true\".
-   we need to convert that into true/false"
-  (if (= "true" thing)
-    true
-    false)
-  )
-
 (defn add-tag! [tagname description advanced]
   (when (some empty? [tagname description])
     (throw (AssertionError. "empty values are not allowed")))

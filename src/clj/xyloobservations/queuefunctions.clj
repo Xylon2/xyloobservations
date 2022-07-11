@@ -35,6 +35,8 @@
    :secret-key (env :aws-secret-key)
    :endpoint (env :aws-region)})
 
+(def amqp-url (get (System/getenv) "CLOUDAMQP_URL" "amqp://guest:guest@localhost:5672"))
+
 (defn message-handler
   [ch meta ^bytes payload]
   (let [message (nippy/thaw payload)
@@ -58,7 +60,7 @@
     (db/update-progress! {:image_id image_id :progress "complete"})))
 
 (mount/defstate thequeue
-  :start (let [conn (rmq/connect)
+  :start (let [conn (rmq/connect {:uri amqp-url})
                ch (lch/open conn)
                qname "xyloobservations.imagequeue"]
            (log/info "starting the queue")

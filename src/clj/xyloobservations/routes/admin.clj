@@ -50,7 +50,7 @@
         chozen_tags (-> request :params :tags)]
     (try
       (let [image_id (adminfunc/upload-image! file caption chozen_tags)]
-          (-> (generate-string {:msgtype "success" :msgtxt "queued" :image_id image_id})
+          (-> (generate-string {:msgtype "info" :msgtxt "...queued........." :image_id image_id})
               (response/ok)
               (response/content-type "application/json")))
       (catch AssertionError e
@@ -60,8 +60,12 @@
 
 (defn image-progress [request]
   (let [image_id (Integer/parseInt ((request :query-params) "image_id"))
-        {progress :progress} (db/get-progress {:image_id image_id})]
-    (-> (generate-string {:msgtype "success" :msgtxt progress :image_id image_id})
+        {progress :progress} (db/get-progress {:image_id image_id})
+        progress_styled ({"resizing" ".....resizing.....",
+                          "saving"   ".........saving...",
+                          "complete" "..........complete"} progress)
+        msgtype (case progress "complete" "success" "info")]
+    (-> (generate-string {:msgtype msgtype :msgtxt progress_styled :image_id image_id})
         (response/ok)
         (response/content-type "application/json"))))
 

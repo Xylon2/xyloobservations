@@ -1,9 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="content">
-    <p id="message" style="color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
-      {{msgtxt}}
-    </p>
     <form id="uploadform" method="POST" enctype="multipart/form-data" action="/upload_image_ajax">
       {% csrf-field %}
       <fieldset>
@@ -18,7 +15,10 @@
         <input type="submit" value="Upload" id="uploadsubmit">
       </fieldset>
   </form>
-  </div>
+  <p id="message" style="font-family: monospace; color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
+    {{msgtxt}}
+  </p>
+</div>
 {% endblock %}
 
 {% block page-scripts %}
@@ -26,20 +26,31 @@
 <script>
 function doPoll(image_id){
     $.get('/image_progress?image_id='.concat(image_id), function(data) {
-      switch (data["msgtxt"]) {
-        case "complete":
-          $("#message").css("color", "green");
-          $("#message").text(data["msgtxt"]);
-          $("#uploadsubmit").prop("disabled", false);
-          break;
-        case null:
-          setTimeout(doPoll, 1000, image_id);
-          break;
-        default:
-          $("#message").text(data["msgtxt"]);
-          setTimeout(doPoll, 1000, image_id);
+      if (data["msgtype"] === "success") {
+        setMessage(data);
+        $("#uploadsubmit").prop("disabled", false);
+      } else {
+        setMessage(data);
+        setTimeout(doPoll, 1000, image_id);
       }
     });
+}
+
+function setMessage(data)
+{
+  switch (data["msgtype"]) {
+    case "info":
+      $("#message").css("color", "blue");
+      break
+    case "success":
+      $("#message").css("color", "green");
+      break
+    default:
+      $("#message").css("color", "red");
+  }
+  if (data["msgtxt"] !== null) {
+    $("#message").text(data["msgtxt"]);
+  }
 }
 
 $(function() {
@@ -52,7 +63,7 @@ $(function() {
         // disable the form. update the message
         $("#uploadsubmit").prop("disabled", true);
         $("#message").css("color", "blue");
-        $("#message").text("uploading");
+        $("#message").text("uploading.......");
 
         // todo set the color explicitly
 

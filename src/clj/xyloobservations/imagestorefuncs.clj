@@ -22,13 +22,13 @@
 
 (defn store-image
   "stores an image using whichever backend is appropriate"
-  [extension mimetype tempfile t-conn caption]
+  [extension mimetype tempfile t-conn caption size]
   (case (env :image-store)
     "s3"
-    (let [object_ref (str (.toString (java.util.UUID/randomUUID)) "." extension)
+    (let [object_ref (str (.toString (java.util.UUID/randomUUID)))
           image_id (:image_id (db/reference-image! t-conn
                                                    (map-of object_ref mimetype caption)))]
-      (queue/add tempfile object_ref image_id mimetype)
+      (queue/add tempfile object_ref image_id mimetype size)
       image_id)
     "postgres"
     (comment (let [imagedata (slurp-bytes tempfile)]
@@ -44,7 +44,7 @@
       (for [x images]
         {:image_id (x :image_id)
          :caption (x :caption)
-         :url (str url-prefix (x :object_ref))}))
+         :url (str url-prefix (x :object_ref) "_medium")}))
     "postgres"
     (for [x images]
       {:image_id (x :image_id)

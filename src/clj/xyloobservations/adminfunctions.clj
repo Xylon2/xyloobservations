@@ -37,7 +37,7 @@
     (when (> size 20000000)
       (throw (AssertionError. "this picture is too big")))
     (jdbc/with-transaction [t-conn db/*db*]
-      (let [image_id (imgstore/store-image extension mimetype tempfile t-conn caption)]
+      (let [image_id (imgstore/store-image extension mimetype tempfile t-conn caption size)]
         (when-not (empty? tag_integers)
           (db/tag-image! t-conn {:taglist tag_integers
                                  :image_id image_id}))

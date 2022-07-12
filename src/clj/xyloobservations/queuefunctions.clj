@@ -12,7 +12,8 @@
             [clojure.java.io :as io]
             [mount.core :as mount]
             [clojure.tools.logging :as log]
-            [xyloobservations.db.core :as db]))
+            [xyloobservations.db.core :as db]
+            [xyloobservations.resizingfunctions :as resizers]))
 
 (defmacro map-of
   [& xs]
@@ -37,23 +38,33 @@
 
 (def amqp-url (get (System/getenv) "CLOUDAMQP_URL" "amqp://guest:guest@localhost:5672"))
 
+(defn upload-to-s3
+  "takes a vector of files to upload"
+  [object_ref files]
+  (doseq [file files]
+    (let [{:keys [filepath mimetype identifier]} file]
+      (put-object (awscreds)
+                  :bucket-name (env :bucket-name)
+                  :key (str object_ref "_" identifier)
+                  :metadata {:content-type mimetype
+                             :cache-control "public, max-age=31536000, immutable"}
+                  ;; :input-stream (java.io.ByteArrayInputStream. imagebytes)
+                  :file (io/file filepath))))
+  )
+
 (defn message-handler
   [ch meta ^bytes payload]
   (let [message (nippy/thaw payload)
-        {:keys [image_id object_ref mimetype imagebytes]} message]
+        {:keys [image_id object_ref mimetype size imagebytes]} message]
     (log/info (format "received image id %s with ref %s"
                       image_id
                       object_ref))
     (db/update-progress! {:image_id image_id :progress "resizing"})
-    (Thread/sleep 6000)
-    (db/update-progress! {:image_id image_id :progress "saving"})
-    (put-object (awscreds)
-                :bucket-name (env :bucket-name)
-                :key object_ref
-                :metadata {:content-type mimetype
-                           :cache-control "public, max-age=31536000, immutable"}
-                :input-stream (java.io.ByteArrayInputStream. imagebytes))
-    (Thread/sleep 6000)
+
+    (def uploadme (resizers/resize size imagebytes image_id mimetype))
+    (db/update-progress! {:image_id image_id :progress "saving"}) 
+
+    (upload-to-s3 object_ref uploadme)
     (log/info (format "uploaded image id %s with ref %s"
                       image_id
                       object_ref))
@@ -73,9 +84,9 @@
           (rmq/close conn)
           ))
 
-(defn add [tempfile object_ref image_id mimetype]
+(defn add [tempfile object_ref image_id mimetype size]
   ;; need to pickle
   (let [imagebytes (slurp-bytes tempfile)]
     (lb/publish (thequeue :ch) default-exchange-name (thequeue :qname)
-                (nippy/freeze (map-of imagebytes object_ref image_id mimetype))
+                (nippy/freeze (map-of imagebytes object_ref image_id mimetype size))
                 {:content-type "application/json" :type "new_image"})))

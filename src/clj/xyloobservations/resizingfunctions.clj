@@ -36,8 +36,8 @@
   "generates the compressed versions of the uploaded image"
   [size imagebytes image_id mimetype]
   (let [origpath (str "/tmp/imageresizing/" image_id "_orig")  ;; no extension as IM auto-detects type
-        mediumpath (str "/tmp/imageresizing/" image_id "_medium.avif")
-        smallpath (str "/tmp/imageresizing/" image_id "_small.avif")]
+        mediumpath (str "/tmp/imageresizing/" image_id "_medium.webp")
+        smallpath (str "/tmp/imageresizing/" image_id "_small.webp")]
     (io/make-parents origpath)
 
     ;; save original image
@@ -55,5 +55,5 @@
       (copy-file origpath smallpath))
 
     [{:filepath origpath :mimetype mimetype :identifier "original"}
-     {:filepath mediumpath :mimetype "image/avif" :identifier "medium"}
-     {:filepath smallpath :mimetype "image/avif" :identifier "small"}]))
+     {:filepath mediumpath :mimetype "image/webp" :identifier "medium"}
+     {:filepath smallpath :mimetype "image/webp" :identifier "small"}]))

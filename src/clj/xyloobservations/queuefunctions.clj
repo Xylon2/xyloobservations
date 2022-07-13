@@ -42,15 +42,14 @@
   "takes a vector of maps of files to upload"
   [object_ref files]
   (doseq [file files]
-    (let [{:keys [filepath width mimetype identifier]} file]
+    (let [{:keys [filepath mimetype identifier width height]} file]
       (put-object (awscreds)
                   :bucket-name (env :bucket-name)
                   :key (str object_ref "_" identifier)
                   :metadata {:content-type mimetype
                              :cache-control "public, max-age=31536000, immutable"}
                   ;; :input-stream (java.io.ByteArrayInputStream. imagebytes)
-                  :file (io/file filepath))))
-  )
+                  :file (io/file filepath)))))
 
 (defn message-handler
   [ch meta ^bytes payload]
@@ -81,8 +80,7 @@
   :stop (let [{:keys [conn ch qname]} thequeue]
           (log/info "stopping the queue")
           (lch/close ch)
-          (rmq/close conn)
-          ))
+          (rmq/close conn)))
 
 (defn add [tempfile object_ref image_id mimetype size]
   ;; need to pickle

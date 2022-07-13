@@ -200,3 +200,9 @@ where image_id = :image_id;
 -- :doc get the processing progress for an image
 select progress from image
 where image_id = :image_id;
+
+-- :name save-meta! :! :n
+-- :doc adds metadata to an image
+update image
+set imagemeta = :imagemeta::jsonb
+where image_id = :image_id;

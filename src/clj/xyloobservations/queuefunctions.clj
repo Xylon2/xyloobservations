@@ -13,7 +13,8 @@
             [mount.core :as mount]
             [clojure.tools.logging :as log]
             [xyloobservations.db.core :as db]
-            [xyloobservations.resizingfunctions :as resizers]))
+            [xyloobservations.resizingfunctions :as resizers]
+            [cheshire.core :refer :all]))
 
 (defmacro map-of
   [& xs]
@@ -64,6 +65,8 @@
     (db/update-progress! {:image_id image_id :progress "saving"}) 
 
     (upload-to-s3 object_ref uploadme)
+    (db/save-meta! {:imagemeta (generate-string (map #(dissoc % :filepath) uploadme))
+                    :image_id image_id})
     (log/info (format "uploaded image id %s with ref %s"
                       image_id
                       object_ref))

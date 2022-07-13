@@ -116,7 +116,8 @@ and tag_ref = :tag_id;
 select
     image_id,
     object_ref,
-    caption
+    caption,
+    imagemeta
 from
     imagetag
 inner join image
@@ -127,7 +128,8 @@ inner join image
 select
     image_id,
     object_ref,
-    caption
+    caption,
+    imagemeta
 from
     image
 where image_id in
@@ -144,7 +146,7 @@ where image_id in
 -- :doc return the specified number of random images that have tags
 with distinctimages as (
     select distinct
-        image_id, object_ref, caption
+        image_id, object_ref, caption, imagemeta
     from
         imagetag
     inner join image

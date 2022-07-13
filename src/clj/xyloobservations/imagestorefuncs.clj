@@ -7,7 +7,8 @@
    [clojure.java.io :as io]
    [clojure.string :as str]
    [xyloobservations.config :refer [env]]
-   [xyloobservations.queuefunctions :as queue]))
+   [xyloobservations.queuefunctions :as queue]
+   [cheshire.core :refer :all]))
 
 (defmacro map-of
   [& xs]
@@ -36,7 +37,8 @@
                                             (map-of imagedata mimetype caption)))))))
 
 (defn resolve_images
-  "we output a sequence of maps, each containing a URL and a caption"
+  "we output a sequence of maps, each containing a URL, a caption, and a map of sizes
+   the images argument gives us image_id, object_ref, caption and imagemeta"
   [images]
   (case (env :image-store)
     "s3"
@@ -44,7 +46,8 @@
       (for [x images]
         {:image_id (x :image_id)
          :caption (x :caption)
-         :url (str url-prefix (x :object_ref) "_medium")}))
+         :url (str url-prefix (x :object_ref) "_medium")
+         :sizes (parse-string (x :imagemeta))}))
     "postgres"
     (for [x images]
       {:image_id (x :image_id)

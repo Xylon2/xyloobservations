@@ -46,8 +46,8 @@
       (for [x images]
         {:image_id (x :image_id)
          :caption (x :caption)
-         :url (str url-prefix (x :object_ref) "_medium")
-         :sizes (parse-string (x :imagemeta))}))
+         :urlprefix (str url-prefix (x :object_ref))
+         :sizes (x :imagemeta)}))
     "postgres"
     (for [x images]
       {:image_id (x :image_id)

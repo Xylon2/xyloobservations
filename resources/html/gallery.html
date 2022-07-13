@@ -16,8 +16,16 @@
   {% endif %}
   {% for image in images %}
     <figure class="nomargin">
-      <a href="{{image.url}}">
-        <img src="{{image.url}}" loading="lazy">
+      <a href="{{image.urlprefix}}_original">
+        <img
+          srcset="{{image.urlprefix}}_tiny {{image.sizes.tiny.width}}w,
+                  {{image.urlprefix}}_small {{image.sizes.small.width}}w,
+                  {{image.urlprefix}}_medium {{image.sizes.medium.width}}w"
+          sizes="(max-width: 640px) {{image.sizes.tiny.width}}px,
+                 (max-width: 960px) {{image.sizes.small.width}}px,
+                 {{image.sizes.medium.width}}px"
+          src="{{image.urlprefix}}_tiny"
+          loading="lazy">
       </a>
       <figcaption>{{image.caption}}</figcaption>
     </figure>

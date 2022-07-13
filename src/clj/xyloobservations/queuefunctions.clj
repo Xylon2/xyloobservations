@@ -52,6 +52,9 @@
                   ;; :input-stream (java.io.ByteArrayInputStream. imagebytes)
                   :file (io/file filepath)))))
 
+(defn extract-key [buildme innermap]
+  (conj buildme {(keyword (innermap :identifier)) (dissoc innermap :filepath :identifier)}))
+
 (defn message-handler
   [ch meta ^bytes payload]
   (let [message (nippy/thaw payload)
@@ -65,7 +68,7 @@
     (db/update-progress! {:image_id image_id :progress "saving"}) 
 
     (upload-to-s3 object_ref uploadme)
-    (db/save-meta! {:imagemeta (generate-string (map #(dissoc % :filepath) uploadme))
+    (db/save-meta! {:imagemeta (generate-string (reduce extract-key {} uploadme))
                     :image_id image_id})
     (log/info (format "uploaded image id %s with ref %s"
                       image_id

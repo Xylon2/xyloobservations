@@ -3,57 +3,74 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]))
 
-(defmacro map-of
-  [& xs]
-  `(hash-map ~@(mapcat (juxt keyword identity) xs)))
-
 (defn copy-file [source-path dest-path]
   (io/copy (io/file source-path) (io/file dest-path)))
 
+(defn get_dimensions
+"returns a map of width and height"
+[imgpath]
+(let [wh (->> (sh "identify" "-ping" "-format" "%w\n%h\n" imgpath)
+           :out
+           (str/split-lines)
+           (map #(Integer/parseInt %)))]
+  {:width (first wh) :height (second wh)}))
+
 (defn big_dimension
-  "returns the biggest dimension"
-  [imgpath]
-  (->> (sh "identify" "-ping" "-format" "%w\n%h\n" imgpath)
-       :out
-       (str/split-lines)
-       (map #(Integer/parseInt %))
+  "given a map of width and height, returns the biggest dimension"
+  [{:keys [width height]}]
+  (-> [width height]
        sort
        last))
 
 (defn compresslike
   "resize to resolution"
   [origpath newpath resolution]
-  (sh "convert" origpath "-quality" "60" "-resize" (str resolution "x" resolution ">") newpath))
+  (sh "convert" origpath "-quality" "60" "-resize" (str resolution "x" resolution ">") "-define" "webp:method=6" newpath))
 
-(defn compress_images
-  [origpath newpath resolution]
-  (let [bigdim (big_dimension origpath)]
-    (if (> bigdim (* resolution 1.2))
-      (compresslike origpath newpath resolution)
-      (compresslike origpath newpath bigdim))))
+(defn make_image_version
+  "Given a path, a max-size and a resolution, makes the image or copy it.
+   Return a map of filepath, width, mimetype and identifier."
+  [{:keys [origpath size origmimetype newpath maxsize resolution identifier]}]
+  (let [origdimensions (get_dimensions origpath)]
+    (if (> size maxsize)
+      (let [bigdim (big_dimension origdimensions)]
+        ;; don't bother resizing unless the original resolution is substantially
+        ;; bigger than the target resolution
+        (if (> bigdim (* resolution 1.2))
+          (do (compresslike origpath newpath resolution)
+              (def width ((get_dimensions newpath) :width)))
+          (do (compresslike origpath newpath (origdimensions :width))
+              (def width (origdimensions :width))))
+        (def newmimetype "image/webp"))
+      (do
+        (copy-file origpath newpath)
+        (def width (origdimensions :width))
+        (def newmimetype origmimetype)))
+    {:filepath newpath :width width :mimetype newmimetype :identifier identifier})
+  )
 
 (defn resize
   "generates the compressed versions of the uploaded image"
   [size imagebytes image_id mimetype]
-  (let [origpath (str "/tmp/imageresizing/" image_id "_orig")  ;; no extension as IM auto-detects type
-        mediumpath (str "/tmp/imageresizing/" image_id "_medium.webp")
-        smallpath (str "/tmp/imageresizing/" image_id "_small.webp")]
+  (let [tempdir "/tmp/imageresizing/"
+        origpath   (str tempdir image_id "_orig")  ;; no extension as IM auto-detects type
+        mediumpath (str tempdir image_id "_medium.webp")
+        smallpath  (str tempdir image_id "_small.webp")
+        tinypath   (str tempdir image_id "_tiny.webp")]
     (io/make-parents origpath)
 
     ;; save original image
     (with-open [w (io/output-stream origpath)]
       (.write w imagebytes))
 
-    ;; make medium image if it's bigger than 1MB
-    (if (> size 1000000)
-      (compress_images origpath mediumpath 2560)
-      (copy-file origpath mediumpath))
-
-    ;; make small image if it's bigger than 300KB
-    (if (> size 300000)
-      (compress_images origpath smallpath 1920)
-      (copy-file origpath smallpath))
-
-    [{:filepath origpath :mimetype mimetype :identifier "original"}
-     {:filepath mediumpath :mimetype "image/webp" :identifier "medium"}
-     {:filepath smallpath :mimetype "image/webp" :identifier "small"}]))
+    ;; the output of this function is a map of filepath, width, mimetype and identifier
+    (conj (map #(make_image_version (conj {:origpath origpath
+                                           :size size
+                                           :origmimetype mimetype} %))
+               [{:newpath mediumpath :maxsize 1000000 :resolution 2560 :identifier "medium"}
+                {:newpath smallpath  :maxsize 500000  :resolution 1920 :identifier "small"}
+                {:newpath tinypath   :maxsize 250000  :resolution 1280 :identifier "tiny"}])
+          {:filepath origpath
+           :width ((get_dimensions origpath) :width)
+           :mimetype mimetype
+           :identifier "original"})))

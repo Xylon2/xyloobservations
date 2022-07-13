@@ -39,10 +39,10 @@
 (def amqp-url (get (System/getenv) "CLOUDAMQP_URL" "amqp://guest:guest@localhost:5672"))
 
 (defn upload-to-s3
-  "takes a vector of files to upload"
+  "takes a vector of maps of files to upload"
   [object_ref files]
   (doseq [file files]
-    (let [{:keys [filepath mimetype identifier]} file]
+    (let [{:keys [filepath width mimetype identifier]} file]
       (put-object (awscreds)
                   :bucket-name (env :bucket-name)
                   :key (str object_ref "_" identifier)

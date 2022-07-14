@@ -15,7 +15,7 @@
   `(hash-map ~@(mapcat (juxt keyword identity) xs)))
 
 (defn store-image
-  "stores an image using whichever backend is appropriate"
+  "adds an image's basic info to the database and puts it in the queue"
   [extension mimetype tempfile t-conn caption size]
   (let [object_ref (str (.toString (java.util.UUID/randomUUID)))
         image_id (:image_id (db/reference-image! t-conn

@@ -48,23 +48,27 @@
   (let [file (request :multipart-params)
         caption (-> request :params :caption)
         chozen_tags (-> request :params :tags)]
-    (try
-      (let [image_id (adminfunc/upload-image! file caption chozen_tags)]
-          (-> (generate-string {:msgtype "info" :msgtxt "...queued........." :image_id image_id})
-              (response/ok)
-              (response/content-type "application/json")))
-      (catch AssertionError e
-        (-> (generate-string {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))})
-            (response/ok)
-            (response/content-type "application/json"))))))
+    (->
+     (try (let [image_id (adminfunc/upload-image! file caption chozen_tags)]
+            (generate-string {:msgtype "info" :msgtxt "...queued........." :image_id image_id}))
+          (catch AssertionError e
+            (generate-string {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))}))
+          (catch com.rabbitmq.client.AlreadyClosedException e
+            (generate-string {:msgtype "error" :msgtxt (str "failed adding image to queue: " (.getMessage e))})))
+     (response/ok)
+     (response/content-type "application/json"))))
 
 (defn image-progress [request]
   (let [image_id (Integer/parseInt ((request :query-params) "image_id"))
         {progress :progress} (db/get-progress {:image_id image_id})
-        progress_styled ({"resizing" ".....resizing.....",
-                          "saving"   ".........saving...",
-                          "complete" "..........complete"} progress)
-        msgtype (case progress "complete" "success" "info")]
+        progress_styled (or ({"resizing" ".....resizing.....",
+                              "saving"   ".........saving...",
+                              "complete" "..........complete"} progress) progress)
+        msgtype (case progress
+                  "complete" "success"
+                  "failed resizing" "error"
+                  "failed saving" "error"
+                  "info")]
     (-> (generate-string {:msgtype msgtype :msgtxt progress_styled :image_id image_id})
         (response/ok)
         (response/content-type "application/json"))))

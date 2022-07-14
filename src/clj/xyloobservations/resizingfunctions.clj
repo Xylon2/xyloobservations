@@ -10,11 +10,14 @@
 (defn get_dimensions
   "returns a map of width and height"
   [imgpath]
-  (let [wh (->> (sh "identify" "-ping" "-format" "%w\n%h\n" imgpath)
-                :out
-                (str/split-lines)
-                (map #(Integer/parseInt %)))]
-    {:width (first wh) :height (second wh)}))
+  (let [{:keys [exit out err]} (sh "identify" "-ping" "-format" "%w\n%h\n" imgpath)]
+    (if (= exit 0)
+      (let [wh (->> out
+                    (str/split-lines)
+                    (map #(Integer/parseInt %)))]
+        {:width (first wh) :height (second wh)})
+      (throw (ex-info err
+                      {:type :shell-exception, :cause :imagemagic})))))
 
 (defn big_dimension
   "given a map of width and height, returns the biggest dimension"
@@ -26,7 +29,11 @@
 (defn compresslike
   "resize to resolution"
   [origpath newpath resolution]
-  (sh "convert" origpath "-quality" "60" "-resize" (str resolution "x" resolution ">") "-define" "webp:method=6" newpath))
+  (let [{:keys [exit out err]}
+        (sh "convert" origpath "-quality" "60" "-resize" (str resolution "x" resolution ">") "-define" "webp:method=6" newpath)]
+    (when (not= exit 0)
+      (throw (ex-info err
+                      {:type :shell-exception, :cause :imagemagic})))))
 
 (defn make_image_version
   "Given a path, a max-size and a resolution, makes the image or copy it.

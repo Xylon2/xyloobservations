@@ -26,7 +26,8 @@
 <script>
 function doPoll(image_id){
     $.get('/image_progress?image_id='.concat(image_id), function(data) {
-      if (data["msgtype"] === "success") {
+      // if it's a success or error our job is done. else keep polling
+      if (["success","error"].includes(data["msgtype"])) {
         setMessage(data);
         $("#uploadsubmit").prop("disabled", false);
       } else {
@@ -65,8 +66,6 @@ $(function() {
         $("#message").css("color", "blue");
         $("#message").text("uploading.......");
 
-        // todo set the color explicitly
-
         // get the action-url of the form
         var actionurl = e.currentTarget.action;
 
@@ -79,11 +78,15 @@ $(function() {
                 processData: false,
                 contentType: false,
                 success: function(data, status) {
-                  $("#message").text(data["msgtxt"]);
-                  $('#uploadform').trigger("reset");
+                  setMessage(data);
 
-                  var image_id = data["image_id"];
-                  doPoll(image_id);
+                  // the AJAX query was a success but is the response message a success?
+                  if (data["msgtype"] !== "error") {
+                    $('#uploadform').trigger("reset");
+
+                    var image_id = data["image_id"];
+                    doPoll(image_id);
+                  }
                 },
                 error: function (xhr, status, err)
                 {   

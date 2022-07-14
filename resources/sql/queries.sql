@@ -45,7 +45,8 @@ from
     imagetag
 right join image
     on image_ref = image_id
-where imagetag_id is null;
+where imagetag_id is null
+and progress = 'complete';
 
 -- :name images-by-tag :? :*
 -- :doc get ids of all the images which have a certain tag
@@ -129,6 +130,7 @@ from
     imagetag
 inner join image
     on image_ref = image_id
+where progress = 'complete';
 
 -- :name images-multi-tags :? :*
 -- :doc find images that have all of the provided tags. accepts vector of tags
@@ -148,6 +150,7 @@ where image_id in
     (map #(str "intersect select image_ref from imagetag where tag_ref = " %) (pop taglist))))
 ~*/
 )
+and progress = 'complete';
 
 -- :name random-images :? :*
 -- :doc return the specified number of random images that have tags
@@ -156,7 +159,8 @@ with distinctimages as (
         image_id,
         object_ref,
         caption,
-        imagemeta
+        imagemeta,
+        progress
     from
         imagetag
     inner join image
@@ -169,6 +173,7 @@ select
     imagemeta
 from
     distinctimages
+where progress = 'complete'
 order by random() limit :numimages
 
 -- :name names-for-tags :? :*

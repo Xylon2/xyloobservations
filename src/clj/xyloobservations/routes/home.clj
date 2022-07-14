@@ -32,13 +32,6 @@
     (myrender request "random.html" {:images (imgstore/resolve_images (db/random-images {:numimages numimages}))
                                      :numimages numimages})))
 
-(defn image [request]
-  (let [image_id (Integer/parseInt ((request :query-params) "id"))
-        {:keys [imagedata mimetype]} (homefunc/fetch-image image_id)]
-    (->  (response/ok imagedata)
-         (response/content-type mimetype)
-         (response/header "Cache-Control" "public, max-age=31536000, immutable"))))
-
 (defn about [request]
   (myrender request "about.html" {}))
 
@@ -48,7 +41,6 @@
                  middleware/wrap-formats]}
    ["/" {:get #(gallery "gallery.html" %)}]
    ["/advanced" {:get #(gallery "advanced.html" %)}]
-   ["/image" {:get image}]
    ["/random" {:get random}]
    ["/about" {:get about}]])
 

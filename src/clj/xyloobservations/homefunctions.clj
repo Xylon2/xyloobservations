@@ -4,12 +4,6 @@
    [xyloobservations.db.core :as db]
    [clojure.java.io :as io]))
 
-(defn fetch-image
-  "just run the fetch-image query and convert the imagedata into an io/input-stream"
-  [image_id]
-  (let [{:keys [imagedata mimetype]} (db/fetch-image {:image_id image_id})]
-    {:mimetype mimetype :imagedata (io/input-stream imagedata)}))
-
 (defn images-with-tags []
   "any images that have tags attached.
    output is image_id, object_ref, caption and imagemeta"

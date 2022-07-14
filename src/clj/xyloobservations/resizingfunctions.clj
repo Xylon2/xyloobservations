@@ -1,7 +1,8 @@
 (ns xyloobservations.resizingfunctions
   (:use [clojure.java.shell :only [sh]])
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [xyloobservations.mimetypes :as mimetypes]))
 
 (defn copy-file [source-path dest-path]
   (io/copy (io/file source-path) (io/file dest-path)))
@@ -45,13 +46,16 @@
       (copy-file origpath newpath)
       (def newdimensions origdimensions)
       (def newmimetype origmimetype)))
-  (conj {:filepath newpath :mimetype newmimetype :identifier identifier} newdimensions))
+  (conj {:filepath newpath
+         :mimetype newmimetype
+         :extension (mimetypes/type-to-extension newmimetype)
+         :identifier identifier} newdimensions))
 
 (defn resize
   "generates the compressed versions of the uploaded image"
   [size imagebytes image_id mimetype]
   (let [tempdir "/tmp/imageresizing/"
-        origpath   (str tempdir image_id "_orig")  ;; no extension as IM auto-detects type
+        origpath   (str tempdir image_id "_orig." (mimetypes/type-to-extension mimetype))
         mediumpath (str tempdir image_id "_medium.webp")
         smallpath  (str tempdir image_id "_small.webp")
         tinypath   (str tempdir image_id "_tiny.webp")]
@@ -65,13 +69,17 @@
 
     (let [origdimensions (get_dimensions origpath)]
       ;; the output of this function is a map of filepath, mimetype, identifier, width and height
-      (conj (map #(make_image_version (conj {:origpath origpath
-                                             :origdimensions origdimensions
-                                             :size size
-                                             :origmimetype mimetype} %))
+      (conj (map #(make_image_version (conj
+                                       ;; we add all these extra bits to all the maps below
+                                       {:origpath origpath
+                                        :origdimensions origdimensions
+                                        :size size
+                                        :origmimetype mimetype} %))
                  [{:newpath mediumpath :maxsize 1000000 :resolution 2560 :identifier "medium"}
                   {:newpath smallpath  :maxsize 500000  :resolution 1920 :identifier "small"}
                   {:newpath tinypath   :maxsize 250000  :resolution 1280 :identifier "tiny"}])
+            ;; we add the details for the original image too
             (conj {:filepath origpath
                    :mimetype mimetype
+                   :extension (mimetypes/type-to-extension mimetype)
                    :identifier "original"} origdimensions)))))

@@ -5,7 +5,8 @@
    [next.jdbc :as jdbc]
    [xyloobservations.db.core :as db]
    [clojure.string :as str]
-   [xyloobservations.imagestorefuncs :as imgstore]))
+   [xyloobservations.imagestorefuncs :as imgstore]
+   [xyloobservations.mimetypes :as mimetypes]))
 
 (defmacro map-of
   [& xs]
@@ -26,11 +27,7 @@
                      chozen_tags]
   ;; size is the filesize in bytes
   (let [extension (last (str/split filename #"\."))
-        mimetype ({"jpeg" "image/jpeg"
-                   "jpg"  "image/jpeg"
-                   "avif" "image/avif"
-                   "webp" "image/webp"
-                   "png"  "image/png"} extension)
+        mimetype (mimetypes/extension-to-type extension)
         tag_integers (map #(Integer/parseInt %) chozen_tags)]
     (when (not mimetype)
       (throw (AssertionError. "cannot detect file-type based on extension")))

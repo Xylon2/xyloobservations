@@ -14,52 +14,22 @@
   [& xs]
   `(hash-map ~@(mapcat (juxt keyword identity) xs)))
 
-(defn slurp-bytes
-  "Slurp the bytes from a slurpable thing"
-  [x]
-  (with-open [out (java.io.ByteArrayOutputStream.)]
-    (io/copy (io/input-stream x) out)
-    (.toByteArray out)))
-
 (defn store-image
   "stores an image using whichever backend is appropriate"
   [extension mimetype tempfile t-conn caption size]
-  (case (env :image-store)
-    "s3"
-    (let [object_ref (str (.toString (java.util.UUID/randomUUID)))
-          image_id (:image_id (db/reference-image! t-conn
-                                                   (map-of object_ref mimetype caption)))]
-      (queue/add tempfile object_ref image_id mimetype size)
-      image_id)
-    "postgres"
-    (comment (let [imagedata (slurp-bytes tempfile)]
-               (:image_id (db/upload-image! t-conn
-                                            (map-of imagedata mimetype caption)))))))
+  (let [object_ref (str (.toString (java.util.UUID/randomUUID)))
+        image_id (:image_id (db/reference-image! t-conn
+                                                 (map-of object_ref caption)))]
+    (queue/add tempfile object_ref image_id mimetype size)
+    image_id))
 
 (defn resolve_images
   "We output a sequence of maps, each containing an id, caption, a urlprefix and a map of sizes.
    The images argument gives us image_id, object_ref, caption and imagemeta."
   [images]
-  (case (env :image-store)
-    "s3"
-    (let [url-prefix (env :url-prefix)]
-      (for [x images]
-        {:image_id (x :image_id)
-         :caption (x :caption)
-         :urlprefix (str url-prefix (x :object_ref))
-         :sizes (x :imagemeta)}))
-    "postgres"
+  (let [url-prefix (env :url-prefix)]
     (for [x images]
       {:image_id (x :image_id)
        :caption (x :caption)
-       :url (str "/image?id=" (x :image_id))})))
-
-(defn resolve_image
-  "We output a map of id, caption, a urlprefix and a map of sizes.
-   The image argument gives us image_id, object_ref, caption and imagemeta."
-  [image_id object_ref]
-  (case (env :image-store)
-    "s3"
-    (str (env :url-prefix) object_ref)
-    "postgres"
-    (str "/image?id=" image_id)))
+       :urlprefix (str url-prefix (x :object_ref))
+       :sizes (x :imagemeta)})))

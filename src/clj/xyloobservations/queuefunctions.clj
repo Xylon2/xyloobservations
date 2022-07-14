@@ -14,11 +14,15 @@
             [clojure.tools.logging :as log]
             [xyloobservations.db.core :as db]
             [xyloobservations.resizingfunctions :as resizers]
-            [cheshire.core :refer :all]))
+            [cheshire.core :refer :all]
+            [xyloobservations.mimetypes :as mimetypes]))
 
 (defmacro map-of
   [& xs]
   `(hash-map ~@(mapcat (juxt keyword identity) xs)))
+
+(defn copy-file [source-path dest-path]
+  (io/copy (io/file source-path) (io/file dest-path)))
 
 (defn slurp-bytes
   "Slurp the bytes from a slurpable thing"
@@ -46,11 +50,19 @@
     (let [{:keys [filepath mimetype identifier width height]} file]
       (put-object (awscreds)
                   :bucket-name (env :bucket-name)
-                  :key (str object_ref "_" identifier)
+                  :key (str object_ref "_" identifier "." (mimetypes/type-to-extension mimetype))
                   :metadata {:content-type mimetype
                              :cache-control "public, max-age=31536000, immutable"}
                   ;; :input-stream (java.io.ByteArrayInputStream. imagebytes)
                   :file (io/file filepath)))))
+
+(defn save-to-filesystem
+  "takes a vector of maps of files to save"
+  [object_ref files]
+  (doseq [file files]
+    (let [{:keys [filepath mimetype identifier width height]} file]
+      (copy-file filepath (str (env :img-path) object_ref "_" identifier "." (mimetypes/type-to-extension mimetype)))
+      )))
 
 (defn extract-key [buildme innermap]
   (conj buildme {(keyword (innermap :identifier)) (dissoc innermap :filepath :identifier)}))
@@ -67,7 +79,11 @@
     (def uploadme (resizers/resize size imagebytes image_id mimetype))
     (db/update-progress! {:image_id image_id :progress "saving"}) 
 
-    (upload-to-s3 object_ref uploadme)
+    (case (env :image-store)
+      "s3"
+      (upload-to-s3 object_ref uploadme)
+      "filesystem"
+      (save-to-filesystem object_ref uploadme))
     (db/save-meta! {:imagemeta (generate-string (reduce extract-key {} uploadme))
                     :image_id image_id})
     (log/info (format "uploaded image id %s with ref %s"

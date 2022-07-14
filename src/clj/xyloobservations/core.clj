@@ -70,9 +70,9 @@
     (do
       (log/error "Image store configuration not found, :image-store environment variable must be set before running")
       (System/exit 1))
-    (nil? ({"s3" true "postgres" true} (:image-store env)))
+    (nil? ({"s3" true "filesytem" true} (:image-store env)))
     (do
-      (log/error "Image store configuration invalid, :image-store should be s3 or postgres")
+      (log/error "Image store configuration invalid, :image-store should be s3 or filesystem")
       (System/exit 1))
     (some #{"init"} args)
     (do

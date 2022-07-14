@@ -22,16 +22,10 @@ update tag set
   advanced = :advanced::adstates
 where tag_id = :tag_id
 
--- :name upload-image! :! :1
--- :doc upload the image
-insert into image (imagedata, mimetype, caption)
-values (:imagedata, :mimetype, :caption)
-returning image_id
-
 -- :name reference-image! :! :1
 -- :doc add an image which is in s3
-insert into image (object_ref, mimetype, caption)
-values (:object_ref, :mimetype, :caption)
+insert into image (object_ref, caption)
+values (:object_ref, :caption)
 returning image_id
 
 -- :name orphan-images :? :*
@@ -58,11 +52,6 @@ from
 inner join image
     on image_ref = image_id
 where tag_ref = :tag_ref
-
--- :name fetch-image :? :1
--- :doc fetch image data
-select imagedata, mimetype from image
-where image_id = :image_id;
 
 -- :name tag_names_of_image :? :*
 -- :doc get names and ids of all tags attached to a given image

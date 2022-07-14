@@ -22,8 +22,14 @@ Create a PostgreSQL database and user, and create a file `dev-config.edn` with c
  ; set your dev database connection URL here
  :database-url "postgresql://localhost/dbname?user=dbuser&password=dbpass"
 
- ;; s3 or postgres
- :image-store "postgres"
+ ;; s3 or filesystem
+ :image-store "filesystem"
+
+ ;; the url s3 or your webserver exposes the images
+ :url-prefix "https://example.com/"}
+
+ ;; this should be a writeable directory where your webserver will serve the images
+ :img-path "/var/www/html/images/"
 }
 ```
 
@@ -45,25 +51,26 @@ For uploading images there is an admin interface which you can access at `/login
 
 For general info on hosting Luminus apps check out [the luminus docs](https://luminusweb.com/docs/deployment.html). However I designed this to be hosted on Heroku.
 
-xyloobservations can store it's images either in postgres or an S3 bucket. Postgres is easier for development but s3 is a better long-term solution. If you want to use s3 you will need to set the right variables.
+xyloobservations can store it's images either in an S3 bucket or on the filesystem. If you want to use s3 you will need to specify the aws credentials and bucket-name. If using the filesystem you will need to specify the directory the app will save the files in.
 
-In `dev-config.edn` it will look something like this:
+For using s3, `dev-config.edn` will look something like this:
 ```
+ :url-prefix "https://bucketname.s3.eu-west-2.amazonaws.com/"
+
  :aws-access-key ""
  :aws-secret-key ""
  :aws-region "eu-west-2"
  :bucket-name ""
- :url-prefix "https://bucketname.s3.eu-west-2.amazonaws.com/"
 ```
 
 If configuring with environment variables the settings are upper-case and use under-scores. Setting the variables for Heroku looks something like:
 ```
 heroku config:set IMAGE_STORE=s3
+heroku config:set URL_PREFIX=https://bucketname.s3.eu-west-2.amazonaws.com/
 heroku config:set AWS_ACCESS_KEY=
 heroku config:set AWS_SECRET_KEY=
 heroku config:set AWS_REGION=eu-west-2
 heroku config:set BUCKET_NAME=
-heroku config:set URL_PREFIX=https://bucketname.s3.eu-west-2.amazonaws.com/
 ```
 
 ## License

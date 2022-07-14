@@ -11,6 +11,8 @@ Here I explain how you may run this code on your workstation for development.
 Install:
 - [Leiningen](https://github.com/technomancy/leiningen)
 - [PostgreSQL](https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e)
+- [RabbitMQ](https://www.rabbitmq.com/download.html)
+- [ImageMagick](https://imagemagick.org/script/download.php)
 
 Create a PostgreSQL database and user, and create a file `dev-config.edn` with credentials. An example of how that might look:
 ```
@@ -28,8 +30,16 @@ Create a PostgreSQL database and user, and create a file `dev-config.edn` with c
  ;; the url s3 or your webserver exposes the images
  :url-prefix "https://example.com/"}
 
+ ;; if storing on filessytem
  ;; this should be a writeable directory where your webserver will serve the images
  :img-path "/var/www/html/images/"
+
+ ;; ;; if storing in s3.
+ ;; ;; you will need to setup the bucket for public access
+ ;; :aws-access-key ""
+ ;; :aws-secret-key ""
+ ;; :aws-region "eu-west-2"
+ ;; :bucket-name ""
 }
 ```
 
@@ -51,7 +61,7 @@ For uploading images there is an admin interface which you can access at `/login
 
 For general info on hosting Luminus apps check out [the luminus docs](https://luminusweb.com/docs/deployment.html). However I designed this to be hosted on Heroku.
 
-xyloobservations can store it's images either in an S3 bucket or on the filesystem. If you want to use s3 you will need to specify the aws credentials and bucket-name. If using the filesystem you will need to specify the directory the app will save the files in.
+xyloobservations can store it's images either in an S3 bucket or on the filesystem. If you want to use s3 you will need to specify the aws credentials and bucket-name.
 
 For using s3, `dev-config.edn` will look something like this:
 ```
@@ -72,6 +82,12 @@ heroku config:set AWS_SECRET_KEY=
 heroku config:set AWS_REGION=eu-west-2
 heroku config:set BUCKET_NAME=
 ```
+
+Also note for Heroku you need:
+- Heroku 22 stack or newer
+- [Heroku Postgres addon](https://elements.heroku.com/addons/heroku-postgresql)
+- [CloudAMQP addon](https://elements.heroku.com/addons/cloudamqp)
+- [Apt buildpack](https://github.com/heroku/heroku-buildpack-apt)
 
 ## License
 

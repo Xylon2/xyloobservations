@@ -82,6 +82,7 @@
           (db/update-progress! {:image_id image_id :progress "saving"}))
       (catch Exception e
         ;; we log the output of the exception, then we throw it again
+        ;; to stop any further execution
         (log/info (format "failed resizing image %s with exception: %s" image_id e))
         (db/update-progress! {:image_id image_id :progress "failed resizing"})
         (throw (ex-info e
@@ -102,6 +103,7 @@
         (db/update-progress! {:image_id image_id :progress "complete"}))
       (catch Exception e
         ;; we log the output of the exception, then we throw it again
+        ;; to stop any further execution
         (log/info (format "failed saving image %s with exception: %s" image_id e))
         (db/update-progress! {:image_id image_id :progress "failed saving"})
         (throw (ex-info e

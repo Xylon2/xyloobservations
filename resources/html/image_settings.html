@@ -4,7 +4,15 @@
     <p style="color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
       {{msgtxt}}
     </p>
-    <img src="{{url}}">
+    <img
+      srcset="{{image.urlprefix}}_tiny {{image.sizes.tiny.width}}w,
+              {{image.urlprefix}}_small {{image.sizes.small.width}}w,
+              {{image.urlprefix}}_medium {{image.sizes.medium.width}}w"
+      sizes="(max-width: 640px) {{image.sizes.tiny.width}}px,
+             (max-width: 960px) {{image.sizes.small.width}}px,
+             {{image.sizes.medium.width}}px"
+      src="{{image.urlprefix}}_tiny"
+      loading="lazy">
     <h2>Attached tags</h2>
     <form method="POST">
       {% csrf-field %}
@@ -32,7 +40,7 @@
     <h2>Caption</h2>
     <form method="POST">
       {% csrf-field %}
-      <textarea name="caption" id="caption">{{caption}}</textarea><br>
+      <textarea name="caption" id="caption">{{image.caption}}</textarea><br>
       <input type="hidden" name="whichform" value="edit_caption">
       <input type="submit" value="Save">
     </form>

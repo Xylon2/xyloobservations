@@ -38,7 +38,9 @@ returning image_id
 -- :doc get images which do not have a tag associated
 select
     image_id,
-    caption
+    object_ref,
+    caption,
+    imagemeta
 from
     imagetag
 right join image
@@ -93,9 +95,14 @@ delete from imagetag
 where image_ref = :image_id
 and tag_ref = :tag;
 
--- :name caption-and-object :? :1
+-- :name caption-and-object :? :*
 -- :doc get the caption and object_ref for an image
-select caption, object_ref from image
+select
+    image_id,
+    object_ref,
+    caption,
+    imagemeta
+from image
 where image_id = :image_id;
 
 -- :name update-caption! :! :n

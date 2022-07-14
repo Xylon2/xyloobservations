@@ -2,7 +2,15 @@
 {% block content %}
   <div class="content">
     <h1>Confirm deletion</h1>
-    <img src="{{url}}">
+    <img
+      srcset="{{image.urlprefix}}_tiny {{image.sizes.tiny.width}}w,
+              {{image.urlprefix}}_small {{image.sizes.small.width}}w,
+              {{image.urlprefix}}_medium {{image.sizes.medium.width}}w"
+      sizes="(max-width: 640px) {{image.sizes.tiny.width}}px,
+             (max-width: 960px) {{image.sizes.small.width}}px,
+             {{image.sizes.medium.width}}px"
+      src="{{image.urlprefix}}_tiny"
+      loading="lazy">
     <form method="POST" action="?id={{image_id}}&redirect={{redirect}}">
       {% csrf-field %}
       <input type="submit" value="Delete"/>

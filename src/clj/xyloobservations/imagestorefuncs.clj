@@ -37,8 +37,8 @@
                                             (map-of imagedata mimetype caption)))))))
 
 (defn resolve_images
-  "we output a sequence of maps, each containing a URL, a caption, and a map of sizes
-   the images argument gives us image_id, object_ref, caption and imagemeta"
+  "We output a sequence of maps, each containing an id, caption, a urlprefix and a map of sizes.
+   The images argument gives us image_id, object_ref, caption and imagemeta."
   [images]
   (case (env :image-store)
     "s3"
@@ -55,7 +55,8 @@
        :url (str "/image?id=" (x :image_id))})))
 
 (defn resolve_image
-  "we output the url an image can be accessed at"
+  "We output a map of id, caption, a urlprefix and a map of sizes.
+   The image argument gives us image_id, object_ref, caption and imagemeta."
   [image_id object_ref]
   (case (env :image-store)
     "s3"

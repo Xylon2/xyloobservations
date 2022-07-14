@@ -73,10 +73,10 @@
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
         redirect (urlencode ((request :query-params) "redirect"))
         attached_tags (db/tag_names_of_image {:image_id image_id})
-        {:keys [caption object_ref]} (db/caption-and-object {:image_id image_id})
-        url (imgstore/resolve_image image_id object_ref)
+        image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
         all_tags (db/all_tags)]
-    (myrender request "image_settings.html" (map-of url image_id attached_tags all_tags caption redirect))))
+    (spit "/home/joseph/cljdebug.txt" image)
+    (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect))))
 
 (defn image-settings-submit [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
@@ -90,20 +90,19 @@
       "edit_caption"
         (adminfunc/update-caption! newcaption, image_id))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
-          {:keys [caption object_ref]} (db/caption-and-object {:image_id image_id})
-          url (imgstore/resolve_image image_id object_ref)
+          image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
           all_tags (db/all_tags)]
-      (myrender request "image_settings.html" (map-of url image_id attached_tags all_tags caption redirect)))))
+      (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect)))))
 
 (defn orphan_images [request]
-  (myrender request "orphan_images.html" {:orphans (db/orphan-images)}))
+  (let [images (imgstore/resolve_images (db/orphan-images))]
+    (myrender request "orphan_images.html" {:orphans images})))
 
 (defn confirm_delete_image [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))
-        object_ref ((db/caption-and-object {:image_id image_id}) :object_ref)
-        url (imgstore/resolve_image image_id object_ref)
+        image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
         redirect ((request :query-params) "redirect")]
-    (myrender request "delete_image.html" (map-of image_id url redirect))))
+    (myrender request "delete_image.html" (map-of image image_id redirect))))
 
 (defn delete_image [request]
   (let [image_id (Integer/parseInt ((request :query-params) "id"))

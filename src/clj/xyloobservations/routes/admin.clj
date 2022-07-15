@@ -79,7 +79,6 @@
         attached_tags (db/tag_names_of_image {:image_id image_id})
         image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
         all_tags (db/all_tags)]
-    (spit "/home/joseph/cljdebug.txt" image)
     (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect))))
 
 (defn image-settings-submit [request]

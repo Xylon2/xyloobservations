@@ -30,7 +30,6 @@
   (let [extension (last (str/split filename #"\."))
         mimetype (mimetypes/extension-to-type extension)
         tag_integers (map #(Integer/parseInt %) (homefunc/always-vector chozen_tags))]
-    (spit "/home/joseph/cljdebug.txt" chozen_tags)
     (when (not mimetype)
       (throw (AssertionError. "cannot detect file-type based on extension")))
     (when (> size 20000000)

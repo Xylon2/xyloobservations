@@ -64,6 +64,13 @@
       (copy-file filepath (str (env :img-path) object_ref "_" identifier "." (mimetypes/type-to-extension mimetype)))
       )))
 
+(defn cleanup-files
+  "takes a vector of maps of files to delete"
+  [files]
+  (doseq [file files]
+    (let [{:keys [filepath]} file]
+      (io/delete-file filepath))))
+
 (defn extract-key [buildme innermap]
   (conj buildme {(keyword (innermap :identifier)) (dissoc innermap :filepath :identifier)}))
 
@@ -76,6 +83,7 @@
                       object_ref))
     (db/update-progress! {:image_id image_id :progress "resizing"})
 
+    ;; resize
     (try
       (do (def uploadme (resizers/resize size imagebytes image_id mimetype))
           (log/info (format "resized image %s successfully" image_id))
@@ -86,8 +94,9 @@
         (log/info (format "failed resizing image %s with exception: %s" image_id e))
         (db/update-progress! {:image_id image_id :progress "failed resizing"})
         (throw (ex-info e
-                        {:type :resize-exception})))) 
+                        {:type :resize-exception}))))
 
+    ;; upload the items from the "uploadme" var and save the metadata
     (try
       (do
         (case (env :image-store)
@@ -107,7 +116,10 @@
         (log/info (format "failed saving image %s with exception: %s" image_id e))
         (db/update-progress! {:image_id image_id :progress "failed saving"})
         (throw (ex-info e
-                        {:type :save-exception}))))))
+                        {:type :save-exception}))))
+
+    ;; delete the temporary files resizers/resize made earlier
+    (cleanup-files uploadme)))
 
 (mount/defstate thequeue
   :start (let [conn (rmq/connect {:uri amqp-url})

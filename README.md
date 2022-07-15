@@ -81,6 +81,8 @@ heroku config:set AWS_ACCESS_KEY=
 heroku config:set AWS_SECRET_KEY=
 heroku config:set AWS_REGION=eu-west-2
 heroku config:set BUCKET_NAME=
+heroku config:set CLOUDAMQP_APIKEY=
+heroku config:set CLOUDAMQP_URL=
 ```
 
 Also note for Heroku you need:

@@ -30,7 +30,7 @@
   "resize to resolution"
   [origpath newpath resolution]
   (let [{:keys [exit out err]}
-        (sh "convert" origpath "-quality" "60" "-resize" (str resolution "x" resolution ">") "-define" "webp:method=6" newpath)]
+        (sh "convert" origpath "-quality" "60" "-resize" (str resolution "x" resolution ">") "-define" "webp:method=4" newpath)]
     (when (not= exit 0)
       (throw (ex-info err
                       {:type :shell-exception, :cause :imagemagic})))))

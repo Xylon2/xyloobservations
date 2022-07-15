@@ -6,7 +6,8 @@
    [xyloobservations.db.core :as db]
    [clojure.string :as str]
    [xyloobservations.imagestorefuncs :as imgstore]
-   [xyloobservations.mimetypes :as mimetypes]))
+   [xyloobservations.mimetypes :as mimetypes]
+   [xyloobservations.homefunctions :as homefunc]))
 
 (defmacro map-of
   [& xs]
@@ -28,7 +29,8 @@
   ;; size is the filesize in bytes
   (let [extension (last (str/split filename #"\."))
         mimetype (mimetypes/extension-to-type extension)
-        tag_integers (map #(Integer/parseInt %) chozen_tags)]
+        tag_integers (map #(Integer/parseInt %) (homefunc/always-vector chozen_tags))]
+    (spit "/home/joseph/cljdebug.txt" chozen_tags)
     (when (not mimetype)
       (throw (AssertionError. "cannot detect file-type based on extension")))
     (when (> size 20000000)

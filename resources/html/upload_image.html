@@ -61,6 +61,12 @@ $(function() {
         //prevent Default functionality
         e.preventDefault();
 
+        if ($('#newimage').val() === "") {
+          $("#message").css("color", "red");
+          $("#message").text("don't forget to choose a file");
+          return;
+        }
+
         // disable the form. update the message
         $("#uploadsubmit").prop("disabled", true);
         $("#message").css("color", "blue");

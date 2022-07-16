@@ -9,7 +9,7 @@ It's based on [Luminus](https://luminusweb.com/) and I designed it to work with 
 Here I explain how you may run this code on your workstation for development.
 
 Install:
-- [Leiningen](https://github.com/technomancy/leiningen)
+- [Leiningen](https://codeberg.org/leiningen/leiningen)
 - [PostgreSQL](https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e)
 - [RabbitMQ](https://www.rabbitmq.com/download.html)
 - [ImageMagick](https://imagemagick.org/script/download.php)

@@ -3,6 +3,7 @@
 
 (def extension-to-type
   {"jpeg" "image/jpeg"
+   "JPG"  "image/jpeg"
    "jpg"  "image/jpeg"
    "avif" "image/avif"
    "webp" "image/webp"

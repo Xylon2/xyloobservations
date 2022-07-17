@@ -38,7 +38,8 @@
 (defn make_image_version
   "Given a path, a max-size and a resolution, makes the image or copy it.
    Return a map of filepath, width, mimetype and identifier."
-  [{:keys [origpath origdimensions size origmimetype newpath maxsize resolution identifier]}]
+  [{:keys [origpath origdimensions size origmimetype]}
+   {:keys [newpath maxsize resolution identifier]}]
   (if (> size maxsize)
     (let [bigdim (big_dimension origdimensions)]
         ;; don't bother resizing unless the original resolution is substantially
@@ -74,14 +75,14 @@
     (with-open [w (io/output-stream origpath)]
       (.write w imagebytes))
 
-    (let [origdimensions (get_dimensions origpath)]
+    (let [origdimensions (get_dimensions origpath)
+          make_image_closure
+          #(make_image_version {:origpath origpath
+                                :origdimensions origdimensions
+                                :size size
+                                :origmimetype mimetype} %)]
       ;; the output of this function is a map of filepath, mimetype, identifier, width and height
-      (conj (map #(make_image_version (conj
-                                       ;; we add all these extra bits to all the maps below
-                                       {:origpath origpath
-                                        :origdimensions origdimensions
-                                        :size size
-                                        :origmimetype mimetype} %))
+      (conj (map #(make_image_closure %)
                  [{:newpath mediumpath :maxsize 1000000 :resolution 2560 :identifier "medium"}
                   {:newpath smallpath  :maxsize 500000  :resolution 1920 :identifier "small"}
                   {:newpath tinypath   :maxsize 250000  :resolution 1280 :identifier "tiny"}])

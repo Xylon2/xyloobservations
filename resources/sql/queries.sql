@@ -185,7 +185,7 @@ from
     imagetag
 inner join tag
     on tag_id = tag_ref
-order by advanced;
+order by advanced, tag_name;
 
 -- :name delete-image! :! :n
 -- :doc delete an image

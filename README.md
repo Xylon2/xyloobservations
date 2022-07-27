@@ -6,7 +6,7 @@ It's based on [Luminus](https://luminusweb.com/) and I designed it to work with 
 
 ## Running this code
 
-Here I explain how you may run this code on your workstation for development.
+Here I explain briefly how you may run this code on your workstation for development.
 
 Install:
 - [Leiningen](https://codeberg.org/leiningen/leiningen)
@@ -59,6 +59,8 @@ For uploading images there is an admin interface which you can access at `/login
 
 ## Hosting
 
+If you are willing to comply with the requirements of the Affero GPL you may use this code for your own photo gallery. In addition to applying appropriate config for your environment you will need to modify some of the templates to customise it for your site. In-particular `base.html` and `about.html`.
+
 For general info on hosting Luminus apps check out [the luminus docs](https://luminusweb.com/docs/deployment.html). However I designed this to be hosted on Heroku.
 
 xyloobservations can store it's images either in an S3 bucket or on the filesystem. If you want to use s3 you will need to specify the aws credentials and bucket-name.
@@ -94,3 +96,9 @@ Also note for Heroku you need:
 ## License
 
 Copyright © 2022 Joseph Graham
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.

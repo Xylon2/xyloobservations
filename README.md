@@ -93,6 +93,11 @@ Also note for Heroku you need:
 - [CloudAMQP addon](https://elements.heroku.com/addons/cloudamqp)
 - [Apt buildpack](https://github.com/heroku/heroku-buildpack-apt)
 
+If you find your dyno is running out of memory when uploading images, this can limit imagemagick's memory usage:
+```
+heroku config:set MAGICK_AREA_LIMIT=30MB
+```
+
 ## License
 
 Copyright © 2022 Joseph Graham

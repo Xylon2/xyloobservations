@@ -68,7 +68,7 @@ where image_ref = :image_id;
 -- :doc get names and ids of all tags
 select tag_id, tag_name
 from tag
-order by advanced;
+order by advanced, tag_name;
 
 -- :name tag-image! :! :n
 -- :doc add tags to an image

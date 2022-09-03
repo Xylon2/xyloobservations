@@ -2,24 +2,26 @@
 {% block content %}
   <div class="content">
   <h1>{{ numimages }} random images</h1>
-  {% for image in images %}
-    <figure class="nomargin">
-      <a href="{{image.urlprefix}}_original.{{image.sizes.original.extension}}">
-        <img
-          srcset="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}} {{image.sizes.tiny.width}}w,
-                  {{image.urlprefix}}_small.{{image.sizes.small.extension}} {{image.sizes.small.width}}w,
-                  {{image.urlprefix}}_medium.{{image.sizes.medium.extension}} {{image.sizes.medium.width}}w"
-          sizes="(max-width: 640px) {{image.sizes.tiny.width}}px,
-                 (max-width: 960px) {{image.sizes.small.width}}px,
-                 {{image.sizes.medium.width}}px"
-          src="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}}"
-          loading="lazy">
-      </a>
-      <figcaption>{{image.caption}}</figcaption>
-    </figure>
-    {% if loggedin %}
-    <a href="/image_settings?id={{image.image_id}}&redirect={{fullpath}}">settings</a>
-    {% endif %}
-  {% endfor %}
+    <div id="thepictures" style="padding-top: 1em;">
+    {% for image in images %}
+      <figure class="nomargin">
+        <a href="{{image.urlprefix}}_original.{{image.sizes.original.extension}}">
+          <img
+            srcset="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}} {{image.sizes.tiny.width}}w,
+                    {{image.urlprefix}}_small.{{image.sizes.small.extension}} {{image.sizes.small.width}}w,
+                    {{image.urlprefix}}_medium.{{image.sizes.medium.extension}} {{image.sizes.medium.width}}w"
+            sizes="(max-width: 640px) {{image.sizes.tiny.width}}px,
+                  (max-width: 960px) {{image.sizes.small.width}}px,
+                  {{image.sizes.medium.width}}px"
+            src="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}}"
+            {% if forloop.counter > 3 %}loading="lazy"{% endif %}>
+        </a>
+        <figcaption>{{image.caption}}</figcaption>
+      </figure>
+      {% if loggedin %}
+      <a href="/image_settings?id={{image.image_id}}&redirect={{fullpath}}">settings</a>
+      {% endif %}
+    {% endfor %}
+    </div>
   </div>
 {% endblock %}

@@ -3,7 +3,7 @@
   <div class="content">
   <h1>Select a tag to filter your results</h1>
   {% for tag in alltags %}{% ifequal tag.advanced "false" %}
-  <a href="?tags={{tag.tag_id}}" class="ck-button"><span
+  <a href="?tags={{tag.tag_id}}#thepictures" class="ck-button"><span
     {% for ftag in filters %}
       {% if ftag.tag_id = tag.tag_id %}
         class="green"
@@ -12,30 +12,32 @@
     >{{tag.tag_name}}</span></a>
   {% endifequal %}{% endfor %}
   {% if filters|length > 0 %}
-  <h2>{{filters.0.description}}</h2>
+    <h2>{{filters.0.description}}</h2>
   {% endif %}
-  {% for image in images %}
-    <figure class="nomargin">
-      <a href="{{image.urlprefix}}_original.{{image.sizes.original.extension}}">
-        <img
-          srcset="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}} {{image.sizes.tiny.width}}w,
-                  {{image.urlprefix}}_small.{{image.sizes.small.extension}} {{image.sizes.small.width}}w,
-                  {{image.urlprefix}}_medium.{{image.sizes.medium.extension}} {{image.sizes.medium.width}}w"
-          sizes="(max-width: 640px) {{image.sizes.tiny.width}}px,
-                 (max-width: 960px) {{image.sizes.small.width}}px,
-                 {{image.sizes.medium.width}}px"
-          src="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}}"
-          loading="lazy">
-      </a>
-      <figcaption>{{image.caption}}</figcaption>
-    </figure>
-    {% if loggedin %}
-    {# the redirect= here is because if we delete we need to know where to go back to #}
-    <a href="/image_settings?id={{image.image_id}}&redirect={{fullpath}}">settings</a>
-    {% endif %}
-  {% endfor %}
-  {% ifequal images|length 0 %}
-    <br/><p>No images have been uploaded.</p>
-  {% endifequal %}
+    <div id="thepictures" style="padding-top: 1em;">
+    {% for image in images %}
+      <figure class="nomargin">
+        <a href="{{image.urlprefix}}_original.{{image.sizes.original.extension}}">
+          <img
+            srcset="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}} {{image.sizes.tiny.width}}w,
+                    {{image.urlprefix}}_small.{{image.sizes.small.extension}} {{image.sizes.small.width}}w,
+                    {{image.urlprefix}}_medium.{{image.sizes.medium.extension}} {{image.sizes.medium.width}}w"
+            sizes="(max-width: 640px) {{image.sizes.tiny.width}}px,
+                  (max-width: 960px) {{image.sizes.small.width}}px,
+                  {{image.sizes.medium.width}}px"
+            src="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}}"
+            {% if forloop.counter > 3 %}loading="lazy"{% endif %}>
+        </a>
+        <figcaption>{{image.caption}}</figcaption>
+      </figure>
+      {% if loggedin %}
+      {# the redirect= here is because if we delete we need to know where to go back to #}
+      <a href="/image_settings?id={{image.image_id}}&redirect={{fullpath}}">settings</a>
+      {% endif %}
+    {% endfor %}
+    {% ifequal images|length 0 %}
+      <br/><p>No images have been uploaded.</p>
+    {% endifequal %}
+    </div>
   </div>
 {% endblock %}

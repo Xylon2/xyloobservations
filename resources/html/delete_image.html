@@ -9,8 +9,7 @@
       sizes="(max-width: 640px) {{image.sizes.tiny.width}}px,
              (max-width: 960px) {{image.sizes.small.width}}px,
              {{image.sizes.medium.width}}px"
-      src="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}}"
-      loading="lazy">
+      src="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}}">
     <form method="POST" action="?id={{image_id}}&redirect={{redirect}}">
       {% csrf-field %}
       <input type="submit" value="Delete"/>

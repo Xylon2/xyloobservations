@@ -3,6 +3,7 @@
   <div class="content">
   {% if orphans|length > 0 %}
   <h1>These images have no tags</h1>
+    <div id="thepictures" style="padding-top: 1em;">
     {% for image in orphans %}
       <figure class="nomargin">
         <img
@@ -13,13 +14,14 @@
                  (max-width: 960px) {{image.sizes.small.width}}px,
                  {{image.sizes.medium.width}}px"
           src="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}}"
-          loading="lazy">
+          {% if forloop.counter > 3 %}loading="lazy"{% endif %}>
         <figcaption>{{image.caption}}</figcaption>
       </figure>
       {% if loggedin %}
       <a href="/image_settings?id={{image.image_id}}&redirect={{fullpath}}">settings</a>
       {% endif %}
     {% endfor %}
+    </div>
   {% endif %}
   </div>
 {% endblock %}

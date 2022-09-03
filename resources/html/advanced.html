@@ -1,46 +1,60 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="content">
-  <h1>Select multiple tags to filter your results</h1>
+    <h1>Select multiple tags to filter your results</h1>
 
-  <form method="GET">
-    {% for tag in alltags %}
-    <div class="ck-button"><label>
-      <input type="checkbox" id="tchkbox_{{tag.tag_id}}" name="tags"
-      value="{{tag.tag_id}}"
-        {% for ftag in filters %}
-          {% if ftag.tag_id = tag.tag_id %}
-            checked
-          {% endif %}
-        {% endfor %}>
-      <span>{{tag.tag_name}}</span>
-    </label></div>
+    <form method="GET">
+      {% for tag in alltags %}
+      <div class="ck-button"><label>
+        <input type="checkbox" id="tchkbox_{{tag.tag_id}}" name="tags"
+        value="{{tag.tag_id}}"
+          {% for ftag in filters %}
+            {% if ftag.tag_id = tag.tag_id %}
+              checked
+            {% endif %}
+          {% endfor %}>
+        <span>{{tag.tag_name}}</span>
+      </label></div>
+      {% endfor %}
+      <br/>
+      <input id="filtersubmit" type="submit" value="Submit">
+    </form>
+    <div id="thepictures" style="padding-top: 1em;">
+    {% for image in images %}
+      <figure class="nomargin">
+        <a href="{{image.urlprefix}}_original.{{image.sizes.original.extension}}">
+          <img
+            srcset="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}} {{image.sizes.tiny.width}}w,
+                    {{image.urlprefix}}_small.{{image.sizes.small.extension}} {{image.sizes.small.width}}w,
+                    {{image.urlprefix}}_medium.{{image.sizes.medium.extension}} {{image.sizes.medium.width}}w"
+            sizes="(max-width: 640px) {{image.sizes.tiny.width}}px,
+                  (max-width: 960px) {{image.sizes.small.width}}px,
+                  {{image.sizes.medium.width}}px"
+          src="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}}"
+          {% if forloop.counter > 3 %}loading="lazy"{% endif %}>
+        </a>
+        <figcaption>{{image.caption}}</figcaption>
+      </figure>
+      {% if loggedin %}
+      <a href="/image_settings?id={{image.image_id}}&redirect={{fullpath}}">settings</a>
+      {% endif %}
     {% endfor %}
-    <br/>
-    <input type="submit" value="Submit">
-  </form>
-
-  {% for image in images %}
-    <figure class="nomargin">
-      <a href="{{image.urlprefix}}_original.{{image.sizes.original.extension}}">
-        <img
-          srcset="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}} {{image.sizes.tiny.width}}w,
-                  {{image.urlprefix}}_small.{{image.sizes.small.extension}} {{image.sizes.small.width}}w,
-                  {{image.urlprefix}}_medium.{{image.sizes.medium.extension}} {{image.sizes.medium.width}}w"
-          sizes="(max-width: 640px) {{image.sizes.tiny.width}}px,
-                 (max-width: 960px) {{image.sizes.small.width}}px,
-                 {{image.sizes.medium.width}}px"
-         src="{{image.urlprefix}}_tiny.{{image.sizes.tiny.extension}}"
-         loading="lazy">
-      </a>
-      <figcaption>{{image.caption}}</figcaption>
-    </figure>
-    {% if loggedin %}
-    <a href="/image_settings?id={{image.image_id}}&redirect={{fullpath}}">settings</a>
-    {% endif %}
-  {% endfor %}
-  {% ifequal images|length 0 %}
-    <br/><p>No images match all the selected tags.</p>
-  {% endifequal %}
+    {% ifequal images|length 0 %}
+      <br/><p>No images match all the selected tags.</p>
+    {% endifequal %}
+    </div>
   </div>
+{% endblock %}
+
+{% block page-scripts %}
+<script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+<script>
+$(function(){
+        // scroll down to the pictures when filtering
+        jQuery("#filtersubmit").on("click", function () {
+                  location.hash = "thepictures";
+        });
+
+});
+</script>
 {% endblock %}

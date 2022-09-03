@@ -61,7 +61,7 @@ For uploading images there is an admin interface which you can access at `/login
 
 If you are willing to comply with the requirements of the Affero GPL you may use this code for your own photo gallery. In addition to applying appropriate config for your environment you will need to modify some of the templates to customise it for your site. In-particular `base.html` and `about.html`.
 
-For general info on hosting Luminus apps check out [the luminus docs](https://luminusweb.com/docs/deployment.html). However I designed this to be hosted on Heroku.
+For general info on hosting Luminus apps check out [the luminus docs](https://luminusweb.com/docs/deployment.html).
 
 xyloobservations can store it's images either in an S3 bucket or on the filesystem. If you want to use s3 you will need to specify the aws credentials and bucket-name.
 
@@ -75,28 +75,31 @@ For using s3, `dev-config.edn` will look something like this:
  :bucket-name ""
 ```
 
-If configuring with environment variables the settings are upper-case and use under-scores. Setting the variables for Heroku looks something like:
+If configuring with environment variables the settings are upper-case and use under-scores. Example:
 ```
-heroku config:set IMAGE_STORE=s3
-heroku config:set URL_PREFIX=https://bucketname.s3.eu-west-2.amazonaws.com/
-heroku config:set AWS_ACCESS_KEY=
-heroku config:set AWS_SECRET_KEY=
-heroku config:set AWS_REGION=eu-west-2
-heroku config:set BUCKET_NAME=
-heroku config:set CLOUDAMQP_APIKEY=
-heroku config:set CLOUDAMQP_URL=
+IMAGE_STORE=s3
+URL_PREFIX=https://bucketname.s3.eu-west-2.amazonaws.com/
+AWS_ACCESS_KEY=
+AWS_SECRET_KEY=
+AWS_REGION=eu-west-2
+BUCKET_NAME=
+CLOUDAMQP_APIKEY=
+CLOUDAMQP_URL=
+DATABASE_URL=postgresql://localhost/dbname?user=dbuser&password=dbpass
 ```
 
-Also note for Heroku you need:
-- Heroku 22 stack or newer
-- [Heroku Postgres addon](https://elements.heroku.com/addons/heroku-postgresql)
-- [CloudAMQP addon](https://elements.heroku.com/addons/cloudamqp)
-- [Apt buildpack](https://github.com/heroku/heroku-buildpack-apt)
+Note if your RabbitMQ is running on localhost you may ommit the `CLOUDAMQP_APIKEY` and `CLOUDAMQP_URL`.
 
-If you find your dyno is running out of memory when uploading images, this can limit imagemagick's memory usage:
-```
-heroku config:set MAGICK_AREA_LIMIT=30MB
-```
+I no-longer recommend hosting on Heroku due to:
+- their pricing-structure is no longer affordable for small hobby sites
+- message-size restrictions on their managed CloudAMQP
+- unreasonably small memory allowance on the dynos is problematic for resizing large images
+
+However if you do want to host it on Heroku or similar, note that it requires imagemagick to be available for commands `convert` and `identify`.
+
+Note that at this time there is no conventient way to set the admin password on a live site deployed from a compiled `.jar`. Therefore you will have to do it manually with the following procedure:
+- generate the password on your workstation using `create-user!` as described earlier
+- connect to your production database and use SQL commands to update the `users` table
 
 ## License
 

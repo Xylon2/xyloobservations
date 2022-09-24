@@ -30,7 +30,7 @@
   "resize to resolution"
   [origpath newpath resolution]
   (let [{:keys [exit out err]}
-        (sh "convert" origpath "-quality" "60" "-resize" (str resolution "x" resolution ">") "-define" "webp:method=4" newpath)]
+        (sh "convert" origpath "-quality" "60" "-resize" (str resolution "x" resolution ">") newpath)]
     (when (not= exit 0)
       (throw (ex-info err
                       {:type :shell-exception, :cause :imagemagic})))))
@@ -49,7 +49,7 @@
             (def newdimensions (get_dimensions newpath)))
         (do (compresslike origpath newpath (origdimensions :width))
             (def newdimensions origdimensions)))
-      (def newmimetype "image/webp"))
+      (def newmimetype "image/avif"))
     (do
       (copy-file origpath newpath)
       (def newdimensions origdimensions)
@@ -64,9 +64,9 @@
   [size imagebytes image_id mimetype]
   (let [tempdir "/tmp/imageresizing/"
         origpath   (str tempdir image_id "_orig." (mimetypes/type-to-extension mimetype))
-        mediumpath (str tempdir image_id "_medium.webp")
-        smallpath  (str tempdir image_id "_small.webp")
-        tinypath   (str tempdir image_id "_tiny.webp")]
+        mediumpath (str tempdir image_id "_medium.avif")
+        smallpath  (str tempdir image_id "_small.avif")
+        tinypath   (str tempdir image_id "_tiny.avif")]
 
     ;; make the temp directory
     (io/make-parents origpath)

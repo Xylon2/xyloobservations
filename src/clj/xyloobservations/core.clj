@@ -5,6 +5,7 @@
     [luminus.http-server :as http]
     [luminus-migrations.core :as migrations]
     [xyloobservations.config :refer [env]]
+    [xyloobservations.authfunctions :as authfunc]
     [clojure.tools.cli :refer [parse-opts]]
     [clojure.tools.logging :as log]
     [mount.core :as mount])
@@ -57,6 +58,13 @@
   (migrations/migrate ["migrate"] (select-keys env [:database-url]))
   (.addShutdownHook (Runtime/getRuntime) (Thread. stop-app)))
 
+(defn read-user-pass []
+  (let [console (System/console)
+        username (.readLine     console "%s" (into-array ["Enter username: "]))
+        password (.readPassword console "%s" (into-array ["Enter password: "]))]
+    {:username (apply str username)
+     :password (apply str password)}))
+
 (defn -main [& args]
   (-> args
                             (parse-opts cli-options)
@@ -81,6 +89,11 @@
     (migrations/migration? args)
     (do
       (migrations/migrate args (select-keys env [:database-url]))
+      (System/exit 0))
+    (some #{"add-user"} args)
+    (let [{:keys [username password]} (read-user-pass)]
+      (mount/start #'xyloobservations.db.core/*db*)
+      (authfunc/create-user! username password)
       (System/exit 0))
     :else
     (start-app args)))

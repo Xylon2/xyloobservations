@@ -97,9 +97,14 @@ I no-longer recommend hosting on Heroku due to:
 
 However if you do want to host it on Heroku or similar, note that it requires imagemagick to be available for commands `convert` and `identify`.
 
-Note that at this time there is no conventient way to set the admin password on a live site deployed from a compiled `.jar`. Therefore you will have to do it manually with the following procedure:
-- generate the password on your workstation using `create-user!` as described earlier
-- connect to your production database and use SQL commands to update the `users` table
+To create an admin login, the .jar can be called with an argument "add-user". Here is an example:
+```
+set -o allexport
+source /var/gallery/env
+/usr/bin/java -jar /var/gallery/xyloobservations.jar add-user
+```
+
+It will prompt you for a username and password.
 
 ## License
 

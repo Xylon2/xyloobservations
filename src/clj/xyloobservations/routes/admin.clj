@@ -69,8 +69,6 @@
                   "failed resizing" "error"
                   "failed saving" "error"
                   "info")]
-    (spit "/home/joseph/cljdebug.txt" (str "image_id: " image_id))
-    ;; (spit "/home/joseph/cljdebug.txt" (str "progress: " progress))
 
     (-> (generate-string {:msgtype msgtype :msgtxt progress_styled :image_id image_id})
         (response/ok)

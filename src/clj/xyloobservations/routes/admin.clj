@@ -59,7 +59,7 @@
      (response/content-type "application/json"))))
 
 (defn image-progress [request]
-  (let [{{:keys [image_id]} :query-params} request
+  (let [{{:strs [image_id]} :query-params} request
         {progress :progress} (db/get-progress {:image_id image_id})
         progress_styled (or ({"resizing" ".....resizing.....",
                               "saving"   ".........saving...",
@@ -69,6 +69,9 @@
                   "failed resizing" "error"
                   "failed saving" "error"
                   "info")]
+    (spit "/home/joseph/cljdebug.txt" (str "image_id: " image_id))
+    ;; (spit "/home/joseph/cljdebug.txt" (str "progress: " progress))
+
     (-> (generate-string {:msgtype msgtype :msgtxt progress_styled :image_id image_id})
         (response/ok)
         (response/content-type "application/json"))))

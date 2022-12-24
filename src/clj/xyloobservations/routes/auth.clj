@@ -10,14 +10,14 @@
   (java.net.URLEncoder/encode foo "UTF-8"))
 
 (defn login-page [request]
-  (let [redirect ((request :query-params) "redirect")]
+  (let [{{redirect "redirect"} :query-params} request]
     (layout/render request "login.html" {:redirect
                                          (urlencode (if (empty? redirect) "" redirect))})))
 
 (defn login-attempt [request]
-  (let [{:keys [username password]} (request :params)
-        redirect ((request :query-params) "redirect")
-        session (request :session)]
+  (let [{{:keys [username password]} :params
+         {redirect "redirect"} :query-params
+         session :session} request]
     (def authresult (authfunc/authenticate-user username password))
     (if authresult
       (-> (response/found (if (empty? redirect) "/" redirect))
@@ -25,8 +25,8 @@
       (layout/render request "login.html" {:error (str "Authentication Failure") :redirect redirect}))))
 
 (defn logout-now [request]
-  (let [redirect ((request :query-params) "redirect")
-        session (request :session)]
+  (let [{{redirect "redirect"} :query-params
+         session :session} request]
     (-> (response/found (if (empty? redirect) "/" redirect))
         (assoc :session (dissoc session :user)))
     ))

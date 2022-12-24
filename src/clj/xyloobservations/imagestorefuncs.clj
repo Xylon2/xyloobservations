@@ -27,7 +27,7 @@
   "We output a sequence of maps, each containing an id, caption, a urlprefix and a map of sizes.
    The images argument gives us image_id, object_ref, caption and imagemeta."
   [images]
-  (let [url-prefix (env :url-prefix)]
+  (let [{url-prefix :url-prefix} env]
     (for [x images]
       {:image_id (x :image_id)
        :caption (x :caption)

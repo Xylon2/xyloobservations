@@ -28,7 +28,7 @@
     (myrender request "tag_manager.html" {:all_tags all_tags})))
 
 (defn tag-manager-submit [request]
-  (let [{:keys [tagname description advanced]} (request :params)]
+  (let [{{:keys [tagname description advanced]} :params} request]
     ;; we add it and show the form again so they may add another
     (try
       (do (adminfunc/add-tag! tagname description advanced)
@@ -45,9 +45,9 @@
     (myrender request "upload_image.html" {:all_tags all_tags})))
 
 (defn upload-image-ajax [request]
-  (let [file (request :multipart-params)
-        caption (-> request :params :caption)
-        chozen_tags (-> request :params :tags)]
+  (let [{file :multipart-params} request
+        {{caption :caption
+          chozen_tags :tags} :params} request]
     (->
      (try (let [image_id (adminfunc/upload-image! file caption chozen_tags)]
             (generate-string {:msgtype "info" :msgtxt "...queued........." :image_id image_id}))
@@ -59,7 +59,7 @@
      (response/content-type "application/json"))))
 
 (defn image-progress [request]
-  (let [image_id (Integer/parseInt ((request :query-params) "image_id"))
+  (let [{{:keys [image_id]} :query-params} request
         {progress :progress} (db/get-progress {:image_id image_id})
         progress_styled (or ({"resizing" ".....resizing.....",
                               "saving"   ".........saving...",
@@ -74,22 +74,26 @@
         (response/content-type "application/json"))))
 
 (defn image-settings-page [request]
-  (let [image_id (Integer/parseInt ((request :query-params) "id"))
-        redirect (urlencode ((request :query-params) "redirect"))
+  (let [{{image_id "id"
+          redirect "redirect"} :query-params} request
+        redirect (urlencode redirect)
         attached_tags (db/tag_names_of_image {:image_id image_id})
         image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
         all_tags (db/all_tags)]
     (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect))))
 
 (defn image-settings-submit [request]
-  (let [image_id (Integer/parseInt ((request :query-params) "id"))
-        redirect (urlencode ((request :query-params) "redirect"))
-        {newtag :tag whichform :whichform newcaption :caption} (request :params)]
+  (let [{{image_id "id"
+          redirect "redirect"} :query-params
+         {newtag :tag
+          whichform :whichform
+          newcaption :caption} :params} request
+        redirect (urlencode redirect)]
     (case whichform
       "add_tag"
-        (adminfunc/tag-image! (Integer/parseInt newtag), image_id)
+        (adminfunc/tag-image! newtag, image_id)
       "remove_tag"
-        (adminfunc/untag-image! (Integer/parseInt newtag), image_id)
+        (adminfunc/untag-image! newtag, image_id)
       "edit_caption"
         (adminfunc/update-caption! newcaption, image_id))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
@@ -102,40 +106,43 @@
     (myrender request "orphan_images.html" {:orphans images})))
 
 (defn confirm_delete_image [request]
-  (let [image_id (Integer/parseInt ((request :query-params) "id"))
-        image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
-        redirect ((request :query-params) "redirect")]
+  (let [{{image_id "id"
+          redirect "redirect"} :query-params} request
+        [image] (imgstore/resolve_images (db/caption-and-object {:image_id image_id}))]
     (myrender request "delete_image.html" (map-of image image_id redirect))))
 
 (defn delete_image [request]
-  (let [image_id (Integer/parseInt ((request :query-params) "id"))
-        redirect ((request :query-params) "redirect")]
+  (let [{{image_id "id"
+          redirect "redirect"} :query-params} request]
     (db/delete-image! {:image_id image_id})
     (response/found (if (empty? redirect) "/" redirect))))
 
 (defn confirm_delete_tag [request]
-  (let [tag_id (Integer/parseInt ((request :query-params) "tag"))
-        redirect (urlencode ((request :query-params) "redirect"))
+  (let [{{tag_id "tag"
+          redirect "redirect"} :query-params} request
+        redirect (urlencode redirect)
         images (db/images-by-tag {:tag_ref tag_id})
         tag_name (:tag_name (db/tag-info {:tag_id tag_id :cols ["tag_name"]}))]
     (myrender request "delete_tag.html" (map-of tag_id redirect images tag_name))))
 
 (defn delete_tag [request]
-  (let [tag_id (Integer/parseInt ((request :query-params) "tag"))
-        redirect ((request :query-params) "redirect")]
+  (let [{{tag_id "tag"
+          redirect "redirect"} :query-params} request]
     (db/delete-tag! (map-of tag_id))
     (response/found (if (empty? redirect) "/" redirect))))
 
 (defn tag_settings_page [request]
-  (let [tag_id (Integer/parseInt ((request :query-params) "tag"))
-        redirect (urlencode ((request :query-params) "redirect"))
+  (let [{{tag_id "tag"
+          redirect "redirect"} :query-params} request
+        redirect (urlencode redirect)
         {:keys [tag_name description advanced]} (db/tag-info {:tag_id tag_id :cols ["tag_name", "description", "advanced"]})
         ad_opts ["false" "date" "place"]]
     (myrender request "tag_settings.html" (map-of tag_id redirect tag_name description advanced ad_opts))))
 
 (defn tag_settings_submit [request]
-  (let [tag_id (Integer/parseInt ((request :query-params) "tag"))
-        redirect (urlencode ((request :query-params) "redirect"))
+  (let [{{tag_id "tag"
+          redirect "redirect"} :query-params} request
+        redirect (urlencode redirect)
         {:keys [tag_name description advanced]} (request :params)]
     (adminfunc/modify_tag tag_id tag_name description advanced)
     (let [{:keys [tag_name description advanced]} (db/tag-info {:tag_id tag_id :cols ["tag_name", "description", "advanced"]})

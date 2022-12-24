@@ -19,18 +19,20 @@
                                :fullpath (urlencode (str (request :path-info) "?" (request :query-string)))})))
 
 (defn gallery [template request]
-  (let [tags (map #(Integer/parseInt %) (homefunc/always-vector ((request :query-params) "tags")))]
-    (if-not (empty? tags)
-      (myrender request template {:images (imgstore/resolve_images (homefunc/matching-images tags))
-                                  :filters (db/names-for-tags {:tags tags})
+  (let [{{tags "tags"} :query-params} request
+        tags' (homefunc/always-vector tags)]
+    (if-not (empty? tags')
+      (myrender request template {:images (imgstore/resolve_images (homefunc/matching-images tags'))
+                                  :filters (db/names-for-tags {:tags tags'})
                                   :alltags (db/all-tags-with-images)})
       (myrender request template {:images (imgstore/resolve_images (homefunc/images-with-tags))
                                   :alltags (db/all-tags-with-images)}))))
 
 (defn random [request]
-  (let [numimages (Integer/parseInt (homefunc/default-number ((request :query-params) "num")))]
-    (myrender request "random.html" {:images (imgstore/resolve_images (db/random-images {:numimages numimages}))
-                                     :numimages numimages})))
+  (let [{{numimages "num"} :query-params} request
+        numimages' (homefunc/default-number numimages)]
+    (myrender request "random.html" {:images (imgstore/resolve_images (db/random-images {:numimages numimages'}))
+                                     :numimages numimages'})))
 
 (defn about [request]
   (myrender request "about.html" {}))

@@ -29,15 +29,15 @@
   ;; size is the filesize in bytes
   (let [extension (last (str/split filename #"\."))
         mimetype (mimetypes/extension-to-type extension)
-        tag_integers (map #(Integer/parseInt %) (homefunc/always-vector chozen_tags))]
+        chozen_tags' (homefunc/always-vector chozen_tags)]
     (when (not mimetype)
       (throw (AssertionError. "cannot detect file-type based on extension")))
     (when (> size 20000000)
       (throw (AssertionError. "this picture is too big")))
     (jdbc/with-transaction [t-conn db/*db*]
       (let [image_id (imgstore/store-image extension mimetype tempfile t-conn caption size)]
-        (when-not (empty? tag_integers)
-          (db/tag-image! t-conn {:taglist tag_integers
+        (when-not (empty? chozen_tags')
+          (db/tag-image! t-conn {:taglist chozen_tags'
                                  :image_id image_id}))
         image_id))))
 

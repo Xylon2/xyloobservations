@@ -20,7 +20,7 @@ update tag set
   tag_name = :tag_name,
   description = :description,
   advanced = :advanced::adstates
-where tag_id = :tag_id
+where tag_id = :tag_id::integer
 
 -- :name reference-image! :! :1
 -- :doc add an image which is in s3
@@ -51,7 +51,7 @@ from
     imagetag
 inner join image
     on image_ref = image_id
-where tag_ref = :tag_ref
+where tag_ref = :tag_ref::integer
 
 -- :name tag_names_of_image :? :*
 -- :doc get names and ids of all tags attached to a given image
@@ -62,7 +62,7 @@ from
     imagetag
 inner join tag
     on tag_ref = tag_id
-where image_ref = :image_id;
+where image_ref = :image_id::integer;
 
 -- :name all_tags :? :*
 -- :doc get names and ids of all tags
@@ -75,15 +75,15 @@ order by advanced, tag_name;
 insert into imagetag (tag_ref, image_ref)
 values 
 /*~
-(let [taglist (:taglist params)
+(let [taglist  (map parse-long (:taglist params))
       image_id (:image_id params)]
   (clojure.string/join ", " (map #(str "(" % ", " image_id ")") taglist)))
 ~*/
 
 -- :name untag-image! :! :n
 delete from imagetag
-where image_ref = :image_id
-and tag_ref = :tag;
+where image_ref = :image_id::integer
+and tag_ref = :tag::integer;
 
 -- :name caption-and-object :? :*
 -- :doc get the caption and object_ref for an image
@@ -93,20 +93,20 @@ select
     caption,
     imagemeta
 from image
-where image_id = :image_id;
+where image_id = :image_id::integer;
 
 -- :name update-caption! :! :n
 -- :doc update the caption for an image
 update image
 set caption = :newcaption
-where image_id = :image_id;
+where image_id = :image_id::integer;
 
 -- :name find-imagetag :? :1
 -- :doc is there an imagetag entry linking a specific tag and image
 select count(*)
 from imagetag
-where image_ref = :image_id
-and tag_ref = :tag_id;
+where image_ref = :image_id::integer
+and tag_ref = :tag_id::integer;
 
 -- :name images-with-tags :? :*
 -- :doc gets all image ids and captions that have any tag
@@ -134,7 +134,7 @@ from
 where image_id in
 (
 /*~
-(let [taglist (:tags params)]
+(let [taglist (->> params :tags (map parse-long))]
   (cons
     (str "select image_ref from imagetag where tag_ref = " (last taglist))
     (map #(str "intersect select image_ref from imagetag where tag_ref = " %) (pop taglist))))
@@ -165,19 +165,19 @@ select
 from
     distinctimages
 where progress = 'complete'
-order by random() limit :numimages
+order by random() limit :numimages::integer
 
 -- :name names-for-tags :? :*
 -- :doc given a list of tag ids, return ids and names
 select tag_id, tag_name, description
 from tag
-where tag_id in (:v*:tags)
+where tag_id = any(array[:v*:tags]::integer[])
 
 -- :name tag-info :? :1
 -- :doc info about one tag
 select :i*:cols
 from tag
-where tag_id = :tag_id;
+where tag_id = :tag_id::integer;
 
 -- :name all-tags-with-images :? :*
 -- :doc return all tags which have an image
@@ -192,26 +192,26 @@ order by advanced, tag_name;
 -- :name delete-image! :! :n
 -- :doc delete an image
 delete from image
-where image_id = :image_id;
+where image_id = :image_id::integer;
 
 -- :name delete-tag! :! :n
 -- :doc delete a tag
 delete from tag
-where tag_id = :tag_id;
+where tag_id = :tag_id::integer;
 
 -- :name update-progress! :! :n
 -- :doc updates the progress on an image
 update image
 set progress = :progress
-where image_id = :image_id;
+where image_id = :image_id::integer;
 
 -- :name get-progress :? :1
 -- :doc get the processing progress for an image
 select progress from image
-where image_id = :image_id;
+where image_id = :image_id::integer;
 
 -- :name save-meta! :! :n
 -- :doc adds metadata to an image
 update image
 set imagemeta = :imagemeta::jsonb
-where image_id = :image_id;
+where image_id = :image_id::integer;

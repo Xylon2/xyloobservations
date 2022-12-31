@@ -91,33 +91,33 @@
                   :object_ref object_ref}))
 
 (defn message-handler
-  [ch meta ^bytes payload]
+  [ch {:keys [type]} ^bytes payload]
   (let [message (nippy/thaw payload)
         {:keys [image_id object_ref mimetype size imagebytes]} message]
-    (log/info (format "received image id %s with ref %s" image_id object_ref))
+    (log/info (format "%s: received image id %s with ref %s" type image_id object_ref))
     (db/update-progress! {:image_id image_id :progress "resizing"})
 
     ;; resize
     (try
       (def uploadme (resizers/resize size imagebytes image_id mimetype))
-      (log/info (format "resized image %s successfully" image_id))
+      (log/info (format "%s: resized image %s successfully" type image_id))
       (db/update-progress! {:image_id image_id :progress "saving"})
       (catch Exception e
         ;; we log the output of the exception, then we throw it again
         ;; to stop any further execution
-        (log/info (format "failed resizing image %s with exception: %s" image_id e))
+        (log/info (format "%s: failed resizing image %s with exception: %s" type image_id e))
         (db/update-progress! {:image_id image_id :progress "failed resizing"})
         (throw (ex-info e {:type :resize-exception}))))
 
     ;; upload the items from the "uploadme" var and save the metadata
     (try
       (update-and-save image_id object_ref uploadme)
-      (log/info (format "uploaded image id %s with ref %s" image_id object_ref))
+      (log/info (format "%s: uploaded image id %s with ref %s" type image_id object_ref))
       (db/update-progress! {:image_id image_id :progress "complete"})
       (catch Exception e
         ;; we log the output of the exception, then we throw it again
         ;; to stop any further execution
-        (log/info (format "failed saving image %s with exception: %s" image_id e))
+        (log/info (format "%s: failed saving image %s with exception: %s" type image_id e))
         (db/update-progress! {:image_id image_id :progress "failed saving"})
         (throw (ex-info e {:type :save-exception}))))
 
@@ -143,3 +143,15 @@
     (lb/publish (thequeue :ch) default-exchange-name (thequeue :qname)
                 (nippy/freeze (map-of imagebytes object_ref image_id mimetype size))
                 {:content-type "application/json" :type "new_image"})))
+
+(defn recompress [image_id]
+  ;; need to download original image
+  (let [{url-prefix :url-prefix} env
+        [{{{:keys [extension mimetype]} :original} :imagemeta
+          object_ref_old :object_ref}] (db/caption-and-object {:image_id image_id})
+        old-img-url (str url-prefix object_ref_old "_original." extension)
+        {imagebytes :body size :length} (httpclient/get old-img-url {:as :byte-array})
+        object_ref (img-id-gen)]
+    (lb/publish (thequeue :ch) default-exchange-name (thequeue :qname)
+                (nippy/freeze (map-of imagebytes object_ref image_id mimetype size))
+                {:content-type "application/json" :type "resize_image"})))

@@ -213,5 +213,6 @@ where image_id = :image_id::integer;
 -- :name save-meta! :! :n
 -- :doc adds metadata to an image
 update image
-set imagemeta = :imagemeta::jsonb
+set imagemeta = :imagemeta::jsonb,
+    object_ref = :object_ref
 where image_id = :image_id::integer;

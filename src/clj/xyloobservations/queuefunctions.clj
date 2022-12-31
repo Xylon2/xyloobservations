@@ -15,7 +15,8 @@
             [xyloobservations.db.core :as db]
             [xyloobservations.resizingfunctions :as resizers]
             [cheshire.core :refer :all]
-            [xyloobservations.mimetypes :as mimetypes]))
+            [xyloobservations.mimetypes :as mimetypes]
+            [clj-http.client :as httpclient]))
 
 (defmacro map-of
   [& xs]
@@ -33,6 +34,9 @@
 
 (def ^{:const true}
   default-exchange-name "")
+
+(defn img-id-gen []
+  (str (.toString (java.util.UUID/randomUUID))))
 
 (defn awscreds
   "makes a map of aws creds in the format put-object likes"
@@ -83,7 +87,8 @@
     "filesystem"
     (save-to-filesystem object_ref uploadme))
   (db/save-meta! {:imagemeta (generate-string (reduce extract-key {} uploadme))
-                  :image_id image_id}))
+                  :image_id image_id
+                  :object_ref object_ref}))
 
 (defn message-handler
   [ch meta ^bytes payload]

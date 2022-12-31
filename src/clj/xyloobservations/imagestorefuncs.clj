@@ -17,7 +17,7 @@
 (defn store-image
   "adds an image's basic info to the database and puts it in the queue"
   [extension mimetype tempfile t-conn caption size]
-  (let [object_ref (str (.toString (java.util.UUID/randomUUID)))
+  (let [object_ref (queue/img-id-gen)
         image_id (:image_id (db/reference-image! t-conn
                                                  (map-of object_ref caption)))]
     (queue/add tempfile object_ref image_id mimetype size)

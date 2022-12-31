@@ -37,7 +37,8 @@
 
 (defn make_image_version
   "Given a path, a max-size and a resolution, makes the image or copy it.
-   Return a map of filepath, width, mimetype and identifier."
+   Return a map of filepath, width, mimetype and identifier.
+   n.b. size is the filesize in bytes"
   [{:keys [origpath origdimensions size origmimetype]}
    {:keys [newpath maxsize resolution identifier]}]
   (if (> size maxsize)

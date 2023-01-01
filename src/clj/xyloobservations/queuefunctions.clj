@@ -89,7 +89,8 @@
     (save-to-filesystem object_ref uploadme))
   (db/save-meta! {:imagemeta (generate-string (reduce extract-key {} uploadme))
                   :image_id image_id
-                  :object_ref object_ref})))
+                  :object_ref object_ref
+                  :url_prefix (env :url-prefix)})))
 
 (defn message-handler
   [ch {:keys [type]} ^bytes payload]
@@ -147,10 +148,10 @@
 
 (defn recompress [image_id]
   ;; need to download original image
-  (let [{url-prefix :url-prefix} env
-        [{{{:keys [extension mimetype]} :original} :imagemeta
+  (let [[{{{:keys [extension mimetype]} :original} :imagemeta
+          url_prefix_old :url_prefix
           object_ref_old :object_ref}] (db/caption-and-object {:image_id image_id})
-        old-img-url (str url-prefix object_ref_old "_original." extension)
+        old-img-url (str url_prefix_old object_ref_old "_original." extension)
         {imagebytes :body size :length} (httpclient/get old-img-url {:as :byte-array})]
     (lb/publish (thequeue :ch) default-exchange-name (thequeue :qname)
                 (nippy/freeze (map-of imagebytes image_id mimetype size))

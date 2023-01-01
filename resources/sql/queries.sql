@@ -33,6 +33,7 @@ returning image_id
 select
     image_id,
     object_ref,
+    url_prefix,
     caption,
     imagemeta
 from
@@ -90,6 +91,7 @@ and tag_ref = :tag::integer;
 select
     image_id,
     object_ref,
+    url_prefix,
     caption,
     imagemeta
 from image
@@ -113,6 +115,7 @@ and tag_ref = :tag_id::integer;
 select
     image_id,
     object_ref,
+    url_prefix,
     caption,
     imagemeta
 from
@@ -127,6 +130,7 @@ order by image_id desc;
 select
     image_id,
     object_ref,
+    url_prefix,
     caption,
     imagemeta
 from
@@ -149,6 +153,7 @@ with distinctimages as (
     select distinct
         image_id,
         object_ref,
+        url_prefix,
         caption,
         imagemeta,
         progress
@@ -160,6 +165,7 @@ with distinctimages as (
 select
     image_id,
     object_ref,
+    url_prefix,
     caption,
     imagemeta
 from
@@ -214,5 +220,11 @@ where image_id = :image_id::integer;
 -- :doc adds metadata to an image
 update image
 set imagemeta = :imagemeta::jsonb,
-    object_ref = :object_ref
+    object_ref = :object_ref,
+    url_prefix = :url_prefix
 where image_id = :image_id::integer;
+
+-- :name set-url-prefix! :! :n
+-- :doc just sets the url_prefix for all images
+update image
+set url_prefix = :url_prefix

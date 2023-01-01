@@ -23,11 +23,10 @@
 
 (defn resolve_images
   "We output a sequence of maps, each containing an id, caption, a urlprefix and a map of sizes.
-   The images argument gives us image_id, object_ref, caption and imagemeta."
+   The images argument gives us image_id, object_ref, url_prefix, caption and imagemeta."
   [images]
-  (let [{url-prefix :url-prefix} env]
-    (for [x images]
-      {:image_id (x :image_id)
-       :caption (x :caption)
-       :urlprefix (str url-prefix (x :object_ref))
-       :sizes (x :imagemeta)})))
+  (for [x images]
+    {:image_id (x :image_id)
+     :caption (x :caption)
+     :full_prefix (str (x :url_prefix) (x :object_ref))
+     :sizes (x :imagemeta)}))

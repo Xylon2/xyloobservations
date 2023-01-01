@@ -6,6 +6,7 @@
     [luminus-migrations.core :as migrations]
     [xyloobservations.config :refer [env]]
     [xyloobservations.authfunctions :as authfunc]
+    [xyloobservations.specialmigrations :as specmig]
     [clojure.tools.cli :refer [parse-opts]]
     [clojure.tools.logging :as log]
     [mount.core :as mount])
@@ -94,6 +95,11 @@
     (let [{:keys [username password]} (read-user-pass)]
       (mount/start #'xyloobservations.db.core/*db*)
       (authfunc/create-user! username password)
+      (System/exit 0))
+    (some #{"special-migrate"} args)
+    (do
+      (mount/start #'xyloobservations.db.core/*db*)
+      (specmig/set-url-prefix)
       (System/exit 0))
     :else
     (start-app args)))

@@ -17,10 +17,8 @@
 (defn store-image
   "adds an image's basic info to the database and puts it in the queue"
   [extension mimetype tempfile t-conn caption size]
-  (let [object_ref (queue/img-id-gen)
-        image_id (:image_id (db/reference-image! t-conn
-                                                 (map-of object_ref caption)))]
-    (queue/add tempfile object_ref image_id mimetype size)
+  (let [image_id (:image_id (db/reference-image! t-conn {:caption caption}))]
+    (queue/add tempfile image_id mimetype size)
     image_id))
 
 (defn resolve_images

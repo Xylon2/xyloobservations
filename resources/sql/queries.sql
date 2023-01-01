@@ -24,8 +24,8 @@ where tag_id = :tag_id::integer
 
 -- :name reference-image! :! :1
 -- :doc add an image which is in s3
-insert into image (object_ref, caption)
-values (:object_ref, :caption)
+insert into image (caption)
+values (:caption)
 returning image_id
 
 -- :name orphan-images :? :*

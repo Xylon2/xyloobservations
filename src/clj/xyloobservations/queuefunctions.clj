@@ -93,8 +93,9 @@
 (defn message-handler
   [ch {:keys [type]} ^bytes payload]
   (let [message (nippy/thaw payload)
-        {:keys [image_id object_ref mimetype size imagebytes]} message]
-    (log/info (format "%s: received image id %s with ref %s" type image_id object_ref))
+        {:keys [image_id mimetype size imagebytes]} message
+        object_ref (img-id-gen)]
+    (log/info (format "%s: received image id %s and chozen ref %s" type image_id object_ref))
     (db/update-progress! {:image_id image_id :progress "resizing"})
 
     ;; resize
@@ -137,11 +138,11 @@
           (lch/close ch)
           (rmq/close conn)))
 
-(defn add [tempfile object_ref image_id mimetype size]
+(defn add [tempfile image_id mimetype size]
   ;; need to pickle
   (let [imagebytes (slurp-bytes tempfile)]
     (lb/publish (thequeue :ch) default-exchange-name (thequeue :qname)
-                (nippy/freeze (map-of imagebytes object_ref image_id mimetype size))
+                (nippy/freeze (map-of imagebytes image_id mimetype size))
                 {:content-type "application/json" :type "new_image"})))
 
 (defn recompress [image_id]
@@ -150,8 +151,7 @@
         [{{{:keys [extension mimetype]} :original} :imagemeta
           object_ref_old :object_ref}] (db/caption-and-object {:image_id image_id})
         old-img-url (str url-prefix object_ref_old "_original." extension)
-        {imagebytes :body size :length} (httpclient/get old-img-url {:as :byte-array})
-        object_ref (img-id-gen)]
+        {imagebytes :body size :length} (httpclient/get old-img-url {:as :byte-array})]
     (lb/publish (thequeue :ch) default-exchange-name (thequeue :qname)
-                (nippy/freeze (map-of imagebytes object_ref image_id mimetype size))
+                (nippy/freeze (map-of imagebytes image_id mimetype size))
                 {:content-type "application/json" :type "resize_image"})))

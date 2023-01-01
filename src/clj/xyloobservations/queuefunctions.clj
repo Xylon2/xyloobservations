@@ -80,22 +80,22 @@
 
 (defn update-and-save
   "upload the items from the uploadme var and save the metadata"
-  [image_id object_ref uploadme]
-  (case (env :image-store)
+  [image_id uploadme]
+  (let [object_ref (img-id-gen)]
+    (case (env :image-store)
     "s3"
     (upload-to-s3 object_ref uploadme)
     "filesystem"
     (save-to-filesystem object_ref uploadme))
   (db/save-meta! {:imagemeta (generate-string (reduce extract-key {} uploadme))
                   :image_id image_id
-                  :object_ref object_ref}))
+                  :object_ref object_ref})))
 
 (defn message-handler
   [ch {:keys [type]} ^bytes payload]
   (let [message (nippy/thaw payload)
-        {:keys [image_id mimetype size imagebytes]} message
-        object_ref (img-id-gen)]
-    (log/info (format "%s: received image id %s and chozen ref %s" type image_id object_ref))
+        {:keys [image_id mimetype size imagebytes]} message]
+    (log/info (format "%s: received image id %s" type image_id))
     (db/update-progress! {:image_id image_id :progress "resizing"})
 
     ;; resize
@@ -112,7 +112,7 @@
 
     ;; upload the items from the "uploadme" var and save the metadata
     (try
-      (update-and-save image_id object_ref uploadme)
+      (def object_ref (update-and-save image_id uploadme))
       (log/info (format "%s: uploaded image id %s with ref %s" type image_id object_ref))
       (db/update-progress! {:image_id image_id :progress "complete"})
       (catch Exception e

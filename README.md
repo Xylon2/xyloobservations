@@ -114,8 +114,9 @@ It will prompt you for a username and password.
 
 ### url_prefix
 
-If you upgrade from an old version of the gallery and ___ you likely need to run
-"special-migrate". This populates the new "url_prefix" column of the user table.
+If you upgrade from an old version of the gallery and none of the images are loading,
+you likely need to run "special-migrate". This populates the new "url_prefix" column
+of the user table.
 ```
 set -o allexport
 source /var/gallery/env

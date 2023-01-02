@@ -132,12 +132,16 @@
                qname "xyloobservations.imagequeue"]
            (log/info "starting the queue")
            (lq/declare ch qname {:exclusive false :auto-delete true})
-           (lc/subscribe ch qname message-handler {:auto-ack true})
            (map-of conn ch qname))
   :stop (let [{:keys [conn ch qname]} thequeue]
           (log/info "stopping the queue")
           (lch/close ch)
           (rmq/close conn)))
+
+(mount/defstate queuelistener
+  :start (let [{:keys [conn ch qname]} thequeue]
+           (lc/subscribe ch qname message-handler {:auto-ack true}))
+  :stop :pass)
 
 (defn add [tempfile image_id mimetype size]
   ;; need to pickle

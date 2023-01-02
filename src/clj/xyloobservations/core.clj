@@ -7,6 +7,7 @@
     [xyloobservations.config :refer [env]]
     [xyloobservations.authfunctions :as authfunc]
     [xyloobservations.specialmigrations :as specmig]
+    [xyloobservations.queuefunctions :as queue]
     [clojure.tools.cli :refer [parse-opts]]
     [clojure.tools.logging :as log]
     [mount.core :as mount])
@@ -66,6 +67,12 @@
     {:username (apply str username)
      :password (apply str password)}))
 
+(defn parse-number
+  "Reads a number from a string. Returns nil if not a number."
+  [s]
+  (when (re-find #"^\d+$" s)
+    (read-string s)))
+
 (defn -main [& args]
   (-> args
                             (parse-opts cli-options)
@@ -108,6 +115,16 @@
       (mount/start #'xyloobservations.db.core/*db*)
       (specmig/set-url-prefix)
       (System/exit 0))
+    (some #{"recompress-img"} args)
+    (let [image_id (last args)]
+      (if (parse-number image_id)
+        (do
+          (mount/start #'xyloobservations.db.core/*db* #'xyloobservations.queuefunctions/thequeue)
+          (queue/recompress (parse-number image_id))
+          (System/exit 0))
+        (do
+          (println "last arg must be image_id to recompress")
+          (System/exit 1))))
     :else
     (start-app args)))
   

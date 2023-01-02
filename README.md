@@ -89,6 +89,7 @@ BUCKET_NAME=
 CLOUDAMQP_APIKEY=
 CLOUDAMQP_URL=
 DATABASE_URL=postgresql://localhost/dbname?user=dbuser&password=dbpass
+IMG_FORMAT=avif
 ```
 
 Note if your RabbitMQ is running on localhost you may ommit the `CLOUDAMQP_APIKEY` and `CLOUDAMQP_URL`.

@@ -136,6 +136,11 @@ source /var/gallery/env
 
 It will run in the background, re-compressing your images one at-a-time.
 
+n.b. This will not delete the old versions of the images from the storage backend,
+therefore, if you are re-compressing all the images for the purpose of converting
+them to a newer format, you may want to make a new storage back-end anyway and
+delete the old one after it completes successfully.
+
 ## License
 
 Copyright © 2022 Joseph Graham

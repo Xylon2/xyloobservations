@@ -71,6 +71,7 @@
                             (parse-opts cli-options)
                             (mount/start-with-args #'xyloobservations.config/env))
   (cond
+    ;; sanity checks
     (nil? (:database-url env))
     (do
       (log/error "Database config not found, :database-url environment variable must be set")
@@ -79,14 +80,16 @@
     (do
       (log/error "Image store config not found, :image-store environment variable must be set")
       (System/exit 1))
-    (nil? ({"s3" true "filesytem" true} (:image-store env)))
+    (nil? (#{"s3" "filesytem"} (:image-store env)))
     (do
       (log/error "Image store config invalid, :image-store should be s3 or filesystem")
       (System/exit 1))
-    (some #(= (:img-format env) %) ["webp" "avif" "jpeg"])
+    (nil? (#{"webp" "avif" "jpeg"} (:img-format env)))
     (do
       (log/error "No valid config detected for image format, :img-format environment variable must be set")
       (System/exit 1))
+
+    ;; command-line actions
     (some #{"init"} args)
     (do
       (migrations/init (select-keys env [:database-url :init-script]))

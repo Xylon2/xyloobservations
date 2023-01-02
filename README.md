@@ -40,6 +40,9 @@ Create a PostgreSQL database and user, and create a file `dev-config.edn` with c
  ;; :aws-secret-key ""
  ;; :aws-region "eu-west-2"
  ;; :bucket-name ""
+
+ ;; webp, avif or jpeg
+ :img-format "webp"
 }
 ```
 

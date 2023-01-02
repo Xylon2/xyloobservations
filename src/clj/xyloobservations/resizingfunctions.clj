@@ -2,6 +2,7 @@
   (:use [clojure.java.shell :only [sh]])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [xyloobservations.config :refer [env]]
             [xyloobservations.mimetypes :as mimetypes]))
 
 (defn copy-file [source-path dest-path]
@@ -50,7 +51,7 @@
             (def newdimensions (get_dimensions newpath)))
         (do (compresslike origpath newpath (origdimensions :width))
             (def newdimensions origdimensions)))
-      (def newmimetype "image/avif"))
+      (def newmimetype (str "image/" (env :img-format))))
     (do
       (copy-file origpath newpath)
       (def newdimensions origdimensions)
@@ -65,9 +66,9 @@
   [size imagebytes image_id mimetype]
   (let [tempdir "/tmp/imageresizing/"
         origpath   (str tempdir image_id "_orig." (mimetypes/type-to-extension mimetype))
-        mediumpath (str tempdir image_id "_medium.avif")
-        smallpath  (str tempdir image_id "_small.avif")
-        tinypath   (str tempdir image_id "_tiny.avif")]
+        mediumpath (str tempdir image_id "_medium." (env :img-format))
+        smallpath  (str tempdir image_id "_small." (env :img-format))
+        tinypath   (str tempdir image_id "_tiny." (env :img-format))]
 
     ;; make the temp directory
     (io/make-parents origpath)

@@ -73,15 +73,19 @@
   (cond
     (nil? (:database-url env))
     (do
-      (log/error "Database configuration not found, :database-url environment variable must be set before running")
+      (log/error "Database config not found, :database-url environment variable must be set")
       (System/exit 1))
     (nil? (:image-store env))
     (do
-      (log/error "Image store configuration not found, :image-store environment variable must be set before running")
+      (log/error "Image store config not found, :image-store environment variable must be set")
       (System/exit 1))
     (nil? ({"s3" true "filesytem" true} (:image-store env)))
     (do
-      (log/error "Image store configuration invalid, :image-store should be s3 or filesystem")
+      (log/error "Image store config invalid, :image-store should be s3 or filesystem")
+      (System/exit 1))
+    (some #(= (:img-format env) %) ["webp" "avif" "jpeg"])
+    (do
+      (log/error "No valid config detected for image format, :img-format environment variable must be set")
       (System/exit 1))
     (some #{"init"} args)
     (do

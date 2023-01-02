@@ -125,6 +125,11 @@
         (do
           (println "last arg must be image_id to recompress")
           (System/exit 1))))
+    (some #{"recompress-all"} args)
+    (do
+      (mount/start #'xyloobservations.db.core/*db* #'xyloobservations.queuefunctions/thequeue)
+      (doall (map #(queue/recompress %) (specmig/get-all-images)))
+      (System/exit 0))
     :else
     (start-app args)))
   

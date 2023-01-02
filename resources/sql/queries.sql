@@ -228,3 +228,9 @@ where image_id = :image_id::integer;
 -- :doc just sets the url_prefix for all images
 update image
 set url_prefix = :url_prefix
+
+-- :name all-images :? :*
+-- :doc return image_id, object_ref and imagemeta for all images
+select image_id
+from image
+where progress = 'complete';

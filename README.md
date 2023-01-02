@@ -66,6 +66,8 @@ If you are willing to comply with the requirements of the Affero GPL you may use
 
 For general info on hosting Luminus apps check out [the luminus docs](https://luminusweb.com/docs/deployment.html).
 
+For help setting up your S3 bucket, see [S3.md].
+
 xyloobservations can store it's images either in an S3 bucket or on the filesystem. If you want to use s3 you will need to specify the aws credentials and bucket-name.
 
 For using s3, `dev-config.edn` will look something like this:

@@ -110,6 +110,31 @@ source /var/gallery/env
 
 It will prompt you for a username and password.
 
+## Special upgrades
+
+### url_prefix
+
+If you upgrade from an old version of the gallery and ___ you likely need to run
+"special-migrate". This populates the new "url_prefix" column of the user table.
+```
+set -o allexport
+source /var/gallery/env
+/usr/bin/java -jar /var/gallery/xyloobservations.jar special-migrate
+```
+
+### recompress images
+
+If you want to re-compress the images, either because you are changing the compression
+format or because you want to migrate them to a new storage back-end, there is a
+command for this:
+```
+set -o allexport
+source /var/gallery/env
+/usr/bin/java -jar /var/gallery/xyloobservations.jar recompress-all
+```
+
+It will run in the background, re-compressing your images one at-a-time.
+
 ## License
 
 Copyright © 2022 Joseph Graham

@@ -1,21 +1,20 @@
 (ns xyloobservations.queuefunctions
   (:gen-class)
-  (:use
-   [amazonica.aws.s3])
   (:require [langohr.core      :as rmq]
             [langohr.channel   :as lch]
             [langohr.queue     :as lq]
             [langohr.consumers :as lc]
             [langohr.basic     :as lb]
             [xyloobservations.config :refer [env]]
-            [taoensso.nippy :as nippy]
-            [clojure.java.io :as io]
-            [mount.core :as mount]
-            [clojure.tools.logging :as log]
             [xyloobservations.db.core :as db]
             [xyloobservations.resizingfunctions :as resizers]
-            [cheshire.core :refer :all]
             [xyloobservations.mimetypes :as mimetypes]
+            [clojure.java.io :as io]
+            [clojure.tools.logging :as log]
+            [mount.core :as mount]
+            [taoensso.nippy :as nippy]
+            [cheshire.core :refer [generate-string]]
+            [amazonica.aws.s3 :refer [put-object]]
             [clj-http.client :as httpclient]))
 
 (defmacro map-of

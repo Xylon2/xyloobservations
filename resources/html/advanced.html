@@ -22,7 +22,7 @@
     <div id="thepictures" style="padding-top: 1em;">
     {% for image in images %}
       <figure class="nomargin">
-        <a href="{{image.full_prefix}}_original.{{image.sizes.original.extension}}">
+        <a href="{{image.full_prefix}}_medium.{{image.sizes.medium.extension}}">
           <img
             srcset="{{image.full_prefix}}_tiny.{{image.sizes.tiny.extension}} {{image.sizes.tiny.width}}w,
                     {{image.full_prefix}}_small.{{image.sizes.small.extension}} {{image.sizes.small.width}}w,

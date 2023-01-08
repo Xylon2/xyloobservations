@@ -28,7 +28,7 @@
             src="{{image.full_prefix}}_tiny.{{image.sizes.tiny.extension}}"
             {% if forloop.counter > 3 %}loading="lazy"{% endif %}>
         </a>
-        <figcaption>{{image.caption}} <span class="has-tooltip-arrow has-tooltipl-multiline" style="font-style: normal; text-align: start;" data-tooltip="place: foobar&#10;year: {{ image.date }}">🛈</span> <a style="font-style: normal;" href="{{image.full_prefix}}_original.{{image.sizes.original.extension}}">⮋</a></figcaption>
+        <figcaption>{{image.caption}} {% if any image.place image.date %}<span class="has-tooltip-arrow has-tooltipl-multiline" style="font-style: normal; text-align: start;" data-tooltip="{% if image.place %}place: {{ image.place }}&#10;{% endif %}{% if image.date %}date: {{ image.date }}{% endif %}">🛈</span>{% endif %} <a style="font-style: normal;" href="{{image.full_prefix}}_original.{{image.sizes.original.extension}}">⮋</a></figcaption>
       </figure>
       {% if loggedin %}
       {# the redirect= here is because if we delete we need to know where to go back to #}

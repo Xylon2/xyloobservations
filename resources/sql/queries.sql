@@ -236,7 +236,7 @@ from image
 where progress = 'complete';
 
 -- :name fetch-date :? :1
--- :doc return the year and place of an image
+-- :doc return the date of an image, if it has a tag
 select
     tag_name
 from
@@ -244,4 +244,15 @@ from
 inner join imagetag
     on tag_id = tag_ref
 where advanced = 'date'
+and image_ref = :image_id::integer;
+
+-- :name fetch-place :? :1
+-- :doc return the place of an image, if it has a tag
+select
+    tag_name
+from
+    tag
+inner join imagetag
+    on tag_id = tag_ref
+where advanced = 'place'
 and image_ref = :image_id::integer;

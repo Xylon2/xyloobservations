@@ -29,4 +29,6 @@
     {:image_id (x :image_id)
      :caption (x :caption)
      :full_prefix (str (x :url_prefix) (x :object_ref))
+     :date ((db/fetch-date {:image_id (x :image_id)}) :tag_name)
+     :place (str "foobar")
      :sizes (x :imagemeta)}))

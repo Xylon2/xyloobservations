@@ -28,7 +28,7 @@
             src="{{image.full_prefix}}_tiny.{{image.sizes.tiny.extension}}"
             {% if forloop.counter > 3 %}loading="lazy"{% endif %}>
         </a>
-        <figcaption>{{image.caption}} <a href="#" onclick="">🛈</a> <a href="{{image.full_prefix}}_original.{{image.sizes.original.extension}}">⮋</a></figcaption>
+        <figcaption>{{image.caption}} <span class="has-tooltip-arrow has-tooltipl-multiline" style="font-style: normal; text-align: start;" data-tooltip="place: foobar&#10;year: 1970">🛈</span> <a style="font-style: normal;" href="{{image.full_prefix}}_original.{{image.sizes.original.extension}}">⮋</a></figcaption>
       </figure>
       {% if loggedin %}
       {# the redirect= here is because if we delete we need to know where to go back to #}

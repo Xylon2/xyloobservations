@@ -138,7 +138,7 @@ from
 where image_id in
 (
 /*~
-(let [taglist (->> params :tags (map parse-long))]
+(let [taglist (:tags params)]
   (cons
     (str "select image_ref from imagetag where tag_ref = " (last taglist))
     (map #(str "intersect select image_ref from imagetag where tag_ref = " %) (pop taglist))))

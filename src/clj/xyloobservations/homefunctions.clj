@@ -13,7 +13,7 @@
    "get a list of images that have all of a list of tags.
     output is image_id, object_ref, caption and imagemeta"
   [tags]
-  (db/images-multi-tags {:tags (vec tags)}))
+  (db/images-multi-tags {:tags (vec (map parse-long tags))}))
 
 (defn always-vector
   "this function takes something which may or may not be a vector and makes it always a vector"

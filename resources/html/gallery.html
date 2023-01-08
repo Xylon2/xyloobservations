@@ -28,7 +28,7 @@
             src="{{image.full_prefix}}_tiny.{{image.sizes.tiny.extension}}"
             {% if forloop.counter > 3 %}loading="lazy"{% endif %}>
         </a>
-        <figcaption>{{image.caption}}</figcaption>
+        <figcaption>{{image.caption}} <a href="#" onclick="">🛈</a> <a href="{{image.full_prefix}}_original.{{image.sizes.original.extension}}">⮋</a></figcaption>
       </figure>
       {% if loggedin %}
       {# the redirect= here is because if we delete we need to know where to go back to #}

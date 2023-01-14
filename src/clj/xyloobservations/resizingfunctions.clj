@@ -70,6 +70,16 @@
          :extension (mimetypes/type-to-extension newmimetype)
          :identifier identifier} newdimensions))
 
+(defn get_crop_settings
+  "given the image resolution & image id, returns the crop settings"
+  [{:keys [width height]}
+   image_id]
+  (let [{croppy :crop_data} (db/get-crop-settings {:image_id image_id})]
+    {:hpercent (croppy :hpercent)
+     :vpercent (croppy :vpercent)
+     :hoffset  (.intValue (* width  (/ (croppy :hoffset) 100)))
+     :voffset  (.intValue (* height (/ (croppy :voffset) 100)))}))
+
 (defn resize
   "generates the compressed versions of the uploaded image"
   [size imagebytes image_id mimetype]
@@ -87,7 +97,7 @@
       (.write w imagebytes))
 
     (let [origdimensions (get_dimensions origpath)
-          {cropsettings :crop_data} (db/get-crop-settings {:image_id image_id})
+          cropsettings (get_crop_settings origdimensions image_id)
           make_image_closure #(make_image_version {:origpath origpath
                                                    :origdimensions origdimensions
                                                    :size size

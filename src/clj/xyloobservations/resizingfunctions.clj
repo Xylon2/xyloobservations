@@ -3,6 +3,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [xyloobservations.config :refer [env]]
+            [xyloobservations.db.core :as db]
             [xyloobservations.mimetypes :as mimetypes]))
 
 (defn copy-file [source-path dest-path]
@@ -29,9 +30,16 @@
 
 (defn compresslike
   "resize to resolution"
-  [origpath newpath resolution]
-  (let [{:keys [exit out err]}
-        (sh "convert" origpath "-quality" "60" "-resize" (str resolution "x" resolution ">") newpath)]
+  [origpath newpath resolution cropsettings]
+  (let [cropstring (str (cropsettings :hpercent) "%x"
+                        (cropsettings :vpercent) "%+"
+                        (cropsettings :hoffset) "+"
+                        (cropsettings :voffset))
+        resizestring (str resolution "x" resolution ">")
+        {:keys [exit out err]} (sh "convert" origpath
+                                   "-gravity" "Center" "-crop" cropstring
+                                   "-quality" "60" "-resize" resizestring
+                                   newpath)]
     (when (not= exit 0)
       (throw (ex-info err
                       {:type :shell-exception, :cause :imagemagic})))))
@@ -41,15 +49,16 @@
    Return a map of filepath, width, mimetype and identifier.
    n.b. size is the filesize in bytes"
   [{:keys [origpath origdimensions size origmimetype]}
-   {:keys [newpath maxsize resolution identifier]}]
+   {:keys [newpath maxsize resolution identifier]}
+   cropsettings]
   (if (> size maxsize)
     (let [bigdim (big_dimension origdimensions)]
         ;; don't bother resizing unless the original resolution is substantially
         ;; bigger than the target resolution
       (if (> bigdim (* resolution 1.2))
-        (do (compresslike origpath newpath resolution)
+        (do (compresslike origpath newpath resolution cropsettings)
             (def newdimensions (get_dimensions newpath)))
-        (do (compresslike origpath newpath (origdimensions :width))
+        (do (compresslike origpath newpath (origdimensions :width) cropsettings)
             (def newdimensions origdimensions)))
       (def newmimetype (str "image/" (env :img-format))))
     (do
@@ -78,11 +87,11 @@
       (.write w imagebytes))
 
     (let [origdimensions (get_dimensions origpath)
-          make_image_closure
-          #(make_image_version {:origpath origpath
-                                :origdimensions origdimensions
-                                :size size
-                                :origmimetype mimetype} %)]
+          {cropsettings :crop_data} (db/get-crop-settings {:image_id image_id})
+          make_image_closure #(make_image_version {:origpath origpath
+                                                   :origdimensions origdimensions
+                                                   :size size
+                                                   :origmimetype mimetype} % cropsettings)]
       ;; the output of this function is a map of filepath, mimetype, identifier, width and height
       (conj (map #(make_image_closure %)
                  [{:newpath mediumpath :maxsize 1000000 :resolution 2560 :identifier "medium"}

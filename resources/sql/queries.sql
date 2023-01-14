@@ -256,3 +256,9 @@ inner join imagetag
     on tag_id = tag_ref
 where advanced = 'place'
 and image_ref = :image_id::integer;
+
+-- :name get-crop-settings :? :1
+-- :doc get crop settings for an image
+select crop_data
+from image
+where image_id = :image_id::integer;

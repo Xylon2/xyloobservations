@@ -40,7 +40,9 @@
                                    "-gravity" "Center" "-crop" cropstring
                                    "-quality" "60" "-resize" resizestring
                                    newpath)]
-    (when (not= exit 0)
+    (when (or
+           (not= exit 0)
+           (str/includes? err "geometry does not contain image"))
       (throw (ex-info err
                       {:type :shell-exception, :cause :imagemagic})))))
 

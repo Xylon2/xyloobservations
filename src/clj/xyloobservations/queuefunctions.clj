@@ -11,6 +11,7 @@
             [xyloobservations.mimetypes :as mimetypes]
             [clojure.java.io :as io]
             [clojure.tools.logging :as log]
+            [clojure.string :as str]
             [mount.core :as mount]
             [taoensso.nippy :as nippy]
             [cheshire.core :refer [generate-string]]
@@ -107,7 +108,12 @@
         ;; we log the output of the exception, then we throw it again
         ;; to stop any further execution
         (log/info (format "%s: failed resizing image %s with exception: %s" type image_id e))
-        (db/update-progress! {:image_id image_id :progress "failed resizing"})
+        (db/update-progress! {:image_id image_id :progress
+                              (cond
+                                (str/includes? e "geometry does not contain image")
+                                "crop offset too big"
+                                :else
+                                "failed resizing")})
         (throw (ex-info e {:type :resize-exception}))))
 
     ;; upload the items from the "uploadme" var and save the metadata

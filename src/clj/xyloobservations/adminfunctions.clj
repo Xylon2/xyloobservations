@@ -5,11 +5,9 @@
    [next.jdbc :as jdbc]
    [xyloobservations.db.core :as db]
    [clojure.string :as str]
-   [cheshire.core :refer [generate-string]]
    [xyloobservations.imagestorefuncs :as imgstore]
    [xyloobservations.mimetypes :as mimetypes]
-   [xyloobservations.homefunctions :as homefunc]
-   [xyloobservations.queuefunctions :as queuefunc]))
+   [xyloobservations.homefunctions :as homefunc]))
 
 (defmacro map-of
   [& xs]
@@ -59,11 +57,3 @@
 (defn update-caption! "simply update the caption"
   [image_id {{newcaption :caption} :params}]
   (db/update-caption! (map-of newcaption image_id)))
-
-(defn crop-image "update the image crop setting, and trigger the pipeline to re-compress the image"
-  [image_id, {{:keys [hpercent vpercent hoffset voffset]} :params}]
-  (db/set-crop! {:image_id image_id
-                 :crop_data (generate-string (reduce (fn [build [key val]] (conj build {key (parse-long val)}))
-                                                     {}
-                                                     (map-of hpercent vpercent hoffset voffset)))})
-  (queuefunc/recompress image_id))

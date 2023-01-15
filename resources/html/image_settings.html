@@ -53,7 +53,7 @@
       <input type="hidden" name="whichform" value="add_tag">
     </form>
     <h2>Crop</h2>
-    <form method="POST">
+    <form id="ajaxform" method="POST" enctype="multipart/form-data" action="/crop_image_ajax?id={{image_id}}">
       {% csrf-field %}
       <input type="hidden" name="whichform" value="set_crop">
       <table>
@@ -94,9 +94,15 @@
             </td>
           </tr>
       </table>
-      <input type="submit" value="Save and re-compress">
+      <input type="submit" id="ajaxsubmit" value="Save and re-compress">
     </form>
+    <p id="message" style="font-family: monospace; color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
+    </p>
     <h2>Delete</h2>
     <a href="/deleteimg?id={{image_id}}&redirect={{redirect}}" class="button">Delete</a>
   </div>
+{% endblock %}
+
+{% block page-scripts %}
+  {% include "progress_scripts.html" %}
 {% endblock %}

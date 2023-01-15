@@ -7,7 +7,8 @@
    [ring.util.http-response :as response]
    [xyloobservations.db.core :as db]
    [xyloobservations.imagestorefuncs :as imgstore]
-   [cheshire.core :refer [generate-string parse-string]]))
+   [cheshire.core :refer [generate-string parse-string]]
+   [xyloobservations.queuefunctions :as queuefunc]))
 
 (defn urlencode [foo]
   (java.net.URLEncoder/encode foo "UTF-8"))
@@ -42,21 +43,38 @@
 
 (defn upload-image-page [request]
   (let [all_tags (db/all_tags)]
-    (myrender request "upload_image.html" {:all_tags all_tags})))
+    (myrender request "upload_image.html" {:all_tags all_tags :progresstype "upload"})))
 
-(defn upload-image-ajax [request]
-  (let [{file :multipart-params} request
-        {{caption :caption
-          chozen_tags :tags} :params} request]
-    (->
-     (try (let [image_id (adminfunc/upload-image! file caption chozen_tags)]
-            (generate-string {:msgtype "info" :msgtxt "...queued........." :image_id image_id}))
-          (catch AssertionError e
-            (generate-string {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))}))
-          (catch com.rabbitmq.client.AlreadyClosedException e
-            (generate-string {:msgtype "error" :msgtxt (str "failed adding image to queue: " (.getMessage e))})))
-     (response/ok)
-     (response/content-type "application/json"))))
+(defn upload-image-ajax [{file :multipart-params
+                          {caption :caption
+                           chozen_tags :tags} :params}]
+  (->
+   (try (let [image_id (adminfunc/upload-image! file caption chozen_tags)]
+          (generate-string {:msgtype "info" :msgtxt "...queued........." :image_id image_id}))
+        (catch AssertionError e
+          (generate-string {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))}))
+        (catch com.rabbitmq.client.AlreadyClosedException e
+          (generate-string {:msgtype "error" :msgtxt (str "failed adding image to queue: " (.getMessage e))})))
+   (response/ok)
+   (response/content-type "application/json")))
+
+(defn crop-image-ajax "update the image crop setting, and trigger the pipeline to re-compress the image"
+  [{{image_id "id"} :query-params
+    {:keys [hpercent vpercent hoffset voffset]} :params}]
+  (->
+   (try
+     (db/set-crop! {:image_id image_id
+                    :crop_data (generate-string (reduce (fn [build [key val]] (conj build {key (parse-long val)}))
+                                                        {}
+                                                        (map-of hpercent vpercent hoffset voffset)))})
+     (queuefunc/recompress image_id)
+     (generate-string {:msgtype "info" :msgtxt "...queued........." :image_id image_id})
+     (catch AssertionError e
+       (generate-string {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))}))
+     (catch com.rabbitmq.client.AlreadyClosedException e
+       (generate-string {:msgtype "error" :msgtxt (str "failed adding image to queue: " (.getMessage e))})))
+   (response/ok)
+   (response/content-type "application/json")))
 
 (defn image-progress [request]
   (let [{{:strs [image_id]} :query-params} request
@@ -81,8 +99,9 @@
         attached_tags (db/tag_names_of_image {:image_id image_id})
         image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
         all_tags (db/all_tags)
-        crop_data ((db/get-crop-settings {:image_id image_id}) :crop_data)]
-    (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data))))
+        crop_data ((db/get-crop-settings {:image_id image_id}) :crop_data)
+        progresstype "crop"]
+    (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data progresstype))))
 
 (defn image-settings-submit [{{image_id "id"
                                redirect "redirect"} :query-params
@@ -100,8 +119,9 @@
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
           image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
           all_tags (db/all_tags)
-          crop_data ((db/get-crop-settings {:image_id image_id}) :crop_data)]
-      (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data)))))
+          crop_data ((db/get-crop-settings {:image_id image_id}) :crop_data)
+          progresstype "crop"]
+      (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data progresstype)))))
 
 (defn orphan_images [request]
   (let [images (imgstore/resolve_images (db/orphan-images))]
@@ -164,6 +184,8 @@
    ["/upload_image" {:get upload-image-page}]
    ["/upload_image_ajax" {:get nogetplz
                           :post upload-image-ajax}]
+   ["/crop_image_ajax" {:get nogetplz
+                        :post crop-image-ajax}]
    ["/image_progress" {:get image-progress}]
    ["/image_settings" {:get image-settings-page
                        :post image-settings-submit}]

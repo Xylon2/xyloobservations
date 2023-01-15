@@ -76,6 +76,12 @@
    (response/ok)
    (response/content-type "application/json")))
 
+(defn image-deets-ajax "given an image id in the query-string, returns the full image deets"
+  [{{image_id "id"} :query-params}]
+  (-> (generate-string (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id}))))
+      (response/ok)
+      (response/content-type "application/json")))
+
 (defn image-progress [request]
   (let [{{:strs [image_id]} :query-params} request
         {progress :progress} (db/get-progress {:image_id image_id})
@@ -186,6 +192,7 @@
                           :post upload-image-ajax}]
    ["/crop_image_ajax" {:get nogetplz
                         :post crop-image-ajax}]
+   ["/image_deets_ajax" {:get image-deets-ajax}]
    ["/image_progress" {:get image-progress}]
    ["/image_settings" {:get image-settings-page
                        :post image-settings-submit}]

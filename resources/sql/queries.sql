@@ -266,5 +266,6 @@ where image_id = :image_id::integer;
 -- :name set-crop! :! :n
 -- :doc sets the crop settings
 update image
-set crop_data = :crop_data::jsonb
+set crop_data = :crop_data::jsonb,
+    progress = 'pending crop......'
 where image_id = :image_id::integer;

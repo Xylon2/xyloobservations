@@ -4,7 +4,7 @@
     <p style="color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
       {{msgtxt}}
     </p>
-    <img
+    <img id="theimage"
       srcset="{{image.full_prefix}}_tiny.{{image.sizes.tiny.extension}} {{image.sizes.tiny.width}}w,
               {{image.full_prefix}}_small.{{image.sizes.small.extension}} {{image.sizes.small.width}}w,
               {{image.full_prefix}}_medium.{{image.sizes.medium.extension}} {{image.sizes.medium.width}}w"

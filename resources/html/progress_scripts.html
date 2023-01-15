@@ -1,11 +1,29 @@
 <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
 <script>
-function doPoll(image_id){
+function refreshImage(image_id) {
+    $.get('/image_deets_ajax?id='.concat(image_id), function(image) {
+        $("#theimage").attr("srcset", `${image.full_prefix}_tiny.${image.sizes.tiny.extension} ${image.sizes.tiny.width}w,
+              ${image.full_prefix}_small.${image.sizes.small.extension} ${image.sizes.small.width}w,
+              ${image.full_prefix}_medium.${image.sizes.medium.extension} ${image.sizes.medium.width}w`);
+
+        $("#theimage").attr("sizes", `(max-width: 640px) ${image.sizes.tiny.width}px,
+             (max-width: 960px) ${image.sizes.small.width}px,
+             ${image.sizes.medium.width}px`);
+        $("#theimage").attr("src", `${image.full_prefix}_tiny.${image.sizes.tiny.extension}`);
+    });
+}
+
+function doPoll(image_id) {
     $.get('/image_progress?image_id='.concat(image_id), function(data) {
       // if it's a success or error our job is done. else keep polling
       if (["success","error"].includes(data["msgtype"])) {
         setMessage(data);
         $("#ajaxsubmit").prop("disabled", false);
+
+        if ("{{ progresstype }}" === "crop") {
+            // we need to reload the image, which means re-writing it's srcset, sizes and src
+            refreshImage(image_id);
+        }
       } else {
         setMessage(data);
         setTimeout(doPoll, 1000, image_id);

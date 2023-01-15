@@ -12,6 +12,10 @@
              (max-width: 960px) {{image.sizes.small.width}}px,
              {{image.sizes.medium.width}}px"
       src="{{image.full_prefix}}_tiny.{{image.sizes.tiny.extension}}">
+    <p>
+      <a style="font-style: normal;" href="{{image.full_prefix}}_original.{{image.sizes.original.extension}}">⬇</a>
+      <span id="message" style="font-family: monospace; color: {% if msgtype = "error" %}red{% else %}green{% endif %};"></span>
+    </p>
     <h2>Caption</h2>
     <form method="POST">
       {% csrf-field %}
@@ -96,8 +100,6 @@
       </table>
       <input type="submit" id="ajaxsubmit" value="Save and re-compress">
     </form>
-    <p id="message" style="font-family: monospace; color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
-    </p>
     <h2>Delete</h2>
     <a href="/deleteimg?id={{image_id}}&redirect={{redirect}}" class="button">Delete</a>
   </div>

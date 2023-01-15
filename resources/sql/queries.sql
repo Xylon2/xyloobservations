@@ -262,3 +262,9 @@ and image_ref = :image_id::integer;
 select crop_data
 from image
 where image_id = :image_id::integer;
+
+-- :name set-crop! :! :n
+-- :doc sets the crop settings
+update image
+set crop_data = :crop_data::jsonb
+where image_id = :image_id::integer;

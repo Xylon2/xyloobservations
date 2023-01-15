@@ -83,20 +83,19 @@
         all_tags (db/all_tags)]
     (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect))))
 
-(defn image-settings-submit [request]
-  (let [{{image_id "id"
-          redirect "redirect"} :query-params
-         {newtag :tag
-          whichform :whichform
-          newcaption :caption} :params} request
-        redirect (urlencode redirect)]
+(defn image-settings-submit [{{image_id "id"
+                               redirect "redirect"} :query-params
+                              {whichform :whichform} :params :as request}]
+  (let [redirect (urlencode redirect)]
     (case whichform
       "add_tag"
-        (adminfunc/tag-image! newtag, image_id)
+        (adminfunc/tag-image! image_id request)
       "remove_tag"
-        (adminfunc/untag-image! newtag, image_id)
+        (adminfunc/untag-image! image_id request)
       "edit_caption"
-        (adminfunc/update-caption! newcaption, image_id))
+        (adminfunc/update-caption! image_id request)
+      "set_crop"
+        (adminfunc/crop-image image_id request))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
           image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
           all_tags (db/all_tags)]

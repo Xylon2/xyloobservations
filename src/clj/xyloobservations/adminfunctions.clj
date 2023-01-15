@@ -5,9 +5,11 @@
    [next.jdbc :as jdbc]
    [xyloobservations.db.core :as db]
    [clojure.string :as str]
+   [cheshire.core :refer [generate-string]]
    [xyloobservations.imagestorefuncs :as imgstore]
    [xyloobservations.mimetypes :as mimetypes]
-   [xyloobservations.homefunctions :as homefunc]))
+   [xyloobservations.homefunctions :as homefunc]
+   [xyloobservations.queuefunctions :as queuefunc]))
 
 (defmacro map-of
   [& xs]
@@ -41,19 +43,27 @@
                                  :image_id image_id}))
         image_id))))
 
-(defn tag-image! [tag_id, image_id]
-  "assign a tag to an image"
-  (if (-> (db/find-imagetag (map-of tag_id image_id))
-          :count
-          (= 0)
-          not)
+(defn tag-image! "assign a tag to an image"
+  [image_id {{tag_id :tag} :params}]
+  (when (-> (db/find-imagetag (map-of tag_id image_id))
+            :count
+            (= 0)
+            not)
     (throw (AssertionError. "this tag is already assigned to this image")))
   (db/tag-image! {:taglist [tag_id] :image_id image_id}))
 
-(defn untag-image! [tag_id, image_id]
-  "un-assign a tag from an image"
+(defn untag-image! "un-assign a tag from an image"
+  [image_id {{tag_id :tag} :params}]
   (db/untag-image! {:tag tag_id :image_id image_id}))
 
-(defn update-caption! [newcaption, image_id]
-  "simply update the caption"
+(defn update-caption! "simply update the caption"
+  [image_id {{newcaption :caption} :params}]
   (db/update-caption! (map-of newcaption image_id)))
+
+(defn crop-image "update the image crop setting, and trigger the pipeline to re-compress the image"
+  [image_id, {{:keys [hpercent vpercent hoffset voffset]} :params}]
+  (db/set-crop! {:image_id image_id
+                 :crop_data (generate-string (reduce (fn [build [key val]] (conj build {key (parse-long val)}))
+                                                     {}
+                                                     (map-of hpercent vpercent hoffset voffset)))})
+  (queuefunc/recompress image_id))

@@ -12,16 +12,32 @@
              (max-width: 960px) {{image.sizes.small.width}}px,
              {{image.sizes.medium.width}}px"
       src="{{image.full_prefix}}_tiny.{{image.sizes.tiny.extension}}">
+    <h2>Caption</h2>
+    <form method="POST">
+      {% csrf-field %}
+      <textarea name="caption" id="caption">{{image.caption}}</textarea><br>
+      <input type="hidden" name="whichform" value="edit_caption">
+      <input type="submit" value="Save">
+    </form>
     <h2>Attached tags</h2>
     <form method="POST">
       {% csrf-field %}
-      <ul>
+      <table>
+        <colgroup>
+          <col>
+          <col>
+        </colgroup>
       {% for tag in attached_tags %}
-      <li>
-        {{tag.tag_name}} <input type="submit" value="-" onclick='document.getElementById("remtag").value = "{{tag.tag_id}}";'/>
-      </li>
+        <tr>
+          <td>
+            <label for="remtag_btn_{{tag.tag_id}}">{{tag.tag_name}}</label>
+          </td>
+          <td>
+            <input type="submit" id="remtag_btn_{{tag.tag_id}}" value="-" onclick='document.getElementById("remtag").value = "{{tag.tag_id}}";'/>
+          </td>
+        </tr>
       {% endfor %}
-      </ul>
+      </table>
       <input type="hidden" name="whichform" value="remove_tag">
       <input type="hidden" id="remtag" name="tag" value="">
     </form>
@@ -36,14 +52,50 @@
       </select>
       <input type="hidden" name="whichform" value="add_tag">
     </form>
-    <h2>Caption</h2>
+    <h2>Crop</h2>
     <form method="POST">
       {% csrf-field %}
-      <textarea name="caption" id="caption">{{image.caption}}</textarea><br>
-      <input type="hidden" name="whichform" value="edit_caption">
-      <input type="submit" value="Save">
+      <input type="hidden" name="whichform" value="set_crop">
+      <table>
+          <colgroup>
+            <col>
+            <col>
+          </colgroup>
+          <tr>
+            <td>
+              <label for="hpercent">Horizontal percent</label>
+            </td>
+            <td>
+              <input type="number" min="0" max="100" name="hpercent" id="hpercent" style="width: 5em">
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="vpercent">Vertical percent</label>
+            </td>
+            <td>
+              <input type="number" min="0" max="100" name="vpercent" id="vpercent" style="width: 5em">
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="hoffset">Horizontal offset</label>
+            </td>
+            <td>
+              <input type="number" min="-100" max="100" name="hoffset" id="hoffset" style="width: 5em">
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="voffset">Vertical offset</label>
+              </td>
+            <td>
+              <input type="number" min="-100" max="100" name="voffset" id="voffset" style="width: 5em">
+            </td>
+          </tr>
+      </table>
+      <input type="submit" value="Save and re-compress">
     </form>
-    <br/>
     <h2>Delete</h2>
     <a href="/deleteimg?id={{image_id}}&redirect={{redirect}}" class="button">Delete</a>
   </div>

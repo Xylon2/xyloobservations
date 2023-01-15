@@ -80,8 +80,9 @@
         redirect (urlencode redirect)
         attached_tags (db/tag_names_of_image {:image_id image_id})
         image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
-        all_tags (db/all_tags)]
-    (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect))))
+        all_tags (db/all_tags)
+        crop_data ((db/get-crop-settings {:image_id image_id}) :crop_data)]
+    (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data))))
 
 (defn image-settings-submit [{{image_id "id"
                                redirect "redirect"} :query-params
@@ -98,8 +99,9 @@
         (adminfunc/crop-image image_id request))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
           image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
-          all_tags (db/all_tags)]
-      (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect)))))
+          all_tags (db/all_tags)
+          crop_data ((db/get-crop-settings {:image_id image_id}) :crop_data)]
+      (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data)))))
 
 (defn orphan_images [request]
   (let [images (imgstore/resolve_images (db/orphan-images))]

@@ -66,7 +66,7 @@
               <label for="hpercent">Horizontal percent</label>
             </td>
             <td>
-              <input type="number" min="0" max="100" name="hpercent" id="hpercent" style="width: 5em">
+              <input type="number" min="0" max="100" name="hpercent" id="hpercent" style="width: 5em" value="{{ crop_data.hpercent }}">
             </td>
           </tr>
           <tr>
@@ -74,7 +74,7 @@
               <label for="vpercent">Vertical percent</label>
             </td>
             <td>
-              <input type="number" min="0" max="100" name="vpercent" id="vpercent" style="width: 5em">
+              <input type="number" min="0" max="100" name="vpercent" id="vpercent" style="width: 5em" value="{{ crop_data.vpercent }}">
             </td>
           </tr>
           <tr>
@@ -82,7 +82,7 @@
               <label for="hoffset">Horizontal offset</label>
             </td>
             <td>
-              <input type="number" min="-100" max="100" name="hoffset" id="hoffset" style="width: 5em">
+              <input type="number" min="-100" max="100" name="hoffset" id="hoffset" style="width: 5em" value="{{ crop_data.hoffset }}">
             </td>
           </tr>
           <tr>
@@ -90,7 +90,7 @@
               <label for="voffset">Vertical offset</label>
               </td>
             <td>
-              <input type="number" min="-100" max="100" name="voffset" id="voffset" style="width: 5em">
+              <input type="number" min="-100" max="100" name="voffset" id="voffset" style="width: 5em" value="{{ crop_data.voffset }}">
             </td>
           </tr>
       </table>

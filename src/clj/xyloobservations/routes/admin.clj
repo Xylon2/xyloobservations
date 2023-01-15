@@ -119,9 +119,7 @@
       "remove_tag"
         (adminfunc/untag-image! image_id request)
       "edit_caption"
-        (adminfunc/update-caption! image_id request)
-      "set_crop"
-        (adminfunc/crop-image image_id request))
+        (adminfunc/update-caption! image_id request))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
           image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
           all_tags (db/all_tags)

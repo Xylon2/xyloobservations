@@ -36,7 +36,7 @@
                         (cropsettings :hoffset) "+"
                         (cropsettings :voffset))
         resizestring (str resolution "x" resolution ">")
-        {:keys [exit out err]} (sh "convert" origpath
+        {:keys [exit out err]} (sh "convert" origpath "-auto-orient"
                                    "-gravity" "Center" "-crop" cropstring
                                    "-quality" "60" "-resize" resizestring
                                    newpath)]

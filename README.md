@@ -27,14 +27,14 @@ Create a PostgreSQL database and user, and create a file `dev-config.edn` with c
  ;; s3 or filesystem
  :image-store "filesystem"
 
- ;; the url s3 or your webserver exposes the images
+ ;; the url S3 or your webserver exposes the images
  :url-prefix "https://example.com/"}
 
  ;; if storing on filessytem
  ;; this should be a writeable directory where your webserver will serve the images
  :img-path "/var/www/html/images/"
 
- ;; ;; if storing in s3.
+ ;; ;; if storing in S3.
  ;; ;; you will need to setup the bucket for public access
  ;; :aws-access-key ""
  ;; :aws-secret-key ""
@@ -68,9 +68,9 @@ For general info on hosting Luminus apps check out [the luminus docs](https://lu
 
 For help setting up your S3 bucket, see [S3.md](S3.md).
 
-xyloobservations can store it's images either in an S3 bucket or on the filesystem. If you want to use s3 you will need to specify the aws credentials and bucket-name.
+xyloobservations can store it's images either in an S3 bucket or on the filesystem. If you want to use S3 you will need to specify the aws credentials and bucket-name.
 
-For using s3, `dev-config.edn` will look something like this:
+For using S3, `dev-config.edn` will look something like this:
 ```
  :url-prefix "https://bucketname.s3.eu-west-2.amazonaws.com/"
 
@@ -145,7 +145,7 @@ delete the old one after it completes successfully.
 
 ## License
 
-Copyright © 2022 Joseph Graham
+Copyright © 2022,2023 Joseph Graham
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

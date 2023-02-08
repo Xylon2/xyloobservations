@@ -10,11 +10,8 @@
    [ring.middleware.flash :refer [wrap-flash]]
    [immutant.web.middleware :refer [wrap-session]]
    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-   [ring.util.http-response :as response])
-  )
-
-(defn urlencode [foo]
-  (java.net.URLEncoder/encode foo "UTF-8"))
+   [ring.util.http-response :as response]
+   [xyloobservations.sharedfunctions :as shared]))
 
 (defn wrap-internal-error [handler]
   (fn [req]
@@ -49,7 +46,7 @@
         response
         (response/found
          (str "/login?redirect="
-              (urlencode (str (request :path-info) "?" (request :query-string)))))))))
+              (shared/urlencode (str (request :path-info) "?" (request :query-string)))))))))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)

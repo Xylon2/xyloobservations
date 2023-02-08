@@ -1,24 +1,13 @@
 (ns xyloobservations.routes.admin
   (:require
-   [xyloobservations.layout :as layout]
    [xyloobservations.middleware :as middleware]
    [xyloobservations.adminfunctions :as adminfunc]
+   [xyloobservations.sharedfunctions :as shared]
    [ring.util.response]
    [ring.util.http-response :as response]
    [xyloobservations.db.core :as db]
-   [xyloobservations.imagestorefuncs :as imgstore]
    [cheshire.core :refer [generate-string parse-string]]
    [xyloobservations.queuefunctions :as queuefunc]))
-
-(defn urlencode [foo]
-  (java.net.URLEncoder/encode foo "UTF-8"))
-
-(defn myrender [request template argmap]
-  "simply a wrapper for layout/render to add commonly used arguments"
-  (layout/render request
-                 template
-                 (conj argmap {:loggedin (contains? (request :session) :user)
-                               :fullpath (urlencode (str (request :path-info) "?" (request :query-string)))})))
 
 (defmacro map-of
   [& xs]
@@ -26,7 +15,7 @@
 
 (defn tag-manager-page [request]
   (let [all_tags (db/all_tags)]
-    (myrender request "tag_manager.html" {:all_tags all_tags})))
+    (shared/myrender request "tag_manager.html" {:all_tags all_tags})))
 
 (defn tag-manager-submit [request]
   (let [{{:keys [tagname description advanced]} :params} request]
@@ -39,11 +28,11 @@
         (def message {:msgtype "error"
                       :msgtxt (str "validation error: " (.getMessage e))})))
     (let [all_tags (db/all_tags)]
-      (myrender request "tag_manager.html" (conj {:all_tags all_tags} message)))))
+      (shared/myrender request "tag_manager.html" (conj {:all_tags all_tags} message)))))
 
 (defn upload-image-page [request]
   (let [all_tags (db/all_tags)]
-    (myrender request "upload_image.html" {:all_tags all_tags :progresstype "upload"})))
+    (shared/myrender request "upload_image.html" {:all_tags all_tags :progresstype "upload"})))
 
 (defn upload-image-ajax [{file :multipart-params
                           {caption :caption
@@ -78,7 +67,7 @@
 
 (defn image-deets-ajax "given an image id in the query-string, returns the full image deets"
   [{{image_id "id"} :query-params}]
-  (-> (generate-string (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id}))))
+  (-> (generate-string (first (shared/resolve_images (db/caption-and-object {:image_id image_id}))))
       (response/ok)
       (response/content-type "application/json")))
 
@@ -101,18 +90,18 @@
 (defn image-settings-page [request]
   (let [{{image_id "id"
           redirect "redirect"} :query-params} request
-        redirect (urlencode redirect)
+        redirect (shared/urlencode redirect)
         attached_tags (db/tag_names_of_image {:image_id image_id})
-        image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
+        image (first (shared/resolve_images (db/caption-and-object {:image_id image_id})))
         all_tags (db/all_tags)
         crop_data ((db/get-crop-settings {:image_id image_id}) :crop_data)
         progresstype "crop"]
-    (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data progresstype))))
+    (shared/myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data progresstype))))
 
 (defn image-settings-submit [{{image_id "id"
                                redirect "redirect"} :query-params
                               {whichform :whichform} :params :as request}]
-  (let [redirect (urlencode redirect)]
+  (let [redirect (shared/urlencode redirect)]
     (case whichform
       "add_tag"
         (adminfunc/tag-image! image_id request)
@@ -121,21 +110,21 @@
       "edit_caption"
         (adminfunc/update-caption! image_id request))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
-          image (first (imgstore/resolve_images (db/caption-and-object {:image_id image_id})))
+          image (first (shared/resolve_images (db/caption-and-object {:image_id image_id})))
           all_tags (db/all_tags)
           crop_data ((db/get-crop-settings {:image_id image_id}) :crop_data)
           progresstype "crop"]
-      (myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data progresstype)))))
+      (shared/myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data progresstype)))))
 
 (defn orphan_images [request]
-  (let [images (imgstore/resolve_images (db/orphan-images))]
-    (myrender request "orphan_images.html" {:orphans images})))
+  (let [images (shared/resolve_images (db/orphan-images))]
+    (shared/myrender request "orphan_images.html" {:orphans images})))
 
 (defn confirm_delete_image [request]
   (let [{{image_id "id"
           redirect "redirect"} :query-params} request
-        [image] (imgstore/resolve_images (db/caption-and-object {:image_id image_id}))]
-    (myrender request "delete_image.html" (map-of image image_id redirect))))
+        [image] (shared/resolve_images (db/caption-and-object {:image_id image_id}))]
+    (shared/myrender request "delete_image.html" (map-of image image_id redirect))))
 
 (defn delete_image [request]
   (let [{{image_id "id"
@@ -146,10 +135,10 @@
 (defn confirm_delete_tag [request]
   (let [{{tag_id "tag"
           redirect "redirect"} :query-params} request
-        redirect (urlencode redirect)
+        redirect (shared/urlencode redirect)
         images (db/images-by-tag {:tag_ref tag_id})
         tag_name (:tag_name (db/tag-info {:tag_id tag_id :cols ["tag_name"]}))]
-    (myrender request "delete_tag.html" (map-of tag_id redirect images tag_name))))
+    (shared/myrender request "delete_tag.html" (map-of tag_id redirect images tag_name))))
 
 (defn delete_tag [request]
   (let [{{tag_id "tag"
@@ -160,20 +149,20 @@
 (defn tag_settings_page [request]
   (let [{{tag_id "tag"
           redirect "redirect"} :query-params} request
-        redirect (urlencode redirect)
+        redirect (shared/urlencode redirect)
         {:keys [tag_name description advanced]} (db/tag-info {:tag_id tag_id :cols ["tag_name", "description", "advanced"]})
         ad_opts ["false" "date" "place"]]
-    (myrender request "tag_settings.html" (map-of tag_id redirect tag_name description advanced ad_opts))))
+    (shared/myrender request "tag_settings.html" (map-of tag_id redirect tag_name description advanced ad_opts))))
 
 (defn tag_settings_submit [request]
   (let [{{tag_id "tag"
           redirect "redirect"} :query-params} request
-        redirect (urlencode redirect)
+        redirect (shared/urlencode redirect)
         {:keys [tag_name description advanced]} (request :params)]
     (adminfunc/modify_tag tag_id tag_name description advanced)
     (let [{:keys [tag_name description advanced]} (db/tag-info {:tag_id tag_id :cols ["tag_name", "description", "advanced"]})
           ad_opts ["false" "date" "place"]]
-      (myrender request "tag_settings.html" (map-of tag_id redirect tag_name description advanced ad_opts)))))
+      (shared/myrender request "tag_settings.html" (map-of tag_id redirect tag_name description advanced ad_opts)))))
 
 (defn nogetplz [request] (-> (response/ok "GET not accepted here")
                              (response/content-type "text/html")))

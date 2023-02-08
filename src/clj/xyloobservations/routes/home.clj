@@ -1,41 +1,46 @@
 (ns xyloobservations.routes.home
   (:require
-   [xyloobservations.layout :as layout]
    [xyloobservations.db.core :as db]
-   [xyloobservations.homefunctions :as homefunc]
+   [xyloobservations.sharedfunctions :as shared]
    [xyloobservations.middleware :as middleware]
-   [ring.util.response]
-   [ring.util.http-response :as response]
-   [xyloobservations.imagestorefuncs :as imgstore]))
+   [ring.util.response]))
 
-(defn urlencode [foo]
-  (java.net.URLEncoder/encode foo "UTF-8"))
+(defn images-with-tags "any images that have tags attached.
+  output is image_id, object_ref, caption and imagemeta"
+  []
+  (distinct (db/images-with-tags)))
 
-(defn myrender [request template argmap]
-  "simply a wrapper for layout/render to add commonly used arguments"
-  (layout/render request
-                 template
-                 (conj argmap {:loggedin (contains? (request :session) :user)
-                               :fullpath (urlencode (str (request :path-info) "?" (request :query-string)))})))
+(defn matching-images
+   "get a list of images that have all of a list of tags.
+    output is image_id, object_ref, caption and imagemeta"
+  [tags]
+  (db/images-multi-tags {:tags (vec (map parse-long tags))}))
+
+(defn default-number
+  "if it's null, returns string 10"
+  [item]
+  (cond
+    (= (type item) java.lang.String) item
+    (nil? item) "10"))
 
 (defn gallery [template request]
   (let [{{tags "tags"} :query-params} request
-        tags' (homefunc/always-vector tags)]
+        tags' (shared/always-vector tags)]
     (if-not (empty? tags')
-      (myrender request template {:images (imgstore/resolve_images (homefunc/matching-images tags'))
+      (shared/myrender request template {:images (shared/resolve_images (matching-images tags'))
                                   :filters (db/names-for-tags {:tags tags'})
                                   :alltags (db/all-tags-with-images)})
-      (myrender request template {:images (imgstore/resolve_images (homefunc/images-with-tags))
+      (shared/myrender request template {:images (shared/resolve_images (images-with-tags))
                                   :alltags (db/all-tags-with-images)}))))
 
 (defn random [request]
   (let [{{numimages "num"} :query-params} request
-        numimages' (homefunc/default-number numimages)]
-    (myrender request "random.html" {:images (imgstore/resolve_images (db/random-images {:numimages numimages'}))
+        numimages' (default-number numimages)]
+    (shared/myrender request "random.html" {:images (shared/resolve_images (db/random-images {:numimages numimages'}))
                                      :numimages numimages'})))
 
 (defn about [request]
-  (myrender request "about.html" {}))
+  (shared/myrender request "about.html" {}))
 
 (defn home-routes []
   [""

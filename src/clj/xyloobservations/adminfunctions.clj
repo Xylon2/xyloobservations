@@ -5,9 +5,9 @@
    [next.jdbc :as jdbc]
    [xyloobservations.db.core :as db]
    [clojure.string :as str]
-   [xyloobservations.imagestorefuncs :as imgstore]
    [xyloobservations.mimetypes :as mimetypes]
-   [xyloobservations.homefunctions :as homefunc]))
+   [xyloobservations.queuefunctions :as queue]
+   [xyloobservations.sharedfunctions :as shared]))
 
 (defmacro map-of
   [& xs]
@@ -23,19 +23,26 @@
     (throw (AssertionError. "empty values are not allowed")))
   (db/modify-tag! (map-of tag_id tag_name description advanced)))
 
+(defn store-image
+  "adds an image's basic info to the database and puts it in the queue"
+  [extension mimetype tempfile t-conn caption size]
+  (let [image_id (:image_id (db/reference-image! t-conn {:caption caption}))]
+    (queue/add tempfile image_id mimetype size)
+    image_id))
+
 (defn upload-image! [{{:keys [tempfile size filename]} "filename"}
                      caption
                      chozen_tags]
   ;; size is the filesize in bytes
   (let [extension (last (str/split filename #"\."))
         mimetype (mimetypes/extension-to-type extension)
-        chozen_tags' (homefunc/always-vector chozen_tags)]
+        chozen_tags' (shared/always-vector chozen_tags)]
     (when (not mimetype)
       (throw (AssertionError. "cannot detect file-type based on extension")))
     (when (> size 20000000)
       (throw (AssertionError. "this picture is too big")))
     (jdbc/with-transaction [t-conn db/*db*]
-      (let [image_id (imgstore/store-image extension mimetype tempfile t-conn caption size)]
+      (let [image_id (store-image extension mimetype tempfile t-conn caption size)]
         (when-not (empty? chozen_tags')
           (db/tag-image! t-conn {:taglist chozen_tags'
                                  :image_id image_id}))

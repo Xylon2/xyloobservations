@@ -2,23 +2,21 @@
   (:require
    [xyloobservations.layout :as layout]
    [xyloobservations.authfunctions :as authfunc]
+   [xyloobservations.sharedfunctions :as shared]
    [xyloobservations.middleware :as middleware]
    [ring.util.response]
    [ring.util.http-response :as response]))
 
-(defn urlencode [foo]
-  (java.net.URLEncoder/encode foo "UTF-8"))
-
 (defn login-page [request]
   (let [{{redirect "redirect"} :query-params} request]
     (layout/render request "login.html" {:redirect
-                                         (urlencode (if (empty? redirect) "" redirect))})))
+                                         (shared/urlencode (if (empty? redirect) "" redirect))})))
 
 (defn login-attempt [request]
   (let [{{:keys [username password]} :params
          {redirect "redirect"} :query-params
-         session :session} request]
-    (def authresult (authfunc/authenticate-user username password))
+         session :session} request
+        authresult (authfunc/authenticate-user username password)]
     (if authresult
       (-> (response/found (if (empty? redirect) "/" redirect))
           (assoc :session (assoc session :user (authresult :login))))

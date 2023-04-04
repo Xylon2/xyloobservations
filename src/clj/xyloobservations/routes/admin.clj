@@ -13,6 +13,12 @@
   [& xs]
   `(hash-map ~@(mapcat (juxt keyword identity) xs)))
 
+(defn log
+  "concatenate and save to file"
+  [& strings]
+  (spit "/tmp/cljdebug.txt" (str (reduce str strings) "
+")))  
+
 (defn tag-manager-page [request]
   (let [all_tags (db/all_tags)]
     (shared/myrender request "tag_manager.html" {:all_tags all_tags})))
@@ -37,39 +43,38 @@
 (defn upload-image-ajax [{file :multipart-params
                           {caption :caption
                            chozen_tags :tags} :params}]
-  (->
+  (response/ok
    (try (let [image_id (adminfunc/upload-image! file caption chozen_tags)]
-          (generate-string {:msgtype "info" :msgtxt "...queued........." :image_id image_id}))
+          {:msgtype "info" :msgtxt "...queued........." :image_id image_id})
         (catch AssertionError e
-          (generate-string {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))}))
+          {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))})
         (catch com.rabbitmq.client.AlreadyClosedException e
-          (generate-string {:msgtype "error" :msgtxt (str "failed adding image to queue: " (.getMessage e))})))
-   (response/ok)
-   (response/content-type "application/json")))
+          {:msgtype "error" :msgtxt (str "failed adding image to queue: " (.getMessage e))}))))
 
 (defn crop-image-ajax "update the image crop setting, and trigger the pipeline to re-compress the image"
   [{{image_id "id"} :query-params
     {:keys [hpercent vpercent hoffset voffset]} :params}]
-  (->
+  (response/ok
    (try
      (db/set-crop! {:image_id image_id
                     :crop_data (generate-string (reduce (fn [build [key val]] (conj build {key (parse-long val)}))
                                                         {}
                                                         (map-of hpercent vpercent hoffset voffset)))})
      (queuefunc/recompress image_id)
-     (generate-string {:msgtype "info" :msgtxt "...queued........." :image_id image_id})
+     {:msgtype "info" :msgtxt "...queued........." :image_id image_id}
      (catch AssertionError e
-       (generate-string {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))}))
+       {:msgtype "error" :msgtxt (str "validation error: " (.getMessage e))})
      (catch com.rabbitmq.client.AlreadyClosedException e
-       (generate-string {:msgtype "error" :msgtxt (str "failed adding image to queue: " (.getMessage e))})))
-   (response/ok)
-   (response/content-type "application/json")))
+       {:msgtype "error" :msgtxt (str "failed adding image to queue: " (.getMessage e))}))))
 
-(defn image-deets-ajax "given an image id in the query-string, returns the full image deets"
+(defn image-deets-ajax
+  "Given an image id in the query-string, returns the full image deets.
+   This is called after the image resize is complete, to update the
+   image_settings page to show the new image."
   [{{image_id "id"} :query-params}]
-  (-> (generate-string (first (shared/resolve_images (db/caption-and-object {:image_id image_id}))))
-      (response/ok)
-      (response/content-type "application/json")))
+  (response/ok
+   (first
+    (shared/resolve_images (db/caption-and-object {:image_id image_id})))))
 
 (defn image-progress [request]
   (let [{{:strs [image_id]} :query-params} request
@@ -83,9 +88,7 @@
                   "failed saving" "error"
                   "info")]
 
-    (-> (generate-string {:msgtype msgtype :msgtxt progress_styled :image_id image_id})
-        (response/ok)
-        (response/content-type "application/json"))))
+    (response/ok {:msgtype msgtype :msgtxt progress_styled :image_id image_id})))
 
 (defn image-settings-page [request]
   (let [{{image_id "id"

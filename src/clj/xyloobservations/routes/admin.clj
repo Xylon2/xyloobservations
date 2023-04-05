@@ -17,7 +17,7 @@
   "concatenate and save to file"
   [& strings]
   (spit "/tmp/cljdebug.txt" (str (reduce str strings) "
-")))  
+")))
 
 (defn tag-manager-page [request]
   (let [all_tags (db/all_tags)]
@@ -106,12 +106,9 @@
                               {whichform :whichform} :params :as request}]
   (let [redirect (shared/urlencode redirect)]
     (case whichform
-      "add_tag"
-        (adminfunc/tag-image! image_id request)
-      "remove_tag"
-        (adminfunc/untag-image! image_id request)
-      "edit_caption"
-        (adminfunc/update-caption! image_id request))
+      "add_tag" (adminfunc/tag-image! image_id request)
+      "remove_tag" (adminfunc/untag-image! image_id request)
+      "edit_caption" (adminfunc/update-caption! image_id request))
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
           image (first (shared/resolve_images (db/caption-and-object {:image_id image_id})))
           all_tags (db/all_tags)
@@ -176,7 +173,7 @@
                  middleware/wrap-formats
                  middleware/wrap-auth]}
    ["/tag_manager" {:get tag-manager-page
-                :post tag-manager-submit}]
+                    :post tag-manager-submit}]
    ["/upload_image" {:get upload-image-page}]
    ["/upload_image_ajax" {:get nogetplz
                           :post upload-image-ajax}]

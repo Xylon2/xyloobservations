@@ -1,11 +1,11 @@
 (ns xyloobservations.handler-test
   (:require
-    [clojure.test :refer :all]
-    [ring.mock.request :refer :all]
-    [xyloobservations.handler :refer :all]
-    [xyloobservations.middleware.formats :as formats]
-    [muuntaja.core :as m]
-    [mount.core :as mount]))
+   [clojure.test :refer :all]
+   [ring.mock.request :refer :all]
+   [xyloobservations.handler :refer :all]
+   [xyloobservations.middleware.formats :as formats]
+   [muuntaja.core :as m]
+   [mount.core :as mount]))
 
 (defn parse-json [body]
   (m/decode formats/instance "application/json" body))

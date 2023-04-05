@@ -26,8 +26,7 @@
   (let [{{redirect "redirect"} :query-params
          session :session} request]
     (-> (response/found (if (empty? redirect) "/" redirect))
-        (assoc :session (dissoc session :user)))
-    ))
+        (assoc :session (dissoc session :user)))))
 
 (defn auth-routes []
   [""

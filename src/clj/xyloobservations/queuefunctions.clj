@@ -65,8 +65,7 @@
   [object_ref files]
   (doseq [file files]
     (let [{:keys [filepath mimetype identifier width height]} file]
-      (copy-file filepath (str (env :img-path) object_ref "_" identifier "." (mimetypes/type-to-extension mimetype)))
-      )))
+      (copy-file filepath (str (env :img-path) object_ref "_" identifier "." (mimetypes/type-to-extension mimetype))))))
 
 (defn cleanup-files
   "takes a vector of maps of files to delete"
@@ -83,14 +82,14 @@
   [image_id uploadme]
   (let [object_ref (img-id-gen)]
     (case (env :image-store)
-    "s3"
-    (upload-to-s3 object_ref uploadme)
-    "filesystem"
-    (save-to-filesystem object_ref uploadme))
-  (db/save-meta! {:imagemeta (generate-string (reduce extract-key {} uploadme))
-                  :image_id image_id
-                  :object_ref object_ref
-                  :url_prefix (env :url-prefix)})))
+      "s3"
+      (upload-to-s3 object_ref uploadme)
+      "filesystem"
+      (save-to-filesystem object_ref uploadme))
+    (db/save-meta! {:imagemeta (generate-string (reduce extract-key {} uploadme))
+                    :image_id image_id
+                    :object_ref object_ref
+                    :url_prefix (env :url-prefix)})))
 
 (defn message-handler
   [ch {:keys [type]} ^bytes payload]

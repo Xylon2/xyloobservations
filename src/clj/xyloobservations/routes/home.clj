@@ -11,8 +11,8 @@
   (distinct (db/images-with-tags)))
 
 (defn matching-images
-   "get a list of images that have all of a list of tags.
-    output is image_id, object_ref, caption and imagemeta"
+  "get a list of images that have all of a list of tags.
+   output is image_id, object_ref, caption and imagemeta"
   [tags]
   (db/images-multi-tags {:tags (vec (map parse-long tags))}))
 
@@ -28,16 +28,16 @@
         tags' (shared/always-vector tags)]
     (if-not (empty? tags')
       (shared/myrender request template {:images (shared/resolve_images (matching-images tags'))
-                                  :filters (db/names-for-tags {:tags tags'})
-                                  :alltags (db/all-tags-with-images)})
+                                         :filters (db/names-for-tags {:tags tags'})
+                                         :alltags (db/all-tags-with-images)})
       (shared/myrender request template {:images (shared/resolve_images (images-with-tags))
-                                  :alltags (db/all-tags-with-images)}))))
+                                         :alltags (db/all-tags-with-images)}))))
 
 (defn random [request]
   (let [{{numimages "num"} :query-params} request
         numimages' (default-number numimages)]
     (shared/myrender request "random.html" {:images (shared/resolve_images (db/random-images {:numimages numimages'}))
-                                     :numimages numimages'})))
+                                            :numimages numimages'})))
 
 (defn about [request]
   (shared/myrender request "about.html" {}))

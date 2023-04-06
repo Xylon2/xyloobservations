@@ -37,7 +37,7 @@
   (let [extension (last (str/split filename #"\."))
         mimetype (mimetypes/extension-to-type extension)
         chozen_tags' (shared/always-vector chozen_tags)]
-    (when (not mimetype)
+    (when-not mimetype
       (throw (AssertionError. "cannot detect file-type based on extension")))
     (when (> size 20000000)
       (throw (AssertionError. "this picture is too big")))

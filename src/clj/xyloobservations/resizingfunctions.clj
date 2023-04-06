@@ -105,7 +105,7 @@
                                                    :size size
                                                    :origmimetype mimetype} % cropsettings)]
       ;; the output of this function is a map of filepath, mimetype, identifier, width and height
-      (conj (map #(make_image_closure %)
+      (conj (map make_image_closure
                  [{:newpath mediumpath :maxsize 1000000 :resolution 2560 :identifier "medium"}
                   {:newpath smallpath  :maxsize 500000  :resolution 1920 :identifier "small"}
                   {:newpath tinypath   :maxsize 250000  :resolution 1280 :identifier "tiny"}])

@@ -51,8 +51,7 @@
   :target-path "target/%s/"
   :main ^:skip-aot xyloobservations.core
 
-  :plugins [[lein-cljsbuild "1.1.8"]
-            [lein-immutant "2.1.0"]]
+  :plugins [[lein-cljsbuild "1.1.8"]]
 
   :cljsbuild
   {:builds

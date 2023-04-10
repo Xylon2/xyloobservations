@@ -39,17 +39,39 @@
                  [com.amazonaws/aws-java-sdk-s3 "1.12.442"]
                  [com.novemberain/langohr "5.4.0"]
                  [com.taoensso/nippy "3.2.0"]
-                 [clj-http "3.12.3"]]
+                 [clj-http "3.12.3"]
+                 [org.clojure/clojurescript "1.11.60"]
+                 [cljs-ajax "0.8.4"]]
 
   :min-lein-version "2.0.0"
   
   :source-paths ["src/clj"]
   :test-paths ["test/clj"]
-  :resource-paths ["resources"]
+  :resource-paths ["resources" "target/cljsbuild"]
   :target-path "target/%s/"
   :main ^:skip-aot xyloobservations.core
 
-  :plugins [[lein-immutant "2.1.0"]] 
+  :plugins [[lein-cljsbuild "1.1.8"]
+            [lein-immutant "2.1.0"]]
+
+  :cljsbuild
+  {:builds
+   [{; The path to the top-level ClojureScript source directory:
+     :source-paths ["src/cljs"]
+     ; The standard ClojureScript compiler options:
+     ; (See the ClojureScript compiler documentation for details.)
+     :compiler {:main xyloobservations.advanced
+                :output-to "target/cljsbuild/public/js/advanced.js"
+                :optimizations :whitespace
+                :pretty-print true}}
+    {; The path to the top-level ClojureScript source directory:
+     :source-paths ["src/cljs"]
+     ; The standard ClojureScript compiler options:
+     ; (See the ClojureScript compiler documentation for details.)
+     :compiler {:main xyloobservations.progress
+                :output-to "target/cljsbuild/public/js/progress.js"
+                :optimizations :whitespace
+                :pretty-print true}}]}
 
   :profiles
   {:uberjar {:omit-source true

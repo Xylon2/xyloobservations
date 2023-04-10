@@ -103,8 +103,10 @@
     <h2>Delete</h2>
     <a href="/deleteimg?id={{image_id}}&redirect={{redirect}}" class="button">Delete</a>
   </div>
+  <input id="progresstype" type="hidden" value="{{ progresstype }}">
 {% endblock %}
 
 {% block page-scripts %}
-  {% include "progress_scripts.html" %}
+  {% script "/js/progress.js" %}
+<!--  {% include "progress_scripts.html" %} -->
 {% endblock %}

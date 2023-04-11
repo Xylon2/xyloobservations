@@ -41,7 +41,11 @@
                  [com.taoensso/nippy "3.2.0"]
                  [clj-http "3.12.3"]
                  [org.clojure/clojurescript "1.11.60"]
-                 [cljs-ajax "0.8.4"]]
+                 [cljs-ajax "0.8.4"]
+                 [cljsjs/react "18.0.0-rc.0-0"]
+                 [cljsjs/react-dom "18.0.0-rc.0-0"]
+                 [reagent "1.2.0"]
+                 [org.clojars.quoll/clormat "0.0.1"]]
 
   :min-lein-version "2.0.0"
   

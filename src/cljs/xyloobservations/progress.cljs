@@ -9,6 +9,8 @@
 (def sbmtbtn  (.getElementById js/document "ajaxsubmit"))
 (def image_id  (.-value (.getElementById js/document "image_id")))
 
+(def imgdeets (r/atom {}))
+
 (defn log
   "concatenate and print to console"
   [& strings]
@@ -32,24 +34,8 @@
   (ajax/GET
    (str "/image_deets_ajax?id=" image_id)
    {:handler
-    (fn [{prefix :full_prefix
-          {:keys [tiny small medium]} :sizes}]
-      (dom/render
-       [:img#theimage
-        {:srcSet (format
-                  "%s_tiny.%s %sw, %s_small.%s %sw, %s_medium.%s %sw"
-                  prefix (tiny :extension) (tiny :width)
-                  prefix (small :extension) (small :width)
-                  prefix (medium :extension) (medium :width))
-         :sizes (format
-                 "(max-width: 640px) %spx, (max-width: 960px) %spx, %spx"
-                 (tiny :width)
-                 (small :width)
-                 (medium :width))
-         :src (format
-               "%s_tiny.%s"
-               prefix (tiny :extension))}]
-       (.getElementById js/document "imgwrap")))}))
+    (fn [deets]
+      (reset! imgdeets deets))}))
 
 (defn pollhandler
   ""
@@ -61,7 +47,7 @@
       (set! (.-disabled sbmtbtn) false)
       (when (= progresstype "crop")
         ;; we need to reload the image, which means re-writing it's srcset, sizes and src
-        (comment "todo")))
+        (loadimage)))
     (js/setTimeout dopoll 1000)))
 
 (defn dopoll
@@ -111,11 +97,34 @@
        {:body formdata
         :handler success-handler
         ;; :error-handler error-handler
-        }))
-    
-))
+        }))))
+
+(defn imgrender []
+  (let [{prefix :full_prefix
+         {:keys [tiny small medium]} :sizes} @imgdeets]
+    ;; this is to prevent an error where the atom is unset and it dies
+    (if (nil? prefix)
+      [:img]
+      [:img#theimage
+       {:srcSet (format
+                 "%s_tiny.%s %sw, %s_small.%s %sw, %s_medium.%s %sw"
+                 prefix (tiny :extension) (tiny :width)
+                 prefix (small :extension) (small :width)
+                 prefix (medium :extension) (medium :width))
+        :sizes (format
+                "(max-width: 640px) %spx, (max-width: 960px) %spx, %spx"
+                (tiny :width)
+                (small :width)
+                (medium :width))
+        :src (format
+              "%s_tiny.%s"
+              prefix (tiny :extension))}])))
 
 (loadimage)
+
+(dom/render
+ [imgrender]
+ (.getElementById js/document "imgwrap"))
 
 (.addEventListener ajform "submit"
                    (fn [event]

@@ -18,8 +18,10 @@
   <p id="message" style="font-family: monospace; color: {% if msgtype = "error" %}red{% else %}green{% endif %};">
   </p>
 </div>
+  <input id="progresstype" type="hidden" value="upload">
 {% endblock %}
 
 {% block page-scripts %}
-  {% include "progress_scripts.html" %}
+  {% script "/js/progress.js" %}
+  <!-- {% include "progress_scripts.html" %} -->
 {% endblock %}

@@ -5,11 +5,13 @@
             [clormat.core :refer [format]]))
 
 (def progresstype (.-value (.getElementById js/document "progresstype")))
-(def ajform (.getElementById js/document "ajaxform"))
-(def sbmtbtn  (.getElementById js/document "ajaxsubmit"))
-(def image_id  (.-value (.getElementById js/document "image_id")))
+(def ajform       (.getElementById js/document "ajaxform"))
+(def sbmtbtn      (.getElementById js/document "ajaxsubmit"))
 
 (def imgdeets (r/atom {}))
+
+;; because of two functions which both call each-other
+(declare dopoll)
 
 (defn log
   "concatenate and print to console"
@@ -17,7 +19,7 @@
   ((.-log js/console) (reduce str strings)))
 
 (defn set-message
-  ""
+  "update the message span"
   [{:keys [msgtype msgtxt]}]
   (let [msgspan  (.getElementById js/document "message")]
     (set! (.. msgspan -style -color)
@@ -29,8 +31,8 @@
     (set! (.. msgspan -textContent) msgtxt))))
 
 (defn loadimage
-  ""
-  []
+  "get the details of the image and add to the atom"
+  [image_id]
   (ajax/GET
    (str "/image_deets_ajax?id=" image_id)
    {:handler
@@ -38,8 +40,8 @@
       (reset! imgdeets deets))}))
 
 (defn pollhandler
-  ""
-  [{msgtype :msgtype :as response}]
+  "check the progress, and either continue checking or bail"
+  [image_id {msgtype :msgtype :as response}]
   (set-message response)
   (if (#{"success" "error"} msgtype)
     ;; our job is done
@@ -47,59 +49,68 @@
       (set! (.-disabled sbmtbtn) false)
       (when (= progresstype "crop")
         ;; we need to reload the image, which means re-writing it's srcset, sizes and src
-        (loadimage)))
-    (js/setTimeout dopoll 1000)))
+        (loadimage image_id)))
+    ;; poll again
+    (js/setTimeout #(dopoll image_id) 1000)))
 
 (defn dopoll
-  ""
-  []
+  "hit the image_progress endpoint and see what happens"
+  [image_id]
   (ajax/GET
    (str "/image_progress?image_id=" image_id)
-   {:handler
-    #(pollhandler %)}))
+   {:handler #(pollhandler image_id %)
+    :error-handler (fn [{:keys [status status-text]}]
+                     (pollhandler image_id
+                                  {:msgtype "error"
+                                   :msgtxt (str "Error: " status " " status-text)}))}))
 
 (defn error-handler
-  ""
-  [])
+  "simply set error message"
+  [{:keys [status status-text]}]
+  (set-message {:msgtype "error"
+                :msgtxt (str "Error: " status " " status-text)}))
 
 (defn success-handler
-  ""
-  [response]
+  "in case of success, start polling"
+  [{image_id :image_id :as response}]
   (set-message response)
+  ;; just because AJAX succeeded doesn't mean backend did
   (when-not (= (response :msgtype) "error")
     (when (= progresstype "upload")
-      (.trigger ajform "reset"))
-    (dopoll)))
+      (.reset ajform))
+    (dopoll image_id)))
 
 (defn handle-form
-  ""
+  "AJAX form submission"
   [event]
   (let [actionurl (.. event -currentTarget -action)
-        newimage (.getElementById js/document "dynamiccontent")
+        newimage (.getElementById js/document "newimage")
         msgspan  (.getElementById js/document "message")]
 
     ;; check they specified a file
-    (when (= progresstype "upload")
-      (when (= (.-value newimage) "")
+    (if (and (= progresstype "upload") (= (.-value newimage) ""))
+      (do
         (set! (.. msgspan -style -color) "red")
-        (set! (.. msgspan -textContent) "don't forget to choose a file")))
+        (set! (.. msgspan -textContent) "don't forget to choose a file"))
+      (do
+        ;; disable the form. update the message
+        (set! (.-disabled sbmtbtn) true)
+        (set! (.. msgspan -style -color) "blue")
+        (set! (.. msgspan -textContent) (case progresstype
+                                          "upload" "uploading......."
+                                          "crop"   "pending........."))
 
-    ;; disable the form. update the message
-    (set! (.-disabled sbmtbtn) true)
-    (set! (.. msgspan -style -color) "blue")
-    (set! (.. msgspan -textContent) (case progresstype
-                                      "upload" "uploading......."
-                                      "crop"   "pending........."))
+        (let [formdata (js/FormData. ajform)]
+          (ajax/POST
+           actionurl
+           {:body formdata
+            :handler success-handler
+            :error-handler error-handler
+            }))))))
 
-    (let [formdata (js/FormData. ajform)]
-      (ajax/POST
-       actionurl
-       {:body formdata
-        :handler success-handler
-        ;; :error-handler error-handler
-        }))))
-
-(defn imgrender []
+(defn imgrender
+  "called by reagent to render the image tag from the atom"
+  []
   (let [{prefix :full_prefix
          {:keys [tiny small medium]} :sizes} @imgdeets]
     ;; this is to prevent an error where the atom is unset and it dies
@@ -120,11 +131,13 @@
               "%s_tiny.%s"
               prefix (tiny :extension))}])))
 
-(loadimage)
-
-(dom/render
- [imgrender]
- (.getElementById js/document "imgwrap"))
+(when
+    (= progresstype "crop")
+    (let [image_id (.-value (.getElementById js/document "image_id"))]
+     (loadimage image_id)
+     (dom/render
+      [imgrender]
+      (.getElementById js/document "imgwrap"))))
 
 (.addEventListener ajform "submit"
                    (fn [event]

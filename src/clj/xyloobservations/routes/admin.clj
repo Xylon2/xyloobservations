@@ -38,7 +38,7 @@
 
 (defn upload-image-page [request]
   (let [all_tags (db/all_tags)]
-    (shared/myrender request "upload_image.html" {:all_tags all_tags :progresstype "upload"})))
+    (shared/myrender request "upload_image.html" {:all_tags all_tags})))
 
 (defn upload-image-ajax [{file :multipart-params
                           {caption :caption
@@ -97,9 +97,8 @@
         attached_tags (db/tag_names_of_image {:image_id image_id})
         image (first (shared/resolve_images (db/caption-and-object {:image_id image_id})))
         all_tags (db/all_tags)
-        crop_data ((db/get-crop-settings {:image_id image_id}) :crop_data)
-        progresstype "crop"]
-    (shared/myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data progresstype))))
+        crop_data ((db/get-crop-settings {:image_id image_id}) :crop_data)]
+    (shared/myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data))))
 
 (defn image-settings-submit [{{image_id "id"
                                redirect "redirect"} :query-params
@@ -112,9 +111,8 @@
     (let [attached_tags (db/tag_names_of_image {:image_id image_id})
           image (first (shared/resolve_images (db/caption-and-object {:image_id image_id})))
           all_tags (db/all_tags)
-          crop_data ((db/get-crop-settings {:image_id image_id}) :crop_data)
-          progresstype "crop"]
-      (shared/myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data progresstype)))))
+          crop_data ((db/get-crop-settings {:image_id image_id}) :crop_data)]
+      (shared/myrender request "image_settings.html" (map-of image image_id attached_tags all_tags redirect crop_data)))))
 
 (defn orphan_images [request]
   (let [images (shared/resolve_images (db/orphan-images))]

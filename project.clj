@@ -35,15 +35,15 @@
                  [amazonica "0.3.163" :exclusions [com.amazonaws/aws-java-sdk
                                                    com.amazonaws/amazon-kinesis-client
                                                    com.amazonaws/dynamodb-streams-kinesis-adapter]]
-                 [com.amazonaws/aws-java-sdk-core "1.12.442"]
-                 [com.amazonaws/aws-java-sdk-s3 "1.12.442"]
+                 [com.amazonaws/aws-java-sdk-core "1.12.449"]
+                 [com.amazonaws/aws-java-sdk-s3 "1.12.449"]
                  [com.novemberain/langohr "5.4.0"]
                  [com.taoensso/nippy "3.2.0"]
                  [clj-http "3.12.3"]
                  [org.clojure/clojurescript "1.11.60"]
                  [cljs-ajax "0.8.4"]
-                 [cljsjs/react "18.0.0-rc.0-0"]
-                 [cljsjs/react-dom "18.0.0-rc.0-0"]
+                 [cljsjs/react "18.2.0-1"]
+                 [cljsjs/react-dom "18.2.0-1"]
                  [reagent "1.2.0"]
                  [org.clojars.quoll/clormat "0.0.1"]]
 
@@ -56,6 +56,8 @@
   :main ^:skip-aot xyloobservations.core
 
   :plugins [[lein-cljsbuild "1.1.8"]]
+
+  :hooks [leiningen.cljsbuild]
 
   :cljsbuild
   {:builds

@@ -2,7 +2,13 @@
 
 I made this app for [my personal photo gallery](https://gallery.xylon.me.uk/). I wanted elegant tag-based organization for my photos.
 
-It's based on [Luminus](https://luminusweb.com/) and I designed it to work with [PostgreSQL](https://www.postgresql.org/).
+It is designed to be a robust long-term home for the photos, so it has an
+image-processing pipeline which generates compressed, resized and optionally
+cropped images, whilst keeping the original image stored in-case it's needed. It
+can also re-compress the images or migrate them to a new storage backend without
+an outage.
+
+It's built on the [Luminus](https://luminusweb.com/) framework and requires a [PostgreSQL](https://www.postgresql.org/) database and a [RabbitMQ](https://www.rabbitmq.com/) queue.
 
 ## Running this code
 

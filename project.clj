@@ -1,7 +1,31 @@
+(def buildmapdev
+  [{; The path to the top-level ClojureScript source directory:
+    :source-paths ["src/cljs"]
+    ; The standard ClojureScript compiler options:
+    ; (See the ClojureScript compiler documentation for details.)
+    :compiler {:main 'xyloobservations.advanced
+               :output-to "target/cljsbuild/public/js/advanced.js"
+               :optimizations :whitespace
+               :pretty-print true}}
+    {; The path to the top-level ClojureScript source directory:
+     :source-paths ["src/cljs"]
+     ; The standard ClojureScript compiler options:
+     ; (See the ClojureScript compiler documentation for details.)
+     :compiler {:main 'xyloobservations.progress
+                :output-to "target/cljsbuild/public/js/progress.js"
+                :optimizations :whitespace
+                :pretty-print true}}])
+
+;; prod version of the build map, with optimizations turned on
+(def buildmapprod
+  (map (fn [build] (-> build
+                       (assoc-in [:compiler :optimizations] :advanced)
+                       (assoc-in [:compiler :pretty-print]  false))) buildmapdev))
+
 (defproject xyloobservations "0.1.0-SNAPSHOT"
 
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "A photo gallery app in Clojure with tag-based organization"
+  :url "https://codeberg.org/xylon/xyloobservations"
 
   :dependencies [[clojure.java-time "1.2.0"]
                  [conman "0.9.6"]
@@ -59,31 +83,13 @@
 
   :hooks [leiningen.cljsbuild]
 
-  :cljsbuild
-  {:builds
-   [{; The path to the top-level ClojureScript source directory:
-     :source-paths ["src/cljs"]
-     ; The standard ClojureScript compiler options:
-     ; (See the ClojureScript compiler documentation for details.)
-     :compiler {:main xyloobservations.advanced
-                :output-to "target/cljsbuild/public/js/advanced.js"
-                :optimizations :whitespace
-                :pretty-print true}}
-    {; The path to the top-level ClojureScript source directory:
-     :source-paths ["src/cljs"]
-     ; The standard ClojureScript compiler options:
-     ; (See the ClojureScript compiler documentation for details.)
-     :compiler {:main xyloobservations.progress
-                :output-to "target/cljsbuild/public/js/progress.js"
-                :optimizations :whitespace
-                :pretty-print true}}]}
-
   :profiles
   {:uberjar {:omit-source true
              :aot :all
              :uberjar-name "xyloobservations.jar"
              :source-paths ["env/prod/clj" ]
-             :resource-paths ["env/prod/resources"]}
+             :resource-paths ["env/prod/resources"]
+             :cljsbuild {:builds ~buildmapprod}}
 
    :dev           [:project/dev :profiles/dev]
    :test          [:project/dev :project/test :profiles/test]
@@ -103,8 +109,10 @@
                   :repl-options {:init-ns user
                                  :timeout 120000}
                   :injections [(require 'pjstadig.humane-test-output)
-                               (pjstadig.humane-test-output/activate!)]}
+                               (pjstadig.humane-test-output/activate!)]
+                  :cljsbuild {:builds ~buildmapdev}}
    :project/test {:jvm-opts ["-Dconf=test-config.edn" ]
-                  :resource-paths ["env/test/resources"] }
+                  :resource-paths ["env/test/resources"]
+                  :cljsbuild {:builds ~buildmapdev}}
    :profiles/dev {}
    :profiles/test {}})

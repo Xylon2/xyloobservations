@@ -1,6 +1,6 @@
 (ns xyloobservations.resizingfunctions
-  (:use [clojure.java.shell :only [sh]])
   (:require [clojure.java.io :as io]
+            [clojure.java.shell :refer [sh]]
             [clojure.string :as str]
             [xyloobservations.config :refer [env]]
             [xyloobservations.db.core :as db]

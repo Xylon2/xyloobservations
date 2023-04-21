@@ -1,6 +1,4 @@
 (ns xyloobservations.adminfunctions
-  (:use
-   [amazonica.aws.s3])
   (:require
    [next.jdbc :as jdbc]
    [xyloobservations.db.core :as db]

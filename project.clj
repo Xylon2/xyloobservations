@@ -27,7 +27,7 @@
   :description "A photo gallery app in Clojure with tag-based organization"
   :url "https://codeberg.org/xylon/xyloobservations"
 
-  :dependencies [[clojure.java-time "1.2.0"]
+  :dependencies [[clojure.java-time "1.3.0"]
                  [conman "0.9.6"]
                  [cprop "0.1.19"]
                  [expound "0.9.0"]
@@ -43,24 +43,24 @@
                  [mount "0.1.17"]
                  [nrepl "1.0.0"]
                  [org.clojure/clojure "1.11.1"]
-                 [org.clojure/tools.cli "1.0.214"]
+                 [org.clojure/tools.cli "1.0.219"]
                  [org.clojure/tools.logging "1.2.4"]
                  [org.postgresql/postgresql "42.6.0"]
                  [org.webjars.npm/bulma "0.9.4"]
                  [org.webjars.npm/material-icons "1.13.2"]
-                 [org.webjars/webjars-locator "0.46"]
+                 [org.webjars/webjars-locator "0.47"]
                  [org.webjars/webjars-locator-jboss-vfs "0.1.0"]
                  [ring-webjars "0.2.0"]
                  [ring/ring-core "1.10.0"]
                  [ring/ring-defaults "0.3.4"]
-                 [selmer "1.12.58"]
+                 [selmer "1.12.59"]
                  [cheshire "5.11.0"]
-                 [buddy/buddy-hashers "1.8.158"]
-                 [amazonica "0.3.163" :exclusions [com.amazonaws/aws-java-sdk
+                 [buddy/buddy-hashers "2.0.167"]
+                 [amazonica "0.3.165" :exclusions [com.amazonaws/aws-java-sdk
                                                    com.amazonaws/amazon-kinesis-client
                                                    com.amazonaws/dynamodb-streams-kinesis-adapter]]
-                 [com.amazonaws/aws-java-sdk-core "1.12.449"]
-                 [com.amazonaws/aws-java-sdk-s3 "1.12.449"]
+                 [com.amazonaws/aws-java-sdk-core "1.12.533"]
+                 [com.amazonaws/aws-java-sdk-s3 "1.12.533"]
                  [com.novemberain/langohr "5.4.0"]
                  [com.taoensso/nippy "3.2.0"]
                  [clj-http "3.12.3"]

@@ -91,43 +91,62 @@
                     :object_ref object_ref
                     :url_prefix (env :url-prefix)})))
 
-(defn message-handler
-  [ch {:keys [type]} ^bytes payload]
-  (let [message (nippy/thaw payload)
-        {:keys [image_id mimetype size imagebytes]} message]
-    (log/info (format "%s: received image id %s" type image_id))
-    (db/update-progress! {:image_id image_id :progress "resizing"})
+(defn thaw-and-log
+  [payload type]
+  (try
+    (let [message (nippy/thaw payload)
+          {image_id :image_id :as message'} (select-keys message [:image_id :mimetype :size :imagebytes])]
+      (log/info (format "%s: received image id %s" type image_id))
+      (db/update-progress! {:image_id image_id :progress "resizing"})
 
-    ;; resize
-    (try
-      (def uploadme (resizers/resize size imagebytes image_id mimetype))
+      ;; return the message
+      message')
+    (catch Exception e
+      ;; we log the output of the exception, then we throw it again
+      ;; to stop any further execution
+      (log/info (format "%s: failed thawing payload with exception: %s" type e))
+      (throw (ex-info e {:type :thaw-exception})))))
+
+(defn resize-and-log
+  [{image_id :image_id :as thawed} type]
+  (try
+    (let [uploadme (resizers/resize thawed)]
       (log/info (format "%s: resized image %s successfully" type image_id))
       (db/update-progress! {:image_id image_id :progress "saving"})
-      (catch Exception e
-        ;; we log the output of the exception, then we throw it again
-        ;; to stop any further execution
-        (log/info (format "%s: failed resizing image %s with exception: %s" type image_id e))
-        (db/update-progress! {:image_id image_id :progress
-                              (cond
-                                (str/includes? e "geometry does not contain image")
-                                "crop offset too big"
-                                :else
-                                "failed resizing")})
-        (throw (ex-info e {:type :resize-exception}))))
 
-    ;; upload the items from the "uploadme" var and save the metadata
-    (try
-      (def object_ref (update-and-save image_id uploadme))
+      ;; we return this map of filepath, mimetype, identifier, width and height
+      uploadme)
+    (catch Exception e
+      ;; we log the output of the exception, then we throw it again
+      ;; to stop any further execution
+      (log/info (format "%s: failed resizing image %s with exception: %s" type image_id e))
+      (db/update-progress! {:image_id image_id :progress
+                            (cond
+                              (str/includes? e "geometry does not contain image")
+                              "crop offset too big"
+                              :else
+                              "failed resizing")})
+      (throw (ex-info e {:type :resize-exception})))))
+
+(defn save-and-log
+  [image_id uploadme type]
+  (try
+    (let [object_ref (update-and-save image_id uploadme)]
       (log/info (format "%s: uploaded image id %s with ref %s" type image_id object_ref))
-      (db/update-progress! {:image_id image_id :progress "complete"})
-      (catch Exception e
+      (db/update-progress! {:image_id image_id :progress "complete"}))
+    (catch Exception e
         ;; we log the output of the exception, then we throw it again
         ;; to stop any further execution
         (log/info (format "%s: failed saving image %s with exception: %s" type image_id e))
         (db/update-progress! {:image_id image_id :progress "failed saving"})
-        (throw (ex-info e {:type :save-exception}))))
+        (throw (ex-info e {:type :save-exception})))))
 
-    ;; delete the temporary files resizers/resize made earlier
+(defn message-handler
+  "thaw the serialized message, resize the image, save the image"
+  [ch {:keys [type]} ^bytes payload]
+  (let [thawed (thaw-and-log payload type)
+        uploadme (resize-and-log thawed type)]
+    (save-and-log (thawed :image_id) uploadme type)
     (cleanup-files uploadme)))
 
 (mount/defstate thequeue

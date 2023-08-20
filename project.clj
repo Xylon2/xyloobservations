@@ -36,6 +36,7 @@
                  [luminus-immutant "0.2.5"]
                  [luminus-migrations "0.7.5"]
                  [luminus-transit "0.1.6"]
+                 [luminus-log4j "0.1.5"]
                  [markdown-clj "1.11.4"]
                  [metosin/muuntaja "0.6.8"]
                  [metosin/reitit "0.6.0"]

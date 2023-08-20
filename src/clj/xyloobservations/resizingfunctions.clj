@@ -84,7 +84,7 @@
 
 (defn resize
   "generates the compressed versions of the uploaded image"
-  [size imagebytes image_id mimetype]
+  [{:keys [size imagebytes image_id mimetype]}]
   (let [tempdir "/tmp/imageresizing/"
         origpath   (str tempdir image_id "_orig." (mimetypes/type-to-extension mimetype))
         mediumpath (str tempdir image_id "_medium." (env :img-format))

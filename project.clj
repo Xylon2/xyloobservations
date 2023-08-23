@@ -63,7 +63,7 @@
                  [com.amazonaws/aws-java-sdk-core "1.12.533"]
                  [com.amazonaws/aws-java-sdk-s3 "1.12.533"]
                  [com.novemberain/langohr "5.4.0"]
-                 [com.taoensso/nippy "3.2.0"]
+                 [com.cognitect/transit-clj "1.0.333"]
                  [clj-http "3.12.3"]
                  [org.clojure/clojurescript "1.11.60"]
                  [cljs-ajax "0.8.4"]

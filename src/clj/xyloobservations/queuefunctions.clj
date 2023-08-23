@@ -13,7 +13,7 @@
             [clojure.tools.logging :as log]
             [clojure.string :as str]
             [mount.core :as mount]
-            [taoensso.nippy :as nippy]
+            [cognitect.transit :as transit]
             [cheshire.core :refer [generate-string]]
             [amazonica.aws.s3 :refer [put-object]]
             [clj-http.client :as httpclient]))
@@ -44,6 +44,19 @@
   {:access-key (env :aws-access-key)
    :secret-key (env :aws-secret-key)
    :endpoint (env :aws-region)})
+
+(defn freeze
+  "you cant put a stream in the queue, it needs to be converted to a byte array"
+  [data]
+  (let [out (java.io.ByteArrayOutputStream.)
+        writer (transit/writer out :msgpack)]
+    (transit/write writer data)
+    (.toByteArray out)))
+
+(defn thaw [byte-data]
+  (let [in (java.io.ByteArrayInputStream. byte-data)
+        reader (transit/reader in :msgpack)]
+    (transit/read reader)))
 
 (def amqp-url (get (System/getenv) "CLOUDAMQP_URL" "amqp://guest:guest@localhost:5672"))
 
@@ -94,7 +107,7 @@
 (defn thaw-and-log
   [payload type]
   (try
-    (let [message (nippy/thaw payload)
+    (let [message (thaw payload)
           {image_id :image_id :as message'} (select-keys message [:image_id :mimetype :size :imagebytes])]
       (log/info (format "%s: received image id %s" type image_id))
       (db/update-progress! {:image_id image_id :progress "resizing"})
@@ -170,7 +183,7 @@
   ;; need to pickle
   (let [imagebytes (slurp-bytes tempfile)]
     (lb/publish (thequeue :ch) default-exchange-name (thequeue :qname)
-                (nippy/freeze (map-of imagebytes image_id mimetype size))
+                (freeze (map-of imagebytes image_id mimetype size))
                 {:content-type "application/json" :type "new_image"})))
 
 (defn recompress [image_id]
@@ -181,5 +194,5 @@
         old-img-url (str url_prefix_old object_ref_old "_original." extension)
         {imagebytes :body size :length} (httpclient/get old-img-url {:as :byte-array})]
     (lb/publish (thequeue :ch) default-exchange-name (thequeue :qname)
-                (nippy/freeze (map-of imagebytes image_id mimetype size))
+                (freeze (map-of imagebytes image_id mimetype size))
                 {:content-type "application/json" :type "resize_image"})))

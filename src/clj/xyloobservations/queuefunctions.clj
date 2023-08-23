@@ -13,7 +13,7 @@
             [clojure.tools.logging :as log]
             [clojure.string :as str]
             [mount.core :as mount]
-            [cognitect.transit :as transit]
+            [clojure.data.fressian :as fress]
             [cheshire.core :refer [generate-string]]
             [amazonica.aws.s3 :refer [put-object]]
             [clj-http.client :as httpclient]))
@@ -46,17 +46,14 @@
    :endpoint (env :aws-region)})
 
 (defn freeze
-  "you cant put a stream in the queue, it needs to be converted to a byte array"
+  "fressian returns a HeapByteBuffer, so we call .array to get a bytearray"
   [data]
-  (let [out (java.io.ByteArrayOutputStream.)
-        writer (transit/writer out :msgpack)]
-    (transit/write writer data)
-    (.toByteArray out)))
+  (.array (fress/write data)))
 
-(defn thaw [byte-data]
-  (let [in (java.io.ByteArrayInputStream. byte-data)
-        reader (transit/reader in :msgpack)]
-    (transit/read reader)))
+(defn thaw
+  "easy"
+  [byte-array-data]
+  (fress/read byte-array-data))
 
 (def amqp-url (get (System/getenv) "CLOUDAMQP_URL" "amqp://guest:guest@localhost:5672"))
 

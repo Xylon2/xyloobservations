@@ -34,7 +34,7 @@ Create a PostgreSQL database and user, and create a file `dev-config.edn` with c
  :image-store "filesystem"
 
  ;; the url S3 or your webserver exposes the images
- :url-prefix "https://example.com/"}
+ :url-prefix "https://example.com/"
 
  ;; if storing on filessytem
  ;; this should be a writeable directory where your webserver will serve the images

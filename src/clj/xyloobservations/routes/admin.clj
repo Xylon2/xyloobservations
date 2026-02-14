@@ -79,13 +79,15 @@
 (defn image-progress [request]
   (let [{{:strs [image_id]} :query-params} request
         {progress :progress} (db/get-progress {:image_id image_id})
-        progress_styled (or ({"resizing" ".....resizing.....",
-                              "saving"   ".........saving...",
-                              "complete" "..........complete"} progress) progress)
+        progress_styled (or ({"resizing"             ".....resizing.....",
+                              "saving"               ".........saving...",
+                              "generating embedding" ".......embedding..",
+                              "complete"             "..........complete"} progress) progress)
         msgtype (case progress
                   "complete" "success"
                   "failed resizing" "error"
                   "failed saving" "error"
+                  "failed embedding" "error"
                   "info")]
 
     (response/ok {:msgtype msgtype :msgtxt progress_styled :image_id image_id})))

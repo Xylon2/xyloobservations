@@ -14,7 +14,7 @@
             [clojure.string :as str]
             [mount.core :as mount]
             [clojure.data.fressian :as fress]
-            [cheshire.core :refer [generate-string]]
+            [cheshire.core :refer [generate-string parse-string]]
             [amazonica.aws.s3 :refer [put-object]]
             [clj-http.client :as httpclient]))
 
@@ -151,12 +151,43 @@
         (db/update-progress! {:image_id image_id :progress "failed saving"})
         (throw (ex-info e {:type :save-exception})))))
 
+(defn generate-and-save-embedding
+  "Call the SigLIP API to generate embedding from the original image and save to database"
+  [image_id uploadme type]
+  (try
+    (db/update-progress! {:image_id image_id :progress "generating embedding"})
+    ;; Use the ORIGINAL version to generate embeddings (uncropped)
+    (let [image-file (first (filter #(= (:identifier %) "original") uploadme))
+          {:keys [filepath]} image-file
+          siglip-api-url (str (env :siglip-api-url "http://localhost:8000/embed") "/image/upload")
+          ;; Call the SigLIP API endpoint with the image file
+          response (httpclient/post siglip-api-url
+                                   {:multipart [{:name "file"
+                                                :content (io/file filepath)}]
+                                    :as :json})
+          embedding (get-in response [:body :embedding])]
+      (if embedding
+        (do
+          (db/save-embedding! {:image_id image_id :embedding embedding})
+          (log/info (format "%s: generated and saved embedding for image %s" type image_id))
+          (db/update-progress! {:image_id image_id :progress "complete"}))
+        (throw (ex-info "No embedding returned from API" {:type :embedding-exception}))))
+    (catch Exception e
+      ;; we log the output of the exception, then we throw it again
+      ;; to stop any further execution
+      (log/info (format "%s: failed generating embedding for image %s with exception: %s" type image_id e))
+      (db/update-progress! {:image_id image_id :progress "failed embedding"})
+      (throw (ex-info e {:type :embedding-exception})))))
+
 (defn message-handler
-  "thaw the serialized message, resize the image, save the image"
+  "thaw the serialized message, resize the image, save the image, generate embedding (for new images only)"
   [ch {:keys [type]} ^bytes payload]
   (let [thawed (thaw-and-log payload type)
         uploadme (resize-and-log thawed type)]
     (save-and-log (thawed :image_id) uploadme type)
+    ;; Only generate embeddings for new images, not recompression
+    (when (= type "new_image")
+      (generate-and-save-embedding (thawed :image_id) uploadme type))
     (cleanup-files uploadme)))
 
 (mount/defstate thequeue
@@ -193,3 +224,35 @@
     (lb/publish (thequeue :ch) default-exchange-name (thequeue :qname)
                 (freeze (map-of imagebytes image_id mimetype size))
                 {:content-type "application/json" :type "resize_image"})))
+
+(defn re-embed [image_id]
+  ;; Generate embedding for an existing image without reprocessing it
+  (try
+    (log/info (format "re-embedding image %s" image_id))
+    (let [[{{{:keys [extension]} :original} :imagemeta
+            url_prefix :url_prefix
+            object_ref :object_ref}] (db/caption-and-object {:image_id image_id})
+          img-url (str url_prefix object_ref "_original." extension)
+          {imagebytes :body} (httpclient/get img-url {:as :byte-array})
+          ;; Write to temp file for the API call
+          tempdir "/tmp/re-embedding/"
+          tempfile (str tempdir image_id "_original." extension)]
+      (io/make-parents tempfile)
+      (with-open [w (io/output-stream tempfile)]
+        (.write w imagebytes))
+      ;; Call SigLIP API
+      (let [siglip-api-url (str (env :siglip-api-url "http://localhost:8000/embed") "/image/upload")
+            response (httpclient/post siglip-api-url
+                                     {:multipart [{:name "file"
+                                                  :content (io/file tempfile)}]
+                                      :as :json})
+            embedding (get-in response [:body :embedding])]
+        (if embedding
+          (do
+            (db/save-embedding! {:image_id image_id :embedding embedding})
+            (log/info (format "successfully generated and saved embedding for image %s" image_id)))
+          (log/error (format "no embedding returned from API for image %s" image_id))))
+      ;; Clean up temp file
+      (io/delete-file tempfile))
+    (catch Exception e
+      (log/error (format "failed to re-embed image %s: %s" image_id (.getMessage e))))))

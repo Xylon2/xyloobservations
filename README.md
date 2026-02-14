@@ -49,6 +49,9 @@ Create a PostgreSQL database and user, and create a file `dev-config.edn` with c
 
  ;; webp, avif or jpeg
  :img-format "webp"
+
+ ;; SigLIP embedding API endpoint (optional)
+ :siglip-api-url "http://localhost:8000/embed"
 }
 ```
 
@@ -99,6 +102,7 @@ CLOUDAMQP_APIKEY=
 CLOUDAMQP_URL=
 DATABASE_URL=postgresql://localhost/dbname?user=dbuser&password=dbpass
 IMG_FORMAT=avif
+SIGLIP_API_URL=http://localhost:8000/embed
 ```
 
 Note if your RabbitMQ is running on localhost you may ommit the `CLOUDAMQP_APIKEY` and `CLOUDAMQP_URL`.
@@ -149,6 +153,26 @@ n.b. This will not delete the old versions of the images from the storage backen
 Therefore, if you are re-compressing all the images for the purpose of converting
 them to a newer format, you may want to make a new storage back-end anyway and
 delete the old one after it completes successfully.
+
+### re-generate embeddings
+
+If you want to regenerate embeddings for all images (e.g., after changing your embedding
+model, or to add embeddings to an old database), use this command:
+```
+set -o allexport
+source /var/gallery/env
+/usr/bin/java -jar /var/gallery/xyloobservations.jar re-embed-all
+```
+
+This will download each original image, generate a new embedding via the SigLIP API,
+and save it to the database. Unlike recompression, this does not go through the queue
+system, so it runs directly and is faster.
+
+You can also re-embed a single image:
+```
+/usr/bin/java -jar /var/gallery/xyloobservations.jar re-embed 123
+```
+where `123` is the image_id.
 
 ## License
 

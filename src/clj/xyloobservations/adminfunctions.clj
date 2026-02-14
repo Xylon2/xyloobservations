@@ -25,7 +25,7 @@
   "adds an image's basic info to the database and puts it in the queue"
   [extension mimetype tempfile t-conn caption size]
   (let [image_id (:image_id (db/reference-image! t-conn {:caption caption}))]
-    (queue/add tempfile image_id mimetype size)
+    (queue/add tempfile image_id mimetype size)    
     image_id))
 
 (defn upload-image! [{{:keys [tempfile size filename]} "filename"}

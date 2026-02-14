@@ -129,5 +129,20 @@
       (mount/start #'xyloobservations.db.core/*db* #'xyloobservations.queuefunctions/thequeue)
       (doall (map #(queue/recompress %) (specmig/get-all-images)))
       (System/exit 0))
+    (some #{"re-embed"} args)
+    (let [image_id (last args)]
+      (if (parse-number image_id)
+        (do
+          (mount/start #'xyloobservations.db.core/*db*)
+          (queue/re-embed (parse-number image_id))
+          (System/exit 0))
+        (do
+          (println "last arg must be image_id to re-embed")
+          (System/exit 1))))
+    (some #{"re-embed-all"} args)
+    (do
+      (mount/start #'xyloobservations.db.core/*db*)
+      (doall (map #(queue/re-embed %) (specmig/get-all-images)))
+      (System/exit 0))
     :else
     (start-app args)))

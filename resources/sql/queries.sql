@@ -269,3 +269,9 @@ update image
 set crop_data = :crop_data::jsonb,
     progress = 'pending crop......'
 where image_id = :image_id::integer;
+
+-- :name save-embedding! :! :n
+-- :doc save the embedding vector for an image
+update image
+set embedding = :embedding::float[]
+where image_id = :image_id::integer;

@@ -76,6 +76,8 @@
   "given the image resolution & image id, returns the crop settings"
   [{:keys [width height]}
    image_id]
+  (Thread/sleep 100) ;; removing this line causes the following db query to
+                     ;; fail. race condition?
   (let [{croppy :crop_data} (db/get-crop-settings {:image_id image_id})]
     {:hpercent (croppy :hpercent)
      :vpercent (croppy :vpercent)

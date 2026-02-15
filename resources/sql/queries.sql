@@ -290,3 +290,24 @@ where embedding is not null
 and progress = 'complete'
 order by embedding <=> :embedding::vector
 limit :limit::integer;
+
+-- :name get-cached-text-embedding :? :1
+-- :doc retrieve cached embedding for a text query
+select embedding
+from text_embedding_cache
+where text = :text;
+
+-- :name cache-text-embedding! :! :n
+-- :doc cache a text embedding for future use
+insert into text_embedding_cache (text, embedding)
+values (:text, :embedding::vector)
+on conflict (text) do nothing;
+
+-- :name clear-text-embedding-cache! :! :n
+-- :doc clear all cached text embeddings
+truncate table text_embedding_cache;
+
+-- :name cleanup-old-text-embeddings! :! :n
+-- :doc delete text embeddings older than the specified age
+delete from text_embedding_cache
+where created_at < now() - :age::interval;

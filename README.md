@@ -175,9 +175,21 @@ You can also re-embed a single image:
 ```
 where `123` is the image_id.
 
+Note: Running `re-embed-all` will also clear the text embedding cache, as cached text
+embeddings would be in a different embedding space after re-embedding images.
+
+### Cleaning up old cached text embeddings
+
+To delete cached text embeddings older than 30 days (useful for periodic cleanup via systemd timer):
+```
+set -o allexport
+source /var/gallery/env
+/usr/bin/java -jar /var/gallery/xyloobservations.jar cleanup-cache
+```
+
 ## License
 
-Copyright © 2022-2025 Joseph Graham
+Copyright © 2022-2026 Joseph Graham
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

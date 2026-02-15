@@ -8,6 +8,7 @@
    [xyloobservations.authfunctions :as authfunc]
    [xyloobservations.specialmigrations :as specmig]
    [xyloobservations.queuefunctions :as queue]
+   [xyloobservations.embedding :as embedding]
    [clojure.tools.cli :refer [parse-opts]]
    [clojure.tools.logging :as log]
    [mount.core :as mount])
@@ -142,7 +143,16 @@
     (some #{"re-embed-all"} args)
     (do
       (mount/start #'xyloobservations.db.core/*db*)
+      (println "Clearing text embedding cache...")
+      (embedding/clear-cache!)
+      (println "Re-embedding all images...")
       (doall (map #(queue/re-embed %) (specmig/get-all-images)))
+      (System/exit 0))
+    (some #{"cleanup-cache"} args)
+    (do
+      (mount/start #'xyloobservations.db.core/*db*)
+      (println "Cleaning up text embeddings older than 30 days...")
+      (embedding/cleanup-old-cache! "30 days")
       (System/exit 0))
     :else
     (start-app args)))

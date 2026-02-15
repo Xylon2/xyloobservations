@@ -2,6 +2,7 @@
   "Functions for interacting with the SigLIP embedding API"
   (:require
    [xyloobservations.config :refer [env]]
+   [xyloobservations.db.core :as db]
    [clj-http.client :as httpclient]
    [clojure.tools.logging :as log]
    [clojure.java.io :as io]))
@@ -12,17 +13,33 @@
   (when embedding
     (str "[" (clojure.string/join "," embedding) "]")))
 
+(defn- generate-text-embedding-from-api
+  "Generate embedding from text by calling the SigLIP API"
+  [text]
+  (let [siglip-api-url (str (env :siglip-api-url "http://localhost:8000/embed") "/text")
+        response (httpclient/post siglip-api-url
+                                 {:form-params {:text text}
+                                  :content-type :json
+                                  :as :json})
+        embedding (get-in response [:body :embedding])]
+    (format-embedding embedding)))
+
 (defn generate-text-embedding
-  "Generate embedding from text using the SigLIP API"
+  "Generate embedding from text using the SigLIP API, with caching"
   [text]
   (try
-    (let [siglip-api-url (str (env :siglip-api-url "http://localhost:8000/embed") "/text")
-          response (httpclient/post siglip-api-url
-                                   {:form-params {:text text}
-                                    :content-type :json
-                                    :as :json})
-          embedding (get-in response [:body :embedding])]
-      (format-embedding embedding))
+    ;; Check cache first
+    (if-let [cached (db/get-cached-text-embedding {:text text})]
+      (do
+        (log/info (format "Cache hit for text: %s" text))
+        (:embedding cached))
+      ;; Cache miss - call API and cache result
+      (do
+        (log/info (format "Cache miss for text: %s" text))
+        (when-let [embedding-str (generate-text-embedding-from-api text)]
+          ;; Cache the result for future use
+          (db/cache-text-embedding! {:text text :embedding embedding-str})
+          embedding-str)))
     (catch Exception e
       (log/error (format "Failed to generate text embedding: %s" e))
       nil)))
@@ -41,3 +58,16 @@
     (catch Exception e
       (log/error (format "Failed to generate image embedding: %s" e))
       nil)))
+
+(defn clear-cache!
+  "Clear all cached text embeddings"
+  []
+  (db/clear-text-embedding-cache!)
+  (log/info "Cleared text embedding cache"))
+
+(defn cleanup-old-cache!
+  "Delete cached text embeddings older than the specified age (e.g., '30 days')"
+  [age]
+  (let [result (db/cleanup-old-text-embeddings! {:age age})]
+    (log/info (format "Cleaned up %s old text embeddings (age: %s)" result age))
+    result))

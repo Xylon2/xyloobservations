@@ -7,6 +7,7 @@
             [langohr.basic     :as lb]
             [xyloobservations.config :refer [env]]
             [xyloobservations.db.core :as db]
+            [xyloobservations.embedding :as embedding]
             [xyloobservations.resizingfunctions :as resizers]
             [xyloobservations.mimetypes :as mimetypes]
             [clojure.java.io :as io]
@@ -159,16 +160,10 @@
     ;; Use the ORIGINAL version to generate embeddings (uncropped)
     (let [image-file (first (filter #(= (:identifier %) "original") uploadme))
           {:keys [filepath]} image-file
-          siglip-api-url (str (env :siglip-api-url "http://localhost:8000/embed") "/image/upload")
-          ;; Call the SigLIP API endpoint with the image file
-          response (httpclient/post siglip-api-url
-                                   {:multipart [{:name "file"
-                                                :content (io/file filepath)}]
-                                    :as :json})
-          embedding (get-in response [:body :embedding])]
-      (if embedding
+          embedding-str (embedding/generate-image-embedding filepath)]
+      (if embedding-str
         (do
-          (db/save-embedding! {:image_id image_id :embedding embedding})
+          (db/save-embedding! {:image_id image_id :embedding embedding-str})
           (log/info (format "%s: generated and saved embedding for image %s" type image_id))
           (db/update-progress! {:image_id image_id :progress "complete"}))
         (throw (ex-info "No embedding returned from API" {:type :embedding-exception}))))
@@ -241,15 +236,10 @@
       (with-open [w (io/output-stream tempfile)]
         (.write w imagebytes))
       ;; Call SigLIP API
-      (let [siglip-api-url (str (env :siglip-api-url "http://localhost:8000/embed") "/image/upload")
-            response (httpclient/post siglip-api-url
-                                     {:multipart [{:name "file"
-                                                  :content (io/file tempfile)}]
-                                      :as :json})
-            embedding (get-in response [:body :embedding])]
-        (if embedding
+      (let [embedding-str (embedding/generate-image-embedding tempfile)]
+        (if embedding-str
           (do
-            (db/save-embedding! {:image_id image_id :embedding embedding})
+            (db/save-embedding! {:image_id image_id :embedding embedding-str})
             (log/info (format "successfully generated and saved embedding for image %s" image_id)))
           (log/error (format "no embedding returned from API for image %s" image_id))))
       ;; Clean up temp file

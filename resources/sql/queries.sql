@@ -273,5 +273,20 @@ where image_id = :image_id::integer;
 -- :name save-embedding! :! :n
 -- :doc save the embedding vector for an image
 update image
-set embedding = :embedding::float[]
+set embedding = :embedding::vector
 where image_id = :image_id::integer;
+
+-- :name search-by-embedding :? :*
+-- :doc find images similar to the provided embedding using cosine similarity
+select
+    image_id,
+    object_ref,
+    url_prefix,
+    caption,
+    imagemeta,
+    1 - (embedding <=> :embedding::vector) as similarity
+from image
+where embedding is not null
+and progress = 'complete'
+order by embedding <=> :embedding::vector
+limit :limit::integer;

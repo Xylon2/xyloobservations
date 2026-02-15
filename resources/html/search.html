@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="content">
+    <h1 class="title">Search by Image Contents</h1>
+
+    <form method="get" action="/search">
+      <div class="field">
+        <div class="control">
+          <input class="input" type="text" name="q" value="{{query}}" placeholder="e.g., a sunset over the ocean" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="control">
+          <button class="button is-primary" type="submit">Search</button>
+        </div>
+      </div>
+    </form>
+
+    {% if query %}
+    <div id="results" style="padding-top: 2em;">
+      <h2 class="subtitle">Results for: "{{query}}"</h2>
+      {% if error %}
+      <div class="notification is-danger">
+        {{error}}
+      </div>
+      {% elif images %}
+      {% for image in images %}
+        <figure class="nomargin">
+          <a href="{{image.full_prefix}}_medium.{{image.sizes.medium.extension}}">
+            <img
+              srcset="{{image.full_prefix}}_tiny.{{image.sizes.tiny.extension}} {{image.sizes.tiny.width}}w,
+                      {{image.full_prefix}}_small.{{image.sizes.small.extension}} {{image.sizes.small.width}}w,
+                      {{image.full_prefix}}_medium.{{image.sizes.medium.extension}} {{image.sizes.medium.width}}w"
+              sizes="(max-width: 640px) {{image.sizes.tiny.width}}px,
+                    (max-width: 960px) {{image.sizes.small.width}}px,
+                    {{image.sizes.medium.width}}px"
+              src="{{image.full_prefix}}_tiny.{{image.sizes.tiny.extension}}"
+              {% if forloop.counter > 3 %}loading="lazy"{% endif %}>
+          </a>
+        </figure>
+      {% endfor %}
+      {% else %}
+      <p>No results found.</p>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+{% endblock %}

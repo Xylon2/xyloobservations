@@ -17,10 +17,11 @@ Here I explain briefly how you may run this code on your workstation for develop
 Install:
 - [Leiningen](https://codeberg.org/leiningen/leiningen)
 - [PostgreSQL](https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e)
+- [pgvector](https://github.com/pgvector/pgvector)
 - [RabbitMQ](https://www.rabbitmq.com/download.html)
 - [ImageMagick](https://imagemagick.org/script/download.php)
 
-Create a PostgreSQL database and user, and create a file `dev-config.edn` with credentials. An example of how that might look:
+Create a PostgreSQL database and user, enable the pgvector extension, and create a file `dev-config.edn` with credentials. An example of how that might look:
 ```
 {:dev true
  :port 3000

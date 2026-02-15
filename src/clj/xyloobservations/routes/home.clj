@@ -2,7 +2,9 @@
   (:require
    [xyloobservations.db.core :as db]
    [xyloobservations.sharedfunctions :as shared]
+   [xyloobservations.embedding :as embedding]
    [xyloobservations.middleware :as middleware]
+   [clojure.tools.logging :as log]
    [ring.util.response]))
 
 (defn images-with-tags "any images that have tags attached.
@@ -42,6 +44,21 @@
 (defn about [request]
   (shared/myrender request "about.html" {}))
 
+(defn search [request]
+  (let [{{query "q"} :query-params} request]
+    (if query
+      (if-let [embedding-str (embedding/generate-text-embedding query)]
+        (let [results (db/search-by-embedding {:embedding embedding-str :limit 50})]
+          (log/info (format "Found %d results for query: %s" (count results) query))
+          (shared/myrender request "search.html" {:query query
+                                                   :images (shared/resolve_images results)}))
+        ;; If embedding generation failed, show error
+        (do
+          (log/error (format "Failed to generate embedding for query: %s" query))
+          (shared/myrender request "search.html" {:query query
+                                                   :error "Failed to generate embedding"})))
+      (shared/myrender request "search.html" {}))))
+
 (defn home-routes []
   [""
    {:middleware [middleware/wrap-csrf
@@ -49,5 +66,6 @@
    ["/" {:get #(gallery "gallery.html" %)}]
    ["/advanced" {:get #(gallery "advanced.html" %)}]
    ["/random" {:get random}]
+   ["/search" {:get search}]
    ["/about" {:get about}]])
 

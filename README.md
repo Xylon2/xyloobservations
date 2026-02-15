@@ -56,6 +56,7 @@ To start a web server for the application, run:
 ```
 lein repl
 (start)
+(migrate)
 ```
 
 Now you should be able to access the app at http://localhost:3000/.

@@ -87,7 +87,7 @@
     (do
       (log/error "Image store config not found, :image-store environment variable must be set")
       (System/exit 1))
-    (nil? (#{"s3" "filesytem"} (:image-store env)))
+    (nil? (#{"s3" "filesystem"} (:image-store env)))
     (do
       (log/error "Image store config invalid, :image-store should be s3 or filesystem")
       (System/exit 1))

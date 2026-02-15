@@ -143,8 +143,7 @@
   [image_id uploadme type]
   (try
     (let [object_ref (update-and-save image_id uploadme)]
-      (log/info (format "%s: uploaded image id %s with ref %s" type image_id object_ref))
-      (db/update-progress! {:image_id image_id :progress "complete"}))
+      (log/info (format "%s: uploaded image id %s with ref %s" type image_id object_ref)))
     (catch Exception e
         ;; we log the output of the exception, then we throw it again
         ;; to stop any further execution
@@ -156,7 +155,6 @@
   "Call the SigLIP API to generate embedding from the original image and save to database"
   [image_id uploadme type]
   (try
-    (db/update-progress! {:image_id image_id :progress "generating embedding"})
     ;; Use the ORIGINAL version to generate embeddings (uncropped)
     (let [image-file (first (filter #(= (:identifier %) "original") uploadme))
           {:keys [filepath]} image-file
@@ -178,11 +176,16 @@
   "thaw the serialized message, resize the image, save the image, generate embedding (for new images only)"
   [ch {:keys [type]} ^bytes payload]
   (let [thawed (thaw-and-log payload type)
-        uploadme (resize-and-log thawed type)]
-    (save-and-log (thawed :image_id) uploadme type)
+        uploadme (resize-and-log thawed type)
+        image_id (thawed :image_id)]
+    (save-and-log image_id uploadme type)
     ;; Only generate embeddings for new images, not recompression
-    (when (= type "new_image")
-      (generate-and-save-embedding (thawed :image_id) uploadme type))
+    (if (= type "new_image")
+      (do
+        (db/update-progress! {:image_id image_id :progress "generating embedding"})
+        (generate-and-save-embedding image_id uploadme type))
+      ;; For recompression, just mark as complete
+      (db/update-progress! {:image_id image_id :progress "complete"}))
     (cleanup-files uploadme)))
 
 (mount/defstate thequeue

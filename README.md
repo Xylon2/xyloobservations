@@ -10,6 +10,8 @@ an outage.
 
 It's built on the [Luminus](https://luminusweb.com/) framework and requires a [PostgreSQL](https://www.postgresql.org/) database and a [RabbitMQ](https://www.rabbitmq.com/) queue.
 
+It also has AI-powered semantic search.
+
 ## Running this code
 
 Here I explain briefly how you may run this code on your workstation for development.
@@ -20,6 +22,7 @@ Install:
 - [pgvector](https://github.com/pgvector/pgvector)
 - [RabbitMQ](https://www.rabbitmq.com/download.html)
 - [ImageMagick](https://imagemagick.org/script/download.php)
+- [Siglip-API](https://github.com/Xylon2/siglip-api)
 
 Create a PostgreSQL database and user, enable the pgvector extension, and create a file `dev-config.edn` with credentials. An example of how that might look:
 ```
@@ -51,7 +54,7 @@ Create a PostgreSQL database and user, enable the pgvector extension, and create
  ;; webp, avif or jpeg
  :img-format "webp"
 
- ;; SigLIP embedding API endpoint (optional)
+ ;; SigLIP embedding API endpoint
  :siglip-api-url "http://localhost:8000/embed"
 }
 ```

@@ -13,6 +13,18 @@
   (when embedding
     (str "[" (clojure.string/join "," embedding) "]")))
 
+(defn- decode-binary-embedding
+  "Decode base64-encoded binary float array (32-bit floats) to vector"
+  [base64-str]
+  (when base64-str
+    (let [decoder (java.util.Base64/getDecoder)
+          bytes (.decode decoder base64-str)
+          buffer (java.nio.ByteBuffer/wrap bytes)
+          _ (.order buffer java.nio.ByteOrder/LITTLE_ENDIAN)
+          float-count (/ (count bytes) 4)]
+      (vec (for [_ (range float-count)]
+             (.getFloat buffer))))))
+
 (defn- generate-text-embedding-from-api
   "Generate embedding from text by calling the SigLIP API"
   [text]
@@ -21,7 +33,8 @@
                                  {:form-params {:text text}
                                   :content-type :json
                                   :as :json})
-        embedding (get-in response [:body :embedding])]
+        base64-embedding (get-in response [:body :embedding])
+        embedding (decode-binary-embedding base64-embedding)]
     (format-embedding embedding)))
 
 (defn generate-text-embedding
@@ -53,7 +66,8 @@
                                    {:multipart [{:name "file"
                                                 :content (io/file image-file-path)}]
                                     :as :json})
-          embedding (get-in response [:body :embedding])]
+          base64-embedding (get-in response [:body :embedding])
+          embedding (decode-binary-embedding base64-embedding)]
       (format-embedding embedding))
     (catch Exception e
       (log/error (format "Failed to generate image embedding: %s" e))

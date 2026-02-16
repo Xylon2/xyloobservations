@@ -45,18 +45,25 @@
   (shared/myrender request "about.html" {}))
 
 (defn search [request]
-  (let [{{query "q"} :query-params} request]
-    (if query
+  (let [{{query "q" image "i"} :query-params} request]
+    (cond
+      query
       (if-let [embedding-str (embedding/generate-text-embedding query)]
-        (let [results (db/search-by-embedding {:embedding embedding-str :limit 50})]
+        (let [results (db/search-by-embedding {:embedding embedding-str :limit 25})]
           (log/info (format "Found %d results for query: %s" (count results) query))
-          (shared/myrender request "search.html" {:query query
-                                                   :images (shared/resolve_images results)}))
+          (shared/myrender request "search.html" {:query {:type :text :text query}
+                                                  :images (shared/resolve_images results)}))
         ;; If embedding generation failed, show error
         (do
           (log/error (format "Failed to generate embedding for query: %s" query))
-          (shared/myrender request "search.html" {:query query
-                                                   :error "Failed to generate embedding"})))
+          (shared/myrender request "search.html" {:query {:type :text :text query}
+                                                  :error "Failed to generate embedding"})))
+      image
+      (let [results (db/search-similar-image {:image_id image :limit 25})]
+        (log/info (format "Found %d results for image: %s" (count results) image))
+        (shared/myrender request "search.html" {:query {:type :image :text "similar image"}
+                                                :images (shared/resolve_images results)}))
+      :else
       (shared/myrender request "search.html" {}))))
 
 (defn home-routes []
@@ -69,3 +76,6 @@
    ["/search" {:get search}]
    ["/about" {:get about}]])
 
+(comment
+
+)

@@ -291,6 +291,24 @@ and progress = 'complete'
 order by embedding <=> :embedding::vector
 limit :limit::integer;
 
+-- :name search-similar-image :? :*
+-- :doc find images similar to the provided image id using cosine similarity
+select
+    i2.image_id,
+    i2.object_ref,
+    i2.url_prefix,
+    i2.caption,
+    i2.imagemeta,
+    1 - (i2.embedding <=> i1.embedding) as similarity
+from image i1
+cross join image i2
+where i1.image_id = :image_id::integer
+and i2.embedding is not null
+and i2.progress = 'complete'
+and i2.image_id != :image_id::integer
+order by i2.embedding <=> i1.embedding
+limit :limit::integer;
+
 -- :name get-cached-text-embedding :? :1
 -- :doc retrieve cached embedding for a text query
 select embedding

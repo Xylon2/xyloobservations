@@ -6,7 +6,7 @@
     <form method="get" action="/search">
       <div class="field">
         <div class="control">
-          <input class="input" type="text" name="q" value="{{query}}" placeholder="e.g., a cute bird" required>
+          <input class="input" type="text" name="q" value="{% ifequal query.type :text %}{{query.text}}{% endifequal %}" placeholder="e.g., a cute bird" required>
         </div>
       </div>
 
@@ -19,7 +19,7 @@
 
     {% if query %}
     <div id="results" style="padding-top: 2em;">
-      <h2 class="subtitle">Results for: "{{query}}"</h2>
+      <h2 class="subtitle">Results for: "{{query.text}}"</h2>
       {% if error %}
       <div class="notification is-danger">
         {{error}}
@@ -38,7 +38,7 @@
               src="{{image.full_prefix}}_tiny.{{image.sizes.tiny.extension}}"
               {% if forloop.counter > 3 %}loading="lazy"{% endif %}>
           </a>
-          <figcaption>{{image.caption}} {% if any image.place image.date %}<span class="has-tooltip-arrow has-tooltipl-multiline" style="font-style: normal; text-align: start;" data-tooltip="{% if image.place %}place: {{ image.place }}&#10;{% endif %}{% if image.date %}date: {{ image.date }}{% endif %}"><a href="#" style="pointer-events: none">ⓘ</a></span>{% endif %} <a style="font-style: normal;" href="{{image.full_prefix}}_original.{{image.sizes.original.extension}}">⬇</a></figcaption>
+          <figcaption>{{image.caption}} {% if any image.place image.date %}<span class="has-tooltip-arrow has-tooltipl-multiline" style="font-style: normal; text-align: start;" data-tooltip="{% if image.place %}place: {{ image.place }}&#10;{% endif %}{% if image.date %}date: {{ image.date }}{% endif %}"><a href="#" style="pointer-events: none">ⓘ</a></span>{% endif %} <a style="font-style: normal;" href="{{image.full_prefix}}_original.{{image.sizes.original.extension}}">⬇</a> <a style="font-style: normal;" href="search?i={{image.image_id}}">≈</a></figcaption>
         </figure>
         {% if loggedin %}
         {# the redirect= here is because if we delete we need to know where to go back to #}

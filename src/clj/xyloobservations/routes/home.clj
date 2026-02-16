@@ -19,11 +19,11 @@
   (db/images-multi-tags {:tags (vec (map parse-long tags))}))
 
 (defn default-number
-  "if it's null, returns string 10"
+  "if it's null, returns string 25"
   [item]
   (cond
     (= (type item) java.lang.String) item
-    (nil? item) "10"))
+    (nil? item) "25"))
 
 (defn gallery [template request]
   (let [{{tags "tags"} :query-params} request

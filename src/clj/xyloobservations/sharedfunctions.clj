@@ -15,6 +15,17 @@
 (defn urlencode [foo]
   (java.net.URLEncoder/encode foo "UTF-8"))
 
+(defn safe-redirect
+  "Returns the redirect target if it's a same-origin path, otherwise '/'.
+   Rejects protocol-relative URLs ('//evil', '/\\evil') and absolute URLs."
+  [redirect]
+  (if (and (not (empty? redirect))
+           (.startsWith ^String redirect "/")
+           (not (.startsWith ^String redirect "//"))
+           (not (.startsWith ^String redirect "/\\")))
+    redirect
+    "/"))
+
 (defn resolve_images
   "We output a sequence of maps, each containing an id, caption, a urlprefix and a map of sizes.
    The images argument gives us image_id, object_ref, url_prefix, caption and imagemeta."

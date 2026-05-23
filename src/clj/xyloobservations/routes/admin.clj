@@ -130,7 +130,7 @@
   (let [{{image_id "id"
           redirect "redirect"} :query-params} request]
     (db/delete-image! {:image_id image_id})
-    (response/found (if (empty? redirect) "/" redirect))))
+    (response/found (shared/safe-redirect redirect))))
 
 (defn confirm_delete_tag [request]
   (let [{{tag_id "tag"
@@ -144,7 +144,7 @@
   (let [{{tag_id "tag"
           redirect "redirect"} :query-params} request]
     (db/delete-tag! (map-of tag_id))
-    (response/found (if (empty? redirect) "/" redirect))))
+    (response/found (shared/safe-redirect redirect))))
 
 (defn tag_settings_page [request]
   (let [{{tag_id "tag"

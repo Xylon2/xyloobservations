@@ -50,7 +50,9 @@
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
       wrap-flash
-      (wrap-session {:cookie-attrs {:http-only true}})
+      (wrap-session {:cookie-attrs (cond-> {:http-only true
+                                            :same-site :lax}
+                                     (not (:dev env)) (assoc :secure true))})
       (wrap-defaults
        (-> site-defaults
            (assoc-in [:security :anti-forgery] false)

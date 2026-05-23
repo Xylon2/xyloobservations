@@ -18,14 +18,14 @@
          session :session} request
         authresult (authfunc/authenticate-user username password)]
     (if authresult
-      (-> (response/found (if (empty? redirect) "/" redirect))
+      (-> (response/found (shared/safe-redirect redirect))
           (assoc :session (assoc session :user (authresult :login))))
       (layout/render request "login.html" {:error (str "Authentication Failure") :redirect redirect}))))
 
 (defn logout-now [request]
   (let [{{redirect "redirect"} :query-params
          session :session} request]
-    (-> (response/found (if (empty? redirect) "/" redirect))
+    (-> (response/found (shared/safe-redirect redirect))
         (assoc :session (dissoc session :user)))))
 
 (defn auth-routes []
